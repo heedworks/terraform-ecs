@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Timezone
-ln -fs /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime
+ln -fs /usr/share/zoneinfo/UTC /etc/localtime
 
 #Using script from http://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_cloudwatch_logs.html
 # Install awslogs and the jq JSON parser
@@ -87,7 +87,7 @@ EOF
 
 start ecs
 
-#Get ECS instance info, althoug not used in this user_data it self this allows you to use
+#Get ECS instance info, although not used in this user_data it self this allows you to use
 #az(availability zone) and region
 until $(curl --output /dev/null --silent --head --fail http://localhost:51678/v1/metadata); do
   printf '.'

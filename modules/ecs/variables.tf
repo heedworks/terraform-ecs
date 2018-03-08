@@ -1,3 +1,7 @@
+variable "region" {
+  description = "The AWS region"
+}
+
 variable "environment" {
   description = "The name of the environment"
 }
@@ -79,4 +83,24 @@ variable "ecs_logging" {
 variable "cloudwatch_prefix" {
   default     = ""
   description = "If you want to avoid cloudwatch collision or you don't want to merge all logs to one log group specify a prefix"
+}
+
+variable "alb_deregistration_delay" {
+  default     = "300"
+  description = "The default alb deregistration delay"
+}
+
+variable "alb_health_check_path" {
+  default     = "/"
+  description = "The default health check path"
+}
+
+variable "alb_health_check_port" {
+  default     = "traffic-port"
+  description = "The default health check port"
+}
+
+variable "alb_health_check_protocol" {
+  default     = "HTTP"
+  description = "The default health check protocol"
 }

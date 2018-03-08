@@ -1,25 +1,28 @@
 # Default ALB implementation that can be used connect ECS instances to it
+# Public LB for routing incoming external traffic; kong would us this target_group
 
-resource "aws_alb_target_group" "default" {
-  name                 = "${var.alb_name}-default"
-  port                 = 80
-  protocol             = "HTTP"
-  vpc_id               = "${var.vpc_id}"
-  deregistration_delay = "${var.deregistration_delay}"
+# resource "aws_alb_target_group" "default" {
+#   name                 = "${var.alb_name}-default"
+#   port                 = "80"
+#   protocol             = "HTTP"
+#   vpc_id               = "${var.vpc_id}"
+#   deregistration_delay = "${var.deregistration_delay}"
 
-  health_check {
-    path     = "${var.health_check_path}"
-    protocol = "HTTP"
-  }
+#   health_check {
+#     path     = "${var.health_check_path}"
+#     protocol = "${var.health_check_protocol}"
+#     port     = "${var.health_check_port}"
+#   }
 
-  tags {
-    Environment = "${var.environment}"
-  }
-}
+#   tags {
+#     Environment = "${var.environment}"
+#   }
+# }
 
 resource "aws_alb" "alb" {
   name            = "${var.alb_name}"
-  subnets         = ["${var.public_subnet_ids}"]
+  internal        = "${var.internal}"
+  subnets         = ["${var.subnet_ids}"]
   security_groups = ["${aws_security_group.alb.id}"]
 
   tags {
@@ -27,19 +30,19 @@ resource "aws_alb" "alb" {
   }
 }
 
-resource "aws_alb_listener" "https" {
-  load_balancer_arn = "${aws_alb.alb.id}"
-  port              = "80"
-  protocol          = "HTTP"
+# resource "aws_alb_listener" "https" {
+#   load_balancer_arn = "${aws_alb.alb.id}"
+#   port              = "80"
+#   protocol          = "HTTP"
 
-  default_action {
-    target_group_arn = "${aws_alb_target_group.default.id}"
-    type             = "forward"
-  }
-}
+#   default_action {
+#     target_group_arn = "${aws_alb_target_group.default.id}"
+#     type             = "forward"
+#   }
+# }
 
 resource "aws_security_group" "alb" {
-  name   = "${var.alb_name}_alb"
+  name   = "${var.alb_name}-alb"
   vpc_id = "${var.vpc_id}"
 
   tags {
@@ -47,10 +50,10 @@ resource "aws_security_group" "alb" {
   }
 }
 
-resource "aws_security_group_rule" "https_from_anywhere" {
+resource "aws_security_group_rule" "http_from_anywhere" {
   type              = "ingress"
-  from_port         = 80
-  to_port           = 80
+  from_port         = "${var.port}"
+  to_port           = "${var.port}"
   protocol          = "TCP"
   cidr_blocks       = ["${var.allow_cidr_block}"]
   security_group_id = "${aws_security_group.alb.id}"

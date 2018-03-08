@@ -1,0 +1,35 @@
+data "aws_ecs_task_definition" "se-address-service" {
+  task_definition = "${aws_ecs_task_definition.se-address-service.family}"
+  depends_on      = ["aws_ecs_task_definition.se-address-service"]
+}
+
+resource "aws_ecs_task_definition" "se-address-service" {
+  family = "se-address-service"
+
+  # definitions could be in external JSON files or inline
+  container_definitions = <<DEFINITION
+[
+  {
+    "name": "se-address-service",
+    "cpu": 128,
+    "memoryReservation": 64,
+    "memory": 128,
+    "environment": [{
+      "name": "SECRET",
+      "value": "KEY"
+    }],
+    "essential": true,
+    "image": "node:8.8-alpine"
+  }
+]
+DEFINITION
+}
+
+resource "aws_ecs_service" "se-address-service" {
+  name          = "se-address-service"
+  cluster       = "${var.cluster}"
+  desired_count = 1
+
+  # Track the latest ACTIVE revision
+  task_definition = "${aws_ecs_task_definition.se-address-service.family}:${max("${aws_ecs_task_definition.se-address-service.revision}", "${data.aws_ecs_task_definition.se-address-service.revision}")}"
+}

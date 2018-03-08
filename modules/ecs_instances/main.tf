@@ -1,6 +1,10 @@
+variable private_ssh_security_group {}
+variable public_ssh_security_group {}
+variable vpc_cidr {}
+
 # You can have multiple ECS clusters in the same account with different resources.
 # Therefore all resources created here have the name containing the name of the:
-# environment, cluster name en the instance_group name.
+# environment, cluster name and the instance_group name.
 # That is also the reason why ecs_instances is a seperate module and not everything is created here.
 
 resource "aws_security_group" "instance" {
@@ -23,6 +27,24 @@ resource "aws_security_group_rule" "outbound_internet_access" {
   to_port           = 0
   protocol          = "-1"
   cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = "${aws_security_group.instance.id}"
+}
+
+resource "aws_security_group_rule" "inbound_private_ssh" {
+  type                     = "ingress"
+  from_port                = 22
+  to_port                  = 22
+  protocol                 = "tcp"
+  security_group_id        = "${aws_security_group.instance.id}"
+  source_security_group_id = "${var.public_ssh_security_group}"
+}
+
+resource "aws_security_group_rule" "outbound_private_ssh" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "tcp"
+  cidr_blocks       = ["${var.vpc_cidr}"]
   security_group_id = "${aws_security_group.instance.id}"
 }
 

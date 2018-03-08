@@ -25,7 +25,7 @@ variable "aws_ami" {
 }
 
 variable "instance_type" {
-  default     = "t2.micro"
+  default     = "t2.large"
   description = "AWS instance type to use"
 }
 
