@@ -1,6 +1,7 @@
 import boto3
 
 from utils import constants
+from termcolor import colored, cprint
 
 
 def update_account_password_policy(session):
@@ -203,6 +204,19 @@ def create_user(session, user_name):
         pass
 
     return user
+
+
+def create_access_key(session, user_name):
+    iam_client = session.client('iam')
+    access_key = None
+    try:
+        access_key = iam_client.create_access_key(UserName=user_name)
+    except iam_client.exceptions.LimitExceededException:
+        cprint('Unable to create access key for {0}. LimitedExceededException'.format(
+            user_name), color='red', attrs=['bold'])
+        pass
+
+    return access_key
 
 
 def add_user_to_group(session, group_name, user_name):

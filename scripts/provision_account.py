@@ -9,14 +9,14 @@ from termcolor import colored, cprint
 
 
 def main(account_key, account_id):
-    cprint('Authentication', 'blue')
+    cprint('Authentication', 'cyan')
     session = create_session('se-master-account-terraform', account_id,
                              'OrganizationAccountAccessRole', 'account_setup')
     cprint('  ✨✨ Session created using se-master-account-terraform IAM user', 'green')
 
     # 1. Create S3 bucket for Terraform state
     # NOTE: Exclude the LocationConstraint for us-east-1
-    cprint('Provisioning S3 Resources...', 'blue')
+    cprint('Provisioning S3 Resources...', 'cyan')
     bucket_name = 'schedule-engine-terraform-{0}'.format(account_key)
     # Create S3 Bucket
     s3_utils.create_bucket(session, bucket_name)
@@ -24,21 +24,20 @@ def main(account_key, account_id):
     print('    Bucket name: {0}'.format(bucket_name))
 
     # 2. Create DynamoDB table for Terraform state
-    cprint('Provisioning DynamoDB Resources...', 'blue')
+    cprint('Provisioning DynamoDB Resources...', 'cyan')
     # Create DynamoDB Terraform lock table
     dynamodb_utils.create_tf_backend_table(session, 'terraform_state_lock')
     cprint('  ✨✨ DynamoDB table created', 'green')
     print('    Table name: terraform_state_lock')
 
     # 3. Create IAM resources
-    cprint('Provisioning IAM Resources...', 'blue')
-    iam_client = session.client('iam')
+    cprint('Provisioning IAM Resources...', 'cyan')
 
     # Account Password Policy
     iam_utils.update_account_password_policy(session)
 
     # Policies
-    cprint('  Provisioning IAM Policies...', 'blue')
+    cprint('  Provisioning IAM Policies...', 'cyan')
 
     # TerraformPolicy
     terraform_policy = iam_utils.create_terraform_policy(
@@ -60,40 +59,13 @@ def main(account_key, account_id):
 # Roles
 
 # TerraformRole
-    cprint('  Provisioning IAM Roles...', 'blue')
-    # terraform_role = None
-    # try:
-    #     terraform_role = iam_client.create_role(
-    #         Path='/',
-    #         RoleName='TerraformRole',
-    #         Description='This role is assumed by the terraform user in the se-ops-account.',
-    #         AssumeRolePolicyDocument='''{{
-    #             "Version": "2012-10-17",
-    #             "Statement": [
-    #                 {{
-    #                     "Effect": "Allow",
-    #                     "Principal": {{
-    #                         "AWS": "arn:aws:iam::{account_id}:root"
-    #                     }},
-    #                     "Action": "sts:AssumeRole",
-    #                     "Condition": {{}}
-    #                 }}
-    #             ]
-    #         }}'''.format(account_id=constants.OPS_ACCOUNT_ID)
-    #     )
-    # except iam_client.exceptions.EntityAlreadyExistsException:
-    #     terraform_role = iam_client.get_role(RoleName='TerraformRole')
-    #     pass
+    cprint('  Provisioning IAM Roles...', 'cyan')
     terraform_role = iam_utils.create_terraform_role(session)
     cprint('    ✨✨ IAM role created', 'green')
     print('      Role Name: {}'.format(terraform_role['Role']['RoleName']))
     print('      Role ARN: {}'.format(terraform_role['Role']['Arn']))
 
     # Attach TerraformPolicy to the TerraformRole
-    # iam_client.attach_role_policy(
-    #     RoleName='TerraformRole',
-    #     PolicyArn=terraform_policy['Policy']['Arn']
-    # )
     iam_utils.attach_role_policy(
         session, terraform_role['Role']['RoleName'], terraform_policy['Policy']['Arn'])
     print('      Attached policy ARN: {}'.format(
@@ -101,39 +73,9 @@ def main(account_key, account_id):
 
     # PipelinesRole
     pipelines_role = iam_utils.create_pipelines_role(session)
-    # pipelines_role = None
-    # try:
-    #     pipelines_role = iam_client.create_role(
-    #         Path='/',
-    #         RoleName='PipelinesRole',
-    #         Description='This role is assumed by the pipelines user in the se-ops-account.',
-    #         AssumeRolePolicyDocument='''{{
-    #             "Version": "2012-10-17",
-    #             "Statement": [
-    #                 {{
-    #                     "Effect": "Allow",
-    #                     "Principal": {{
-    #                         "AWS": "arn:aws:iam::{account_id}:root"
-    #                     }},
-    #                     "Action": "sts:AssumeRole",
-    #                     "Condition": {{}}
-    #                 }}
-    #             ]
-    #         }}'''.format(account_id=constants.OPS_ACCOUNT_ID)
-    #     )
-    # except iam_client.exceptions.EntityAlreadyExistsException:
-    #     pipelines_role = iam_client.get_role(RoleName='PipelinesRole')
-    #     pass
-
     cprint('    ✨✨ IAM role created', 'green')
     print('      Role Name: {}'.format(pipelines_role['Role']['RoleName']))
     print('      Role ARN: {}'.format(pipelines_role['Role']['Arn']))
-
-    # Attach PipelinesPolicy to the PipelinesRole
-    # iam_client.attach_role_policy(
-    #     RoleName='PipelinesRole',
-    #     PolicyArn=pipelines_policy['Policy']['Arn']
-    # )
 
     iam_utils.attach_role_policy(
         session, pipelines_role['Role']['RoleName'], pipelines_policy['Policy']['Arn'])
@@ -141,18 +83,9 @@ def main(account_key, account_id):
         pipelines_policy['Policy']['Arn']))
 
     # Groups
-    cprint('  Provisioning IAM Groups...', 'blue')
+    cprint('  Provisioning IAM Groups...', 'cyan')
     # Terraform group
     terraform_group = iam_utils.create_group(session, 'Terraform')
-    # terraform_group = None
-    # try:
-    #     terraform_group = iam_client.create_group(
-    #         Path='/',
-    #         GroupName='Terraform'
-    #     )
-    # except iam_client.exceptions.EntityAlreadyExistsException:
-    #     terraform_group = iam_client.get_group(GroupName='Terraform')
-    #     pass
 
     cprint('    ✨✨ IAM group created', 'green')
     print('      Group Name: {}'.format(terraform_group['Group']['GroupName']))
@@ -161,10 +94,6 @@ def main(account_key, account_id):
     # Attach TerraformPolicy to the Terraform group
     iam_utils.attach_group_policy(
         session, terraform_group['Group']['GroupName'], terraform_policy['Policy']['Arn'])
-    # iam_client.attach_group_policy(
-    #     GroupName='Terraform',
-    #     PolicyArn=terraform_policy['Policy']['Arn']
-    # )
 
     cprint('        ✨✨ IAM policy attached', 'green')
     print('          Policy Name: {}'.format(
@@ -173,36 +102,48 @@ def main(account_key, account_id):
         terraform_policy['Policy']['Arn']))
 
     # Users
-    cprint('  Provisioning IAM Users...', 'blue')
+    cprint('  Provisioning IAM Users...', 'cyan')
     # terraform user (only used for terraform backend state)
     terraform_user = iam_utils.create_user(session, 'terraform')
-    # terraform_user = None
-    # try:
-    #     terraform_user = iam_client.create_user(
-    #         Path='/',
-    #         UserName='terraform'
-    #     )
-    # except iam_client.exceptions.EntityAlreadyExistsException:
-    #     terraform_user = iam_client.get_user(UserName='terraform')
-    #     pass
 
     cprint('    ✨✨ IAM user created', 'green')
     print('      User Name: {}'.format(terraform_user['User']['UserName']))
     print('      User ARN: {}'.format(terraform_user['User']['Arn']))
 
+    # Generate user access key
+    terraform_user_access_key = iam_utils.create_access_key(
+        session, terraform_user['User']['UserName'])
+
+    if terraform_user_access_key is not None:
+        cprint('     Make sure to save this access key; it is not possible to retreive this value again.',
+               color='green', attrs=['bold'])
+        print('      Access Key ID: {}'.format(
+            terraform_user_access_key['AccessKey']['AccessKeyId']))
+        print('      Secret Access Key: {}'.format(
+            terraform_user_access_key['AccessKey']['SecretAccessKey']))
+
     # Attach terraform user to Terraform group
     iam_utils.add_user_to_group(
         session, terraform_group['Group']['GroupName'], terraform_user['User']['UserName'])
-    # iam_client.add_user_to_group(
-    #     GroupName='Terraform',
-    #     UserName='terraform'
-    # )
 
     cprint('      ✨✨ IAM policy attached', 'green')
     print('        Policy Name: {}'.format(
         terraform_policy['Policy']['PolicyName']))
     print('        Policy ARN: {}'.format(
         terraform_policy['Policy']['Arn']))
+
+    if terraform_user_access_key is not None:
+        credentials_entry = '''
+    [se-{}-account-terraform]
+    region = {}
+    aws_access_key_id = {}
+    aws_secret_access_key = {}
+        '''.format(account_key, constants.DEFAULT_REGION, terraform_user_access_key['AccessKey']['AccessKeyId'], terraform_user_access_key['AccessKey']['SecretAccessKey'])
+        print('')
+        print('')
+        cprint('Add the following entry to ~/.aws/credentials BEFORE running terraform on this account:',
+               color='blue', attrs=['bold'])
+        print(credentials_entry)
 
 
 if __name__ == '__main__':
@@ -250,5 +191,6 @@ if __name__ == '__main__':
     # Provision account
     main(account_key, account_id)
 
-    print('Done.')
+    print('')
+    cprint('Done.', color='green')
     exit(0)
