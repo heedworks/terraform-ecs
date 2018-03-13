@@ -8,14 +8,18 @@ import utils.aws.iam as iam_utils
 from termcolor import colored, cprint
 
 
-def main(account_key, account_id):
-    cprint('Authentication', 'cyan')
-    session = create_session('se-master-account-terraform', account_id,
-                             'OrganizationAccountAccessRole', 'account_setup')
+def main(account_key, account_id, mfa_token):
+    cprint('\nAuthenticating...', 'cyan')
+    session = create_session(
+        profile='se-master-account-terraform',
+        assume_account_id=account_id,
+        assume_role_name='OrganizationAccountAccessRole',
+        assume_reason='account_setup',
+        mfa_token=mfa_token)
+
     cprint('  ✨✨ Session created using se-master-account-terraform IAM user', 'green')
 
     # 1. Create S3 bucket for Terraform state
-    # NOTE: Exclude the LocationConstraint for us-east-1
     cprint('Provisioning S3 Resources...', 'cyan')
     bucket_name = 'schedule-engine-terraform-{0}'.format(account_key)
     # Create S3 Bucket
@@ -56,9 +60,9 @@ def main(account_key, account_id):
         pipelines_policy['Policy']['PolicyName']))
     print('      Policy ARN: {}'.format(pipelines_policy['Policy']['Arn']))
 
-# Roles
+    # Roles
 
-# TerraformRole
+    # TerraformRole
     cprint('  Provisioning IAM Roles...', 'cyan')
     terraform_role = iam_utils.create_terraform_role(session)
     cprint('    ✨✨ IAM role created', 'green')
@@ -171,7 +175,6 @@ if __name__ == '__main__':
         if account_id_input:
             account_id = account_id_input
 
-    print('')
     cprint('You are going to provision the following account for Terraform usage:', 'blue')
     print(colored('  Account Key: ', attrs=['bold']) + account_key)
     print(colored('  Account ID: ', attrs=['bold']) + account_id)
@@ -185,12 +188,17 @@ if __name__ == '__main__':
             continue_response = continue_response_input
 
     if continue_response == 'n':
-        print('Goodbye. 🙁')
+        print('\nGoodbye. 🙁')
         exit(0)
 
-    # Provision account
-    main(account_key, account_id)
+    mfa_token = None
+    while(mfa_token is None):
+        mfa_token_input = input('\nEnter One-Time Password: ').strip()
+        if mfa_token_input:
+            mfa_token = mfa_token_input
 
-    print('')
-    cprint('Done.', color='green')
+    # Provision account
+    main(account_key, account_id, mfa_token)
+
+    cprint('\nDone.', color='green')
     exit(0)
