@@ -7,7 +7,7 @@ resource "aws_ecs_task_definition" "se-client-service" {
   family = "se-client-service"
 
   # definitions could be in external JSON files or inline
-  container_definitions = <<DEFINITION
+  container_definitions = <<EOF
 [
   {
     "name": "se-client-service",
@@ -27,10 +27,18 @@ resource "aws_ecs_task_definition" "se-client-service" {
       { "name": "NODE_ENV", "value": "integration" }, 
       { "name": "AWS_ACCOUNT_KEY", "value": "integration" },
       { "name": "MONGO_CONNECTION_STRING", "value": "" }
-    ]
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${var.environment}/ecs/tasks",
+        "awslogs-region": "us-east-1",
+        "awslogs-stream-prefix": "se-app"
+      }
+    }
   }
 ]
-DEFINITION
+EOF
 }
 
 resource "aws_alb_target_group" "se-client-service" {
@@ -62,7 +70,7 @@ resource "aws_lb_listener_rule" "se-client-service" {
 
   condition {
     field  = "host-header"
-    values = ["se-mobile-api.stack.local"]
+    values = ["se-mobile-api.internal"]
   }
 }
 

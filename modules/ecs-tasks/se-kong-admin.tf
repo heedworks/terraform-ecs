@@ -32,7 +32,15 @@ resource "aws_ecs_task_definition" "se-kong-admin" {
       { "name": "KONG_PG_DATABASE", "value": "se_kong" },
       { "name": "KONG_PG_USER", "value": "se_admin" },
       { "name": "KONG_PG_PASSWORD", "value": "7dxvs>)Dmtc2nnc" }
-    ]
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${var.environment}/ecs/tasks",
+        "awslogs-region": "us-east-1",
+        "awslogs-stream-prefix": "se-app"
+      }
+    }
   }
 ]
 DEFINITION

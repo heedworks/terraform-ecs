@@ -41,6 +41,11 @@ resource "aws_ecs_cluster" "cluster" {
   }
 }
 
+resource "aws_cloudwatch_log_group" "ecs-tasks-cloudwatch" {
+  name              = "${var.cloudwatch_prefix}/ecs/tasks"
+  retention_in_days = 30
+}
+
 module "ecs_tasks" {
   source = "../ecs-tasks"
 
@@ -143,7 +148,7 @@ module "dns" {
   source = "../dns"
 
   # name   = "${var.domain_name}"
-  name = "stack.local"
+  name = "internal"
 
   # vpc_id = "${module.vpc.id}"
   vpc_id = "${module.network.vpc_id}"

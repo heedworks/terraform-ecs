@@ -24,7 +24,15 @@ resource "aws_ecs_task_definition" "se-kong-configuration" {
       { "name": "NODE_ENV", "value": "integration" }, 
       { "name": "AWS_ACCOUNT_KEY", "value": "integration" },
       { "name": "KONG_PG_CONNECTION_STRING", "value": "postgres://se_admin@7dxvs>)Dmtc2nnc@se-postgres.c7l754p6gzdi.us-east-1.rds.amazonaws.com:5432/se_kong" }
-    ]
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${var.environment}/ecs/tasks",
+        "awslogs-region": "us-east-1",
+        "awslogs-stream-prefix": "se-app"
+      }
+    }
   }
 ]
 DEFINITION

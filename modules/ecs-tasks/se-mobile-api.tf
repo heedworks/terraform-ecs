@@ -27,7 +27,15 @@ resource "aws_ecs_task_definition" "se-mobile-api" {
       { "name": "NODE_ENV", "value": "integration" }, 
       { "name": "AWS_ACCOUNT_KEY", "value": "integration" },
       { "name": "MONGO_CONNECTION_STRING", "value": "" }
-    ]
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${var.environment}/ecs/tasks",
+        "awslogs-region": "us-east-1",
+        "awslogs-stream-prefix": "se-app"
+      }
+    }
   }
 ]
 DEFINITION
@@ -63,7 +71,7 @@ resource "aws_lb_listener_rule" "se-mobile-api" {
 
   condition {
     field  = "host-header"
-    values = ["se-mobile-api.stack.local"]
+    values = ["se-mobile-api.internal"]
   }
 }
 
