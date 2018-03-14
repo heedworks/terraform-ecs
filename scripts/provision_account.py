@@ -5,6 +5,7 @@ from utils.aws import create_session
 import utils.aws.s3 as s3_utils
 import utils.aws.dynamodb as dynamodb_utils
 import utils.aws.iam as iam_utils
+from pyfiglet import Figlet
 from termcolor import colored, cprint
 
 
@@ -19,29 +20,43 @@ def main(account_key, account_id, mfa_token):
 
     cprint('  ✨✨ Session created using se-master-account-terraform IAM user', 'green')
 
+    ##########################
+    ##                      ##
+    ##   S3 Configuration   ##
+    ##                      ##
+    ##########################
     # 1. Create S3 bucket for Terraform state
-    cprint('Provisioning S3 Resources...', 'cyan')
+    cprint('\nProvisioning S3 Resources...', 'cyan')
     bucket_name = 'schedule-engine-terraform-{0}'.format(account_key)
     # Create S3 Bucket
     s3_utils.create_bucket(session, bucket_name)
     cprint('  ✨✨ S3 bucket created', 'green')
     print('    Bucket name: {0}'.format(bucket_name))
 
+    #######################
+    ##                   ##
+    ##   DynamoDB Setup  ##
+    ##                   ##
+    #######################
     # 2. Create DynamoDB table for Terraform state
-    cprint('Provisioning DynamoDB Resources...', 'cyan')
+    cprint('\nProvisioning DynamoDB Resources...', 'cyan')
     # Create DynamoDB Terraform lock table
     dynamodb_utils.create_tf_backend_table(session, 'terraform_state_lock')
     cprint('  ✨✨ DynamoDB table created', 'green')
     print('    Table name: terraform_state_lock')
 
     # 3. Create IAM resources
-    cprint('Provisioning IAM Resources...', 'cyan')
+    cprint('\nProvisioning IAM Resources...', 'cyan')
 
     # Account Password Policy
     iam_utils.update_account_password_policy(session)
 
-    # Policies
-    cprint('  Provisioning IAM Policies...', 'cyan')
+    ###################
+    ##               ##
+    ## IAM Policies  ##
+    ##               ##
+    ###################
+    cprint('\n  Provisioning IAM Policies...', 'cyan')
 
     # TerraformPolicy
     terraform_policy = iam_utils.create_terraform_policy(
@@ -60,10 +75,38 @@ def main(account_key, account_id, mfa_token):
         pipelines_policy['Policy']['PolicyName']))
     print('      Policy ARN: {}'.format(pipelines_policy['Policy']['Arn']))
 
-    # Roles
+    # DeveloperPolicy
+    developer_policy = iam_utils.create_developer_policy(session)
+
+    cprint('    ✨✨ IAM policy created', 'green')
+    print('      Policy Name: {}'.format(
+        developer_policy['Policy']['PolicyName']))
+    print('      Policy ARN: {}'.format(developer_policy['Policy']['Arn']))
+
+    # ObserverPolicy
+    observer_policy = iam_utils.create_observer_policy(session)
+
+    cprint('    ✨✨ IAM policy created', 'green')
+    print('      Policy Name: {}'.format(
+        observer_policy['Policy']['PolicyName']))
+    print('      Policy ARN: {}'.format(observer_policy['Policy']['Arn']))
+
+    # OpsAdminPolicy
+    ops_admin_policy = iam_utils.create_ops_admin_policy(session)
+
+    cprint('    ✨✨ IAM policy created', 'green')
+    print('      Policy Name: {}'.format(
+        ops_admin_policy['Policy']['PolicyName']))
+    print('      Policy ARN: {}'.format(ops_admin_policy['Policy']['Arn']))
+
+    ##################
+    ##              ##
+    ##  IAM Roles   ##
+    ##              ##
+    ##################
+    cprint('\n  Provisioning IAM Roles...', 'cyan')
 
     # TerraformRole
-    cprint('  Provisioning IAM Roles...', 'cyan')
     terraform_role = iam_utils.create_terraform_role(session)
     cprint('    ✨✨ IAM role created', 'green')
     print('      Role Name: {}'.format(terraform_role['Role']['RoleName']))
@@ -86,8 +129,48 @@ def main(account_key, account_id, mfa_token):
     print('      Attached policy ARN: {}'.format(
         pipelines_policy['Policy']['Arn']))
 
-    # Groups
-    cprint('  Provisioning IAM Groups...', 'cyan')
+    # OpsAdminRole
+    ops_admin_role = iam_utils.create_ops_mfa_role(
+        session, 'OpsAdminRole', 'This role allows for full admin access from the se-ops-account.')
+    cprint('    ✨✨ IAM role created', 'green')
+    print('      Role Name: {}'.format(ops_admin_role['Role']['RoleName']))
+    print('      Role ARN: {}'.format(ops_admin_role['Role']['Arn']))
+
+    iam_utils.attach_role_policy(
+        session, ops_admin_role['Role']['RoleName'], ops_admin_policy['Policy']['Arn'])
+    print('      Attached policy ARN: {}'.format(
+        ops_admin_policy['Policy']['Arn']))
+
+    # DeveloperRole
+    developer_role = iam_utils.create_ops_mfa_role(
+        session, 'DeveloperRole', 'This role allows for developer access from the se-ops-account.')
+    cprint('    ✨✨ IAM role created', 'green')
+    print('      Role Name: {}'.format(developer_role['Role']['RoleName']))
+    print('      Role ARN: {}'.format(developer_role['Role']['Arn']))
+
+    iam_utils.attach_role_policy(
+        session, developer_role['Role']['RoleName'], developer_policy['Policy']['Arn'])
+    print('      Attached policy ARN: {}'.format(
+        developer_policy['Policy']['Arn']))
+
+    # ObserverRole
+    observer_role = iam_utils.create_ops_mfa_role(
+        session, 'ObserverRole', 'This role allows for observer access from the se-ops-account.')
+    cprint('    ✨✨ IAM role created', 'green')
+    print('      Role Name: {}'.format(observer_role['Role']['RoleName']))
+    print('      Role ARN: {}'.format(observer_role['Role']['Arn']))
+
+    iam_utils.attach_role_policy(
+        session, observer_role['Role']['RoleName'], observer_policy['Policy']['Arn'])
+    print('      Attached policy ARN: {}'.format(
+        observer_policy['Policy']['Arn']))
+
+    ##################
+    ##              ##
+    ##  IAM Groups  ##
+    ##              ##
+    ##################
+    cprint('\n  Provisioning IAM Groups...', 'cyan')
     # Terraform group
     terraform_group = iam_utils.create_group(session, 'Terraform')
 
@@ -105,8 +188,12 @@ def main(account_key, account_id, mfa_token):
     print('          Policy ARN: {}'.format(
         terraform_policy['Policy']['Arn']))
 
-    # Users
-    cprint('  Provisioning IAM Users...', 'cyan')
+    ##################
+    ##              ##
+    ##  IAM Users   ##
+    ##              ##
+    ##################
+    cprint('\n  Provisioning IAM Users...', 'cyan')
     # terraform user (only used for terraform backend state)
     terraform_user = iam_utils.create_user(session, 'terraform')
 
@@ -151,6 +238,9 @@ def main(account_key, account_id, mfa_token):
 
 
 if __name__ == '__main__':
+    f = Figlet(font='standard')
+    cprint('\n{}'.format(f.renderText(
+        'Schedule Engine')), color='cyan')
     parser = argparse.ArgumentParser()
     parser.add_argument("-account_key", "--account_key", dest="account_key",
                         help="Account key of the account to provision (e.g. integration, prod, etc")
@@ -193,12 +283,15 @@ if __name__ == '__main__':
 
     mfa_token = None
     while(mfa_token is None):
-        mfa_token_input = input('\nEnter One-Time Password: ').strip()
+        cprint('\nThe master/terraform IAM user account is secured using multi-factor authentication (MFA).',
+               'blue', attrs=['bold'])
+        mfa_token_input = input(
+            '\nEnter One-Time Password: ').strip()
         if mfa_token_input:
             mfa_token = mfa_token_input
 
     # Provision account
     main(account_key, account_id, mfa_token)
 
-    cprint('\nDone.', color='green')
+    cprint('\n{}'.format(f.renderText('Done.')), color='green')
     exit(0)

@@ -4,6 +4,7 @@ from utils import constants
 from termcolor import colored, cprint
 
 
+# IAM Policies
 def update_account_password_policy(session):
     iam_client = session.client('iam')
 
@@ -107,6 +108,73 @@ def create_terraform_policy(session, account_key, account_id):
         session, policy_name='TerraformPolicy', description='This policy provides the required permissions to run Terraform.', policy_document=policy_document)
 
 
+def create_developer_policy(session):
+    policy_document = '''{
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": [
+                            "ecs:*"
+                        ],
+                        "Resource": "*"
+                    },
+                    {
+                        "Effect": "Allow",
+                        "Action": [
+                            "s3:GetObject",
+                            "s3:ListBucket"
+                        ],
+                        "Resource": [
+                            "*"
+                        ]
+                    }
+                ]
+            }'''
+    return create_policy(
+        session, policy_name='DeveloperPolicy', description='This policy provides the required permissions for developer users in the se-ops-account.', policy_document=policy_document)
+
+
+def create_observer_policy(session):
+    policy_document = '''{
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": [
+                            "s3:GetObject",
+                            "s3:ListBucket"
+                        ],
+                        "Resource": [
+                            "*"
+                        ]
+                    }
+                ]
+            }'''
+    return create_policy(
+        session, policy_name='ObserverPolicy', description='This policy provides the required permissions for observer users in the se-ops-account.', policy_document=policy_document)
+
+
+def create_ops_admin_policy(session):
+    policy_document = '''{
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": [
+                            "*"
+                        ],
+                        "Resource": [
+                            "*"
+                        ]
+                    }
+                ]
+            }'''
+    return create_policy(
+        session, policy_name='OpsAdminPolicy', description='This policy provides the required permissions for ops-admin users in the se-ops-account.', policy_document=policy_document)
+
+
+# IAM Roles
 def create_role(session, role_name, description, assume_role_policy_document):
     iam_client = session.client('iam')
     role = None
@@ -160,6 +228,28 @@ def create_pipelines_role(session):
     return create_role(session, role_name='PipelinesRole', description='This role is assumed by the pipelines user in the se-ops-account.', assume_role_policy_document=assume_role_policy_document)
 
 
+def create_ops_mfa_role(session, role_name, description):
+    assume_role_policy_document = '''{{
+                "Version": "2012-10-17",
+                "Statement": [
+                    {{
+                        "Effect": "Allow",
+                        "Principal": {{
+                            "AWS": "arn:aws:iam::{account_id}:root"
+                        }},
+                        "Action": "sts:AssumeRole",
+                        "Condition": {{
+                            "Bool": {{
+                                "aws:MultiFactorAuthPresent": "true"
+                            }}
+                        }}
+                    }}
+                ]
+            }}'''.format(account_id=constants.OPS_ACCOUNT_ID)
+
+    return create_role(session, role_name=role_name, description=description, assume_role_policy_document=assume_role_policy_document)
+
+
 def attach_role_policy(session, role_name, policy_arn):
     iam_client = session.client('iam')
     iam_client.attach_role_policy(
@@ -168,14 +258,7 @@ def attach_role_policy(session, role_name, policy_arn):
     )
 
 
-def attach_group_policy(session, group_name, policy_arn):
-    iam_client = session.client('iam')
-    iam_client.attach_group_policy(
-        GroupName=group_name,
-        PolicyArn=policy_arn
-    )
-
-
+# IAM Groups
 def create_group(session, group_name):
     iam_client = session.client('iam')
     group = None
@@ -189,6 +272,16 @@ def create_group(session, group_name):
         pass
 
     return group
+
+
+def attach_group_policy(session, group_name, policy_arn):
+    iam_client = session.client('iam')
+    iam_client.attach_group_policy(
+        GroupName=group_name,
+        PolicyArn=policy_arn
+    )
+
+# IAM Users
 
 
 def create_user(session, user_name):
