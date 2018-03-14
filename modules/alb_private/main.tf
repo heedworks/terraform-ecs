@@ -22,7 +22,7 @@ resource "aws_alb_target_group" "private" {
 resource "aws_alb" "alb" {
   name            = "${var.alb_name}"
   internal        = true
-  subnets         = ["${var.public_subnet_ids}"]
+  subnets         = ["${var.subnet_ids}"]
   security_groups = ["${aws_security_group.alb.id}"]
 
   tags {
@@ -41,6 +41,17 @@ resource "aws_alb_listener" "https" {
   }
 }
 
+# resource "aws_alb_listener" "https-2" {
+#   load_balancer_arn = "${aws_alb.alb.id}"
+#   port              = "8001"
+#   protocol          = "HTTP"
+
+#   default_action {
+#     target_group_arn = "${aws_alb_target_group.private.id}"
+#     type             = "forward"
+#   }
+# }
+
 resource "aws_security_group" "alb" {
   name   = "${var.alb_name}-alb"
   vpc_id = "${var.vpc_id}"
@@ -53,7 +64,7 @@ resource "aws_security_group" "alb" {
 resource "aws_security_group_rule" "http_from_anywhere" {
   type      = "ingress"
   from_port = 8000
-  to_port   = 8000
+  to_port   = 8001
   protocol  = "TCP"
 
   # cidr_blocks       = ["${var.allow_cidr_block}"]

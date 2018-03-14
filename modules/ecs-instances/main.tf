@@ -5,7 +5,7 @@ variable vpc_cidr {}
 # You can have multiple ECS clusters in the same account with different resources.
 # Therefore all resources created here have the name containing the name of the:
 # environment, cluster name and the instance_group name.
-# That is also the reason why ecs_instances is a seperate module and not everything is created here.
+# That is also the reason why ecs-instances is a seperate module and not everything is created here.
 
 resource "aws_security_group" "instance" {
   name        = "${var.environment}_${var.cluster}_${var.instance_group}"

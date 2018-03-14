@@ -26,7 +26,7 @@ module "public_subnet" {
 }
 
 module "nat" {
-  source = "../nat_gateway"
+  source = "../nat-gateway"
 
   subnet_ids   = "${module.public_subnet.ids}"
   subnet_count = "${length(var.public_subnet_cidrs)}"

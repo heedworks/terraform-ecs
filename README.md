@@ -112,19 +112,19 @@ For a new method see issue [#1](https://github.com/arminc/terraform-ecs/issues/1
 
 ### ECS configuration
 
-ECS is configured using the */etc/ecs/ecs.config* file as you can see [here](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-config.html). There are two important configurations in this file. One is the ECS cluster name so that it can connect to the cluster, this should be specified from terraform because you want this to be variable. The other one is access to Docker Hub to be able to access private repositories. To do this safely use an S3 bucket that contains the Docker Hub configuration. See the *ecs_config* variable in the *ecs_instances* module for an example.
+ECS is configured using the */etc/ecs/ecs.config* file as you can see [here](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-config.html). There are two important configurations in this file. One is the ECS cluster name so that it can connect to the cluster, this should be specified from terraform because you want this to be variable. The other one is access to Docker Hub to be able to access private repositories. To do this safely use an S3 bucket that contains the Docker Hub configuration. See the *ecs_config* variable in the *ecs-instances* module for an example.
 
 ### Logging
 
 All the default system logs like Docker or ECS agent should go to CloudWatch as configured in this repository. The ECS container logs can be pushed to CloudWatch as well but it is better to push these logs to a service like [ElasticSearch](https://www.elastic.co/cloud). CloudWatch does support search and alerts but with ElasticSearch or other log services you can use more advanced search and grouping. See issue [#5](https://github.com/arminc/terraform-ecs/issues/5)
 
-The [ECS configuration](#ecs-configuration) as described here allows configuration of additional [Docker log drivers](https://docs.docker.com/engine/admin/logging/overview/) to be configured. For example fluentd as shown in the *ecs_logging* variable in the *ecs_instances* module.
+The [ECS configuration](#ecs-configuration) as described here allows configuration of additional [Docker log drivers](https://docs.docker.com/engine/admin/logging/overview/) to be configured. For example fluentd as shown in the *ecs_logging* variable in the *ecs-instances* module.
 
-Be aware when creating two clusters in one AWS account on CloudWatch log group collision, [read the info](modules/ecs_instances/cloudwatch.tf).
+Be aware when creating two clusters in one AWS account on CloudWatch log group collision, [read the info](modules/ecs-instances/cloudwatch.tf).
 
 ### ECS instances
 
-Normally there is only one group of instances like configured in this repository. But it is possible to use the *ecs_instances* module to add more groups of different type of instances that can be used for different deployments. This makes it possible to have multiple different types of instances with different scaling options.
+Normally there is only one group of instances like configured in this repository. But it is possible to use the *ecs-instances* module to add more groups of different type of instances that can be used for different deployments. This makes it possible to have multiple different types of instances with different scaling options.
 
 ### LoadBalancer
 
@@ -158,7 +158,7 @@ It is also possible to do the same thing by just running a docker run command on
 
 **Note:** Both of these methods have one big flaw and that is that you need to change the launch configuration and restart every EC2 node one by one to apply the changes. Most of the time this does not have to be a problem because the system containers don't change that often but is still an issue. It is possible to fix this in a better way with [Blox](https://blox.github.io/), but this also introduces more complexity. So it is a choice between simplicity and an explicit update flow or advanced usage with more complexity.
 
-Regardless which method you pick you will need to add a custom command on EC2 node on boot. This is already available in the module *ecs_instances* by using the *custom_userdata* variable. An example for Docker would look like this:
+Regardless which method you pick you will need to add a custom command on EC2 node on boot. This is already available in the module *ecs-instances* by using the *custom_userdata* variable. An example for Docker would look like this:
 
 ```bash
 docker run \
@@ -187,7 +187,7 @@ Because the EC2 nodes are created by us it means we need to make sure they are u
 
 To know when to update your EC2 node you can subscribe to AWS ECS AMI updates, like described [here](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS-AMI-SubscribeTopic.html). Note: We can not create a sample module for this because terraform does not support email protocol on SNS.
 
-If you need to perform an update you will need to update the information in the *ecs_instances* and then apply the changes on the cluster. This will only create a new *launch_configuration* but it will not touch the running instances. Therefore you need to replace your instances one by one. There are three ways to do this:
+If you need to perform an update you will need to update the information in the *ecs-instances* and then apply the changes on the cluster. This will only create a new *launch_configuration* but it will not touch the running instances. Therefore you need to replace your instances one by one. There are three ways to do this:
 
 Terminating the instances, but this may cause disruption to your application users. By terminating an instance a new one will be started with the new *launch_configuration*
 

@@ -7,11 +7,11 @@ resource "aws_iam_role" "ecs_lb_role" {
   "Version": "2008-10-17",
   "Statement": [
     {
-      "Action": "sts:AssumeRole",
+      "Effect": "Allow",
       "Principal": {
         "Service": ["ecs.amazonaws.com"]
       },
-      "Effect": "Allow"
+      "Action": "sts:AssumeRole"
     }
   ]
 }

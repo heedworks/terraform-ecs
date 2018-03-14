@@ -1,14 +1,15 @@
 module "alb" {
   source = "../alb"
 
+  internal    = false
   environment = "${var.environment}"
-  alb_name    = "${var.environment}-${var.cluster}"
+  alb_name    = "${var.cluster}"
   vpc_id      = "${module.network.vpc_id}"
   subnet_ids  = "${module.network.public_subnet_ids}"
 }
 
 resource "aws_alb_target_group" "default" {
-  name                 = "${var.environment}-${var.cluster}-default"
+  name                 = "${var.cluster}-default"
   port                 = "80"
   protocol             = "HTTP"
   vpc_id               = "${module.network.vpc_id}"
@@ -53,7 +54,7 @@ module "alb_private" {
   source = "../alb_private"
 
   environment = "${var.environment}"
-  alb_name    = "${var.environment}-${var.cluster}-private"
+  alb_name    = "${var.cluster}-private"
   vpc_id      = "${module.network.vpc_id}"
   subnet_ids  = "${module.network.private_subnet_ids}"
 }

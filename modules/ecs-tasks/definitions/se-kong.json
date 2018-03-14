@@ -6,11 +6,6 @@
                 "hostPort": 8021,
                 "protocol": "tcp",
                 "containerPort": 8000
-            },
-            {
-                "hostPort": 8022,
-                "protocol": "tcp",
-                "containerPort": 8001
             }
         ],
         "cpu": 128,

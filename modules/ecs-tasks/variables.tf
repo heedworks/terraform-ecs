@@ -1,15 +1,18 @@
-variable "alb_name" {
-  default     = "default"
-  description = "The name of the loadbalancer"
-}
-
 variable "environment" {
   description = "The name of the environment"
 }
 
-variable "subnet_ids" {
-  type        = "list"
-  description = "List of public subnet ids to place the loadbalancer in"
+variable "cluster" {
+  default     = "default"
+  description = "The name of the ECS cluster"
+}
+
+variable "default_alb_target_group" {
+  description = "The default ALB target group"
+}
+
+variable "private_alb_target_group" {
+  description = "The private ALB target group"
 }
 
 variable "vpc_id" {
@@ -34,9 +37,4 @@ variable "health_check_port" {
 variable "health_check_protocol" {
   default     = "HTTP"
   description = "The default health check protocol"
-}
-
-variable "allow_cidr_block" {
-  default     = "0.0.0.0/0"
-  description = "Specify cidr block that is allowd to access the LoadBalancer"
 }

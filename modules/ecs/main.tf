@@ -9,7 +9,7 @@ module "network" {
 }
 
 module "ecs_instances" {
-  source = "../ecs_instances"
+  source = "../ecs-instances"
 
   environment             = "${var.environment}"
   cluster                 = "${var.cluster}"
@@ -35,11 +35,16 @@ module "ecs_instances" {
 
 resource "aws_ecs_cluster" "cluster" {
   name = "${var.cluster}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 module "ecs_tasks" {
-  source = "../ecs_tasks"
+  source = "../ecs-tasks"
 
+  vpc_id                   = "${module.network.vpc_id}"
   cluster                  = "${var.cluster}"
   environment              = "${var.environment}"
   default_alb_target_group = "${aws_alb_target_group.default.arn}"
