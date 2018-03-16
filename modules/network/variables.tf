@@ -11,14 +11,14 @@ variable "destination_cidr_block" {
   description = "Specify all traffic to be routed either trough Internet Gateway or NAT to access the internet"
 }
 
-variable "private_subnet_cidrs" {
+variable "internal_subnets" {
   type        = "list"
-  description = "List of private cidrs, for every avalibility zone you want you need one. Example: 10.0.0.0/24 and 10.0.1.0/24"
+  description = "List of internal cidrs, for every avalibility zone you want you need one. Example: 10.0.0.0/24 and 10.0.1.0/24"
 }
 
-variable "public_subnet_cidrs" {
+variable "external_subnets" {
   type        = "list"
-  description = "List of public cidrs, for every avalibility zone you want you need one. Example: 10.0.0.0/24 and 10.0.1.0/24"
+  description = "List of external cidrs, for every avalibility zone you want you need one. Example: 10.0.0.0/24 and 10.0.1.0/24"
 }
 
 variable "availability_zones" {

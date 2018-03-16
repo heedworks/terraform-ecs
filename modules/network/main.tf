@@ -5,43 +5,43 @@ module "vpc" {
   environment = "${var.environment}"
 }
 
-module "private_subnet" {
+module "internal_subnet" {
   source = "../subnet"
 
-  name               = "${var.environment}_private_subnet"
+  name               = "${var.environment}-internal-subnet"
   environment        = "${var.environment}"
   vpc_id             = "${module.vpc.id}"
-  cidrs              = "${var.private_subnet_cidrs}"
+  cidrs              = "${var.internal_subnets}"
   availability_zones = "${var.availability_zones}"
 }
 
-module "public_subnet" {
+module "external_subnet" {
   source = "../subnet"
 
-  name               = "${var.environment}_public_subnet"
+  name               = "${var.environment}-external-subnet"
   environment        = "${var.environment}"
   vpc_id             = "${module.vpc.id}"
-  cidrs              = "${var.public_subnet_cidrs}"
+  cidrs              = "${var.external_subnets}"
   availability_zones = "${var.availability_zones}"
 }
 
 module "nat" {
   source = "../nat-gateway"
 
-  subnet_ids   = "${module.public_subnet.ids}"
-  subnet_count = "${length(var.public_subnet_cidrs)}"
+  subnet_ids   = "${module.external_subnet.ids}"
+  subnet_count = "${length(var.external_subnets)}"
 }
 
-resource "aws_route" "public_igw_route" {
-  count                  = "${length(var.public_subnet_cidrs)}"
-  route_table_id         = "${element(module.public_subnet.route_table_ids, count.index)}"
+resource "aws_route" "external_igw_route" {
+  count                  = "${length(var.external_subnets)}"
+  route_table_id         = "${element(module.external_subnet.route_table_ids, count.index)}"
   gateway_id             = "${module.vpc.igw}"
   destination_cidr_block = "${var.destination_cidr_block}"
 }
 
-resource "aws_route" "private_nat_route" {
-  count                  = "${length(var.private_subnet_cidrs)}"
-  route_table_id         = "${element(module.private_subnet.route_table_ids, count.index)}"
+resource "aws_route" "internal_nat_route" {
+  count                  = "${length(var.internal_subnets)}"
+  route_table_id         = "${element(module.internal_subnet.route_table_ids, count.index)}"
   nat_gateway_id         = "${element(module.nat.ids, count.index)}"
   destination_cidr_block = "${var.destination_cidr_block}"
 }

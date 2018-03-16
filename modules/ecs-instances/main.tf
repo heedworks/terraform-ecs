@@ -1,5 +1,5 @@
-variable private_ssh_security_group {}
-variable public_ssh_security_group {}
+variable internal_ssh_security_group {}
+variable external_ssh_security_group {}
 variable vpc_cidr {}
 
 # You can have multiple ECS clusters in the same account with different resources.
@@ -8,7 +8,7 @@ variable vpc_cidr {}
 # That is also the reason why ecs-instances is a seperate module and not everything is created here.
 
 resource "aws_security_group" "instance" {
-  name        = "${var.environment}_${var.cluster}_${var.instance_group}"
+  name        = "${var.cluster}-${var.instance_group}"
   description = "Used in ${var.environment}"
   vpc_id      = "${var.vpc_id}"
 
@@ -30,16 +30,16 @@ resource "aws_security_group_rule" "outbound_internet_access" {
   security_group_id = "${aws_security_group.instance.id}"
 }
 
-resource "aws_security_group_rule" "inbound_private_ssh" {
+resource "aws_security_group_rule" "inbound_internal_ssh" {
   type                     = "ingress"
   from_port                = 22
   to_port                  = 22
   protocol                 = "tcp"
   security_group_id        = "${aws_security_group.instance.id}"
-  source_security_group_id = "${var.public_ssh_security_group}"
+  source_security_group_id = "${var.external_ssh_security_group}"
 }
 
-resource "aws_security_group_rule" "outbound_private_ssh" {
+resource "aws_security_group_rule" "outbound_external_ssh" {
   type              = "egress"
   from_port         = 0
   to_port           = 0
@@ -50,8 +50,8 @@ resource "aws_security_group_rule" "outbound_private_ssh" {
 
 # Default disk size for Docker is 22 gig, see http://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-optimized_AMI.html
 resource "aws_launch_configuration" "launch" {
-  name_prefix          = "${var.environment}_${var.cluster}_${var.instance_group}_"
-  image_id             = "${var.aws_ami}"
+  name_prefix          = "${var.cluster}-${var.instance_group}-"
+  image_id             = "${var.image_id}"
   instance_type        = "${var.instance_type}"
   security_groups      = ["${aws_security_group.instance.id}"]
   user_data            = "${data.template_file.user_data.rendered}"
@@ -68,18 +68,18 @@ resource "aws_launch_configuration" "launch" {
 
 # Instances are scaled across availability zones http://docs.aws.amazon.com/autoscaling/latest/userguide/auto-scaling-benefits.html 
 resource "aws_autoscaling_group" "asg" {
-  name                 = "${var.environment}_${var.cluster}_${var.instance_group}"
+  name                 = "${var.cluster}-${var.instance_group}"
   max_size             = "${var.max_size}"
   min_size             = "${var.min_size}"
   desired_capacity     = "${var.desired_capacity}"
   force_delete         = true
   launch_configuration = "${aws_launch_configuration.launch.id}"
-  vpc_zone_identifier  = ["${var.private_subnet_ids}"]
+  vpc_zone_identifier  = ["${var.internal_subnet_ids}"]
   load_balancers       = ["${var.load_balancers}"]
 
   tag {
     key                 = "Name"
-    value               = "${var.environment}_ecs_${var.cluster}_${var.instance_group}"
+    value               = "ecs-${var.cluster}-${var.instance_group}"
     propagate_at_launch = "true"
   }
 

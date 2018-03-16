@@ -20,7 +20,7 @@ variable "vpc_id" {
   description = "The VPC id"
 }
 
-variable "aws_ami" {
+variable "image_id" {
   description = "The AWS ami id to use"
 }
 
@@ -49,9 +49,9 @@ variable "iam_instance_profile_id" {
   description = "The id of the instance profile that should be used for the instances"
 }
 
-variable "private_subnet_ids" {
+variable "internal_subnet_ids" {
   type        = "list"
-  description = "The list of private subnets to place the instances in"
+  description = "The list of internal subnets to place the instances in"
 }
 
 variable "load_balancers" {

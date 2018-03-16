@@ -1,23 +1,9 @@
-# Required Variables
-
-variable "environment" {
-  description = "The name of the environment"
+variable "name" {
+  description = ""
 }
 
 variable "vpc_id" {
-  description = "The VPC id"
-}
-
-variable "subnet_ids" {
-  type        = "list"
-  description = "List of public subnet ids to place the loadbalancer in"
-}
-
-# Optional Variables
-
-variable "alb_name" {
-  default     = "default"
-  description = "The name of the loadbalancer"
+  description = ""
 }
 
 variable "port" {
@@ -25,14 +11,9 @@ variable "port" {
   description = "The default ingress port"
 }
 
-variable "internal" {
-  default     = true
-  description = "List of public subnet ids to place the loadbalancer in"
-}
-
-variable "target_group_port" {
-  default     = ""
-  description = "The port on which the default target group receive traffic, defaults to port"
+variable "protocol" {
+  default = "Target Protocol for the ALB Listener"
+  default = "HTTP"
 }
 
 variable "deregistration_delay" {

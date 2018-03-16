@@ -33,7 +33,8 @@ resource "aws_ecs_task_definition" "se-mobile-api" {
       "options": {
         "awslogs-group": "${var.environment}/ecs/tasks",
         "awslogs-region": "us-east-1",
-        "awslogs-stream-prefix": "se-app"
+        "awslogs-stream-prefix": "se-app",
+        "tag" : "se-mobile-api"
       }
     }
   }

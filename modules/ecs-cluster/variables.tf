@@ -6,7 +6,7 @@ variable "environment" {
   description = "The name of the environment"
 }
 
-variable "cluster" {
+variable "name" {
   default     = "default"
   description = "The name of the ECS cluster"
 }
@@ -20,14 +20,14 @@ variable "vpc_cidr" {
   description = "VPC cidr block. Example: 10.0.0.0/16"
 }
 
-variable "private_subnet_cidrs" {
+variable "internal_subnets" {
   type        = "list"
-  description = "List of private cidrs, for every avalibility zone you want you need one. Example: 10.0.0.0/24 and 10.0.1.0/24"
+  description = "List of internal cidrs, for every avalibility zone you want you need one. Example: 10.0.0.0/16 and 10.0.1.0/16"
 }
 
-variable "public_subnet_cidrs" {
+variable "external_subnets" {
   type        = "list"
-  description = "List of public cidrs, for every avalibility zone you want you need one. Example: 10.0.0.0/24 and 10.0.1.0/24"
+  description = "List of external cidrs, for every avalibility zone you want you need one. Example: 10.0.0.0/16 and 10.0.1.0/16"
 }
 
 variable "load_balancers" {
@@ -61,8 +61,13 @@ variable "instance_type" {
   description = "AWS instance type to use"
 }
 
-variable "ecs_aws_ami" {
+variable "image_id" {
   description = "The AWS ami id to use for ECS"
+}
+
+variable "bastion_instance_type" {
+  description = "Instance type for the bastion"
+  default     = "t2.micro"
 }
 
 variable "custom_userdata" {

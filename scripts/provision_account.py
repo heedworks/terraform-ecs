@@ -7,6 +7,7 @@ import utils.aws.dynamodb as dynamodb_utils
 import utils.aws.iam as iam_utils
 from pyfiglet import Figlet
 from termcolor import colored, cprint
+import subprocess
 
 
 def main(account_key, account_id, mfa_token):
@@ -75,29 +76,29 @@ def main(account_key, account_id, mfa_token):
         pipelines_policy['Policy']['PolicyName']))
     print('      Policy ARN: {}'.format(pipelines_policy['Policy']['Arn']))
 
-    # DeveloperPolicy
-    developer_policy = iam_utils.create_developer_policy(session)
+    # # DeveloperPolicy
+    # developer_policy = iam_utils.create_developer_policy(session)
 
-    cprint('    ✨✨ IAM policy created', 'green')
-    print('      Policy Name: {}'.format(
-        developer_policy['Policy']['PolicyName']))
-    print('      Policy ARN: {}'.format(developer_policy['Policy']['Arn']))
+    # cprint('    ✨✨ IAM policy created', 'green')
+    # print('      Policy Name: {}'.format(
+    #     developer_policy['Policy']['PolicyName']))
+    # print('      Policy ARN: {}'.format(developer_policy['Policy']['Arn']))
 
-    # ObserverPolicy
-    observer_policy = iam_utils.create_observer_policy(session)
+    # # ObserverPolicy
+    # observer_policy = iam_utils.create_observer_policy(session)
 
-    cprint('    ✨✨ IAM policy created', 'green')
-    print('      Policy Name: {}'.format(
-        observer_policy['Policy']['PolicyName']))
-    print('      Policy ARN: {}'.format(observer_policy['Policy']['Arn']))
+    # cprint('    ✨✨ IAM policy created', 'green')
+    # print('      Policy Name: {}'.format(
+    #     observer_policy['Policy']['PolicyName']))
+    # print('      Policy ARN: {}'.format(observer_policy['Policy']['Arn']))
 
-    # OpsAdminPolicy
-    ops_admin_policy = iam_utils.create_ops_admin_policy(session)
+    # # OpsAdminPolicy
+    # ops_admin_policy = iam_utils.create_ops_admin_policy(session)
 
-    cprint('    ✨✨ IAM policy created', 'green')
-    print('      Policy Name: {}'.format(
-        ops_admin_policy['Policy']['PolicyName']))
-    print('      Policy ARN: {}'.format(ops_admin_policy['Policy']['Arn']))
+    # cprint('    ✨✨ IAM policy created', 'green')
+    # print('      Policy Name: {}'.format(
+    #     ops_admin_policy['Policy']['PolicyName']))
+    # print('      Policy ARN: {}'.format(ops_admin_policy['Policy']['Arn']))
 
     ##################
     ##              ##
@@ -129,41 +130,41 @@ def main(account_key, account_id, mfa_token):
     print('      Attached policy ARN: {}'.format(
         pipelines_policy['Policy']['Arn']))
 
-    # OpsAdminRole
-    ops_admin_role = iam_utils.create_ops_mfa_role(
-        session, 'OpsAdminRole', 'This role allows for full admin access from the se-ops-account.')
-    cprint('    ✨✨ IAM role created', 'green')
-    print('      Role Name: {}'.format(ops_admin_role['Role']['RoleName']))
-    print('      Role ARN: {}'.format(ops_admin_role['Role']['Arn']))
+    # # OpsAdminRole
+    # ops_admin_role = iam_utils.create_ops_mfa_role(
+    #     session, 'OpsAdminRole', 'This role allows for full admin access from the se-ops-account.')
+    # cprint('    ✨✨ IAM role created', 'green')
+    # print('      Role Name: {}'.format(ops_admin_role['Role']['RoleName']))
+    # print('      Role ARN: {}'.format(ops_admin_role['Role']['Arn']))
 
-    iam_utils.attach_role_policy(
-        session, ops_admin_role['Role']['RoleName'], ops_admin_policy['Policy']['Arn'])
-    print('      Attached policy ARN: {}'.format(
-        ops_admin_policy['Policy']['Arn']))
+    # iam_utils.attach_role_policy(
+    #     session, ops_admin_role['Role']['RoleName'], ops_admin_policy['Policy']['Arn'])
+    # print('      Attached policy ARN: {}'.format(
+    #     ops_admin_policy['Policy']['Arn']))
 
-    # DeveloperRole
-    developer_role = iam_utils.create_ops_mfa_role(
-        session, 'DeveloperRole', 'This role allows for developer access from the se-ops-account.')
-    cprint('    ✨✨ IAM role created', 'green')
-    print('      Role Name: {}'.format(developer_role['Role']['RoleName']))
-    print('      Role ARN: {}'.format(developer_role['Role']['Arn']))
+    # # DeveloperRole
+    # developer_role = iam_utils.create_ops_mfa_role(
+    #     session, 'DeveloperRole', 'This role allows for developer access from the se-ops-account.')
+    # cprint('    ✨✨ IAM role created', 'green')
+    # print('      Role Name: {}'.format(developer_role['Role']['RoleName']))
+    # print('      Role ARN: {}'.format(developer_role['Role']['Arn']))
 
-    iam_utils.attach_role_policy(
-        session, developer_role['Role']['RoleName'], developer_policy['Policy']['Arn'])
-    print('      Attached policy ARN: {}'.format(
-        developer_policy['Policy']['Arn']))
+    # iam_utils.attach_role_policy(
+    #     session, developer_role['Role']['RoleName'], developer_policy['Policy']['Arn'])
+    # print('      Attached policy ARN: {}'.format(
+    #     developer_policy['Policy']['Arn']))
 
-    # ObserverRole
-    observer_role = iam_utils.create_ops_mfa_role(
-        session, 'ObserverRole', 'This role allows for observer access from the se-ops-account.')
-    cprint('    ✨✨ IAM role created', 'green')
-    print('      Role Name: {}'.format(observer_role['Role']['RoleName']))
-    print('      Role ARN: {}'.format(observer_role['Role']['Arn']))
+    # # ObserverRole
+    # observer_role = iam_utils.create_ops_mfa_role(
+    #     session, 'ObserverRole', 'This role allows for observer access from the se-ops-account.')
+    # cprint('    ✨✨ IAM role created', 'green')
+    # print('      Role Name: {}'.format(observer_role['Role']['RoleName']))
+    # print('      Role ARN: {}'.format(observer_role['Role']['Arn']))
 
-    iam_utils.attach_role_policy(
-        session, observer_role['Role']['RoleName'], observer_policy['Policy']['Arn'])
-    print('      Attached policy ARN: {}'.format(
-        observer_policy['Policy']['Arn']))
+    # iam_utils.attach_role_policy(
+    #     session, observer_role['Role']['RoleName'], observer_policy['Policy']['Arn'])
+    # print('      Attached policy ARN: {}'.format(
+    #     observer_policy['Policy']['Arn']))
 
     ##################
     ##              ##
@@ -223,6 +224,26 @@ def main(account_key, account_id, mfa_token):
     print('        Policy ARN: {}'.format(
         terraform_policy['Policy']['Arn']))
 
+    ######################
+    ##                  ##
+    ##  SSH Key Pairs   ##
+    ##                  ##
+    ######################
+    cprint('\n  Provisioning SSH Key Pairs...', 'cyan')
+
+    subprocess.Popen([
+        'ssh-keygen',
+        '-t', 'rsa',
+        '-b', '4096',
+        '-f', '../ssh-keys/se-{}-account.key'.format(account_key),
+        '-C', 'Generated by Schedule Engine'
+    ]).wait()
+
+    #######################
+    ##                   ##
+    ##  AWS Credentials  ##
+    ##                   ##
+    #######################
     if terraform_user_access_key is not None:
         credentials_entry = '''
     [se-{}-account-terraform]
@@ -241,6 +262,7 @@ if __name__ == '__main__':
     f = Figlet(font='standard')
     cprint('\n{}'.format(f.renderText(
         'Schedule Engine')), color='cyan')
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-account_key", "--account_key", dest="account_key",
                         help="Account key of the account to provision (e.g. integration, prod, etc")
@@ -267,7 +289,7 @@ if __name__ == '__main__':
 
     cprint('You are going to provision the following account for Terraform usage:', 'blue')
     print(colored('  Account Key: ', attrs=['bold']) + account_key)
-    print(colored('  Account ID: ', attrs=['bold']) + account_id)
+    print(colored('  Account ID:  ', attrs=['bold']) + account_id)
 
     continue_response = None
     while(continue_response is None):

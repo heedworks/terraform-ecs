@@ -1,21 +1,24 @@
 module "network" {
-  source               = "../network"
-  environment          = "${var.environment}"
-  vpc_cidr             = "${var.vpc_cidr}"
-  public_subnet_cidrs  = "${var.public_subnet_cidrs}"
-  private_subnet_cidrs = "${var.private_subnet_cidrs}"
-  availability_zones   = "${var.availability_zones}"
-  depends_id           = ""
+  source             = "../network"
+  environment        = "${var.environment}"
+  vpc_cidr           = "${var.vpc_cidr}"
+  external_subnets   = "${var.external_subnets}"
+  internal_subnets   = "${var.internal_subnets}"
+  availability_zones = "${var.availability_zones}"
+  depends_id         = ""
 }
 
 module "ecs_instances" {
   source = "../ecs-instances"
 
-  environment             = "${var.environment}"
-  cluster                 = "${var.cluster}"
-  instance_group          = "${var.instance_group}"
-  private_subnet_ids      = "${module.network.private_subnet_ids}"
-  aws_ami                 = "${var.ecs_aws_ami}"
+  cluster             = "${var.name}"
+  environment         = "${var.environment}"
+  instance_group      = "${var.instance_group}"
+  internal_subnet_ids = "${module.network.internal_subnet_ids}"
+
+  # aws_ami                 = "${var.ecs_aws_ami}"
+  image_id = "${var.image_id}"
+
   instance_type           = "${var.instance_type}"
   max_size                = "${var.max_size}"
   min_size                = "${var.min_size}"
@@ -28,37 +31,32 @@ module "ecs_instances" {
   custom_userdata         = "${var.custom_userdata}"
   cloudwatch_prefix       = "${var.cloudwatch_prefix}"
 
-  private_ssh_security_group = "${aws_security_group.private_ssh.id}"
-  public_ssh_security_group  = "${aws_security_group.public_ssh.id}"
-  vpc_cidr                   = "${var.vpc_cidr}"
+  internal_ssh_security_group = "${aws_security_group.internal_ssh.id}"
+  external_ssh_security_group = "${aws_security_group.external_ssh.id}"
+  vpc_cidr                    = "${var.vpc_cidr}"
 }
 
 resource "aws_ecs_cluster" "cluster" {
-  name = "${var.cluster}"
+  name = "${var.name}"
 
   lifecycle {
     create_before_destroy = true
   }
 }
 
-resource "aws_cloudwatch_log_group" "ecs-tasks-cloudwatch" {
-  name              = "${var.cloudwatch_prefix}/ecs/tasks"
-  retention_in_days = 30
-}
+# module "ecs_tasks" {
+#   source = "../ecs-tasks"
 
-module "ecs_tasks" {
-  source = "../ecs-tasks"
-
-  vpc_id                   = "${module.network.vpc_id}"
-  cluster                  = "${var.cluster}"
-  environment              = "${var.environment}"
-  default_alb_target_group = "${aws_alb_target_group.default.arn}"
-  private_alb_target_group = "${module.alb_private.private_alb_target_group}"
-}
+#   vpc_id                   = "${module.network.vpc_id}"
+#   cluster                  = "${var.cluster}"
+#   environment              = "${var.environment}"
+#   default_alb_target_group = "${aws_alb_target_group.default.arn}"
+#   private_alb_target_group = "${module.alb_private.private_alb_target_group}"
+# }
 
 # bastion
-resource "aws_security_group" "public_ssh" {
-  name        = "${format("%s-%s-public-ssh", var.environment, var.cluster)}"
+resource "aws_security_group" "external_ssh" {
+  name        = "${format("%s-external-ssh", var.name)}"
   description = "Allows ssh from the world"
   vpc_id      = "${module.network.vpc_id}"
 
@@ -81,13 +79,13 @@ resource "aws_security_group" "public_ssh" {
   }
 
   tags {
-    Name        = "${format("%s-%s public ssh", var.environment, var.cluster)}"
+    Name        = "${format("%s-external-ssh", var.name)}"
     Environment = "${var.environment}"
   }
 }
 
-resource "aws_security_group" "private_ssh" {
-  name        = "${format("%s-%s-private-ssh", var.environment, var.cluster)}"
+resource "aws_security_group" "internal_ssh" {
+  name        = "${format("%s-internal-ssh", var.name)}"
   description = "Allows ssh from bastion"
   vpc_id      = "${module.network.vpc_id}"
 
@@ -95,7 +93,7 @@ resource "aws_security_group" "private_ssh" {
     from_port       = 22
     to_port         = 22
     protocol        = "tcp"
-    security_groups = ["${aws_security_group.public_ssh.id}"]
+    security_groups = ["${aws_security_group.external_ssh.id}"]
   }
 
   egress {
@@ -112,7 +110,7 @@ resource "aws_security_group" "private_ssh" {
   }
 
   tags {
-    Name        = "${format("%s-%s private ssh", var.environment, var.cluster)}"
+    Name        = "${format("%s-internal-ssh", var.name)}"
     Environment = "${var.environment}"
   }
 }
@@ -120,13 +118,13 @@ resource "aws_security_group" "private_ssh" {
 module "bastion" {
   source          = "../bastion"
   region          = "${var.region}"
-  instance_type   = "t2.micro"
-  subnet_id       = "${element(module.network.public_subnet_ids, 0)}"
-  security_groups = "${aws_security_group.public_ssh.id},${aws_security_group.private_ssh.id}"
+  instance_type   = "${var.bastion_instance_type}"
+  subnet_id       = "${element(module.network.external_subnet_ids, 0)}"
+  security_groups = "${aws_security_group.external_ssh.id},${aws_security_group.internal_ssh.id}"
   vpc_id          = "${module.network.vpc_id}"
   key_name        = "${var.key_name}"
   environment     = "${var.environment}"
-  cluster         = "${var.cluster}"
+  cluster         = "${var.name}"
 
   # subnet_id       = "${element(module.vpc.external_subnets, 0)}"
   # instance_type   = "${var.bastion_instance_type}"
@@ -148,8 +146,6 @@ module "dns" {
   source = "../dns"
 
   # name   = "${var.domain_name}"
-  name = "internal"
-
-  # vpc_id = "${module.vpc.id}"
+  name   = "internal"
   vpc_id = "${module.network.vpc_id}"
 }
