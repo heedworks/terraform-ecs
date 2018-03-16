@@ -20,15 +20,15 @@ variable "vpc_cidr" {
   description = "VPC cidr block. Example: 10.0.0.0/16"
 }
 
-variable "internal_subnets" {
-  type        = "list"
-  description = "List of internal cidrs, for every avalibility zone you want you need one. Example: 10.0.0.0/16 and 10.0.1.0/16"
-}
+# variable "internal_subnets" {
+#   type        = "list"
+#   description = "List of internal cidrs, for every avalibility zone you want you need one. Example: 10.0.0.0/16 and 10.0.1.0/16"
+# }
 
-variable "external_subnets" {
-  type        = "list"
-  description = "List of external cidrs, for every avalibility zone you want you need one. Example: 10.0.0.0/16 and 10.0.1.0/16"
-}
+# variable "external_subnets" {
+#   type        = "list"
+#   description = "List of external cidrs, for every avalibility zone you want you need one. Example: 10.0.0.0/16 and 10.0.1.0/16"
+# }
 
 variable "load_balancers" {
   type        = "list"
@@ -36,10 +36,10 @@ variable "load_balancers" {
   description = "The load balancers to couple to the instances"
 }
 
-variable "availability_zones" {
-  type        = "list"
-  description = "List of avalibility zones you want. Example: eu-west-1a and eu-west-1b"
-}
+# variable "availability_zones" {
+#   type        = "list"
+#   description = "List of avalibility zones you want. Example: eu-west-1a and eu-west-1b"
+# }
 
 variable "max_size" {
   description = "Maximum size of the nodes in the cluster"
@@ -108,4 +108,20 @@ variable "alb_health_check_port" {
 variable "alb_health_check_protocol" {
   default     = "HTTP"
   description = "The default health check protocol"
+}
+
+variable "vpc_id" {
+  description = ""
+}
+
+variable "internal_subnet_ids" {
+  description = ""
+}
+
+variable "external_subnet_ids" {
+  description = ""
+}
+
+variable "depends_id" {
+  description = ""
 }

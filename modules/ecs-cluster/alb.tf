@@ -4,8 +4,8 @@ module "alb" {
   internal    = false
   environment = "${var.environment}"
   alb_name    = "${var.name}"
-  vpc_id      = "${module.network.vpc_id}"
-  subnet_ids  = "${module.network.external_subnet_ids}"
+  vpc_id      = "${var.vpc_id}"
+  subnet_ids  = "${var.external_subnet_ids}"
 }
 
 resource "aws_security_group_rule" "alb_to_ecs" {
