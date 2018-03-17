@@ -58,6 +58,20 @@ resource "aws_launch_configuration" "launch" {
   iam_instance_profile = "${var.iam_instance_profile_id}"
   key_name             = "${var.key_name}"
 
+  # # root
+  # root_block_device {
+  #   volume_type = "gp2"
+  #   volume_size = "${var.root_volume_size}"
+  # }
+
+
+  # # docker
+  # ebs_block_device {
+  #   device_name = "/dev/xvdcz"
+  #   volume_type = "gp2"
+  #   volume_size = "${var.docker_volume_size}"
+  # }
+
   # aws_launch_configuration can not be modified.
   # Therefore we use create_before_destroy so that a new modified aws_launch_configuration can be created 
   # before the old one get's destroyed. That's why we use name_prefix instead of name.

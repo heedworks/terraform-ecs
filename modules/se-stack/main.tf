@@ -58,7 +58,7 @@ module "dns" {
   vpc_id = "${module.network.vpc_id}"
 }
 
-module "ecs" {
+module "ecs_cluster" {
   source = "../../modules/ecs-cluster"
 
   region      = "${var.region}"

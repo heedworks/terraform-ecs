@@ -8,6 +8,14 @@
 #   depends_id         = ""
 # }
 
+resource "aws_ecs_cluster" "cluster" {
+  name = "${var.name}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 module "ecs_instances" {
   source = "../ecs-instances"
 
@@ -38,14 +46,6 @@ module "ecs_instances" {
   external_ssh_security_group = ""
 
   vpc_cidr = "${var.vpc_cidr}"
-}
-
-resource "aws_ecs_cluster" "cluster" {
-  name = "${var.name}"
-
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 # module "ecs_tasks" {
