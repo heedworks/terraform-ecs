@@ -97,7 +97,7 @@ resource "aws_instance" "bastion" {
   user_data              = "${file(format("%s/templates/user_data.sh", path.module))}"
 
   tags {
-    Name        = "${format("%s_%s_bastion", var.environment, var.cluster)}"
+    Name        = "${format("%s-bastion", var.cluster)}"
     Environment = "${var.environment}"
     Cluster     = "${var.cluster}"
   }
@@ -121,25 +121,26 @@ resource "null_resource" "provision-bastion-files" {
     timeout = "3m"
 
     # private_key = "${file("~/.ssh/ecs-key-staging.key")}"
-    private_key = "${var.long_key}"
+    # private_key = "${var.long_key}"  
+    # private_key = "${file(format("%s/../../ssh-keys/se-%s-account.key.pub", path.module, var.aws_account_key))}"
+    private_key = "${var.private_key}"
   }
 
   provisioner "file" {
-    # source      = "${format("../../env/global/keys/%s.key", var.key_name)}"
-    content     = "${var.long_key}"
+    # source      = "${format("../../env/global/keys/%s.key", var.key_name)}"  # content     = "${var.long_key}"
+
+    content     = "${var.private_key}"
     destination = "/home/ubuntu/.ssh/ecs-key.pem"
   }
 
-  provisioner "file" {
-    content     = ":))"
-    destination = "/home/ubuntu/hello.txt"
-  }
+  # provisioner "file" {
+  #   content     = ":))"
+  #   destination = "/home/ubuntu/hello.txt"
+  # }
 
   provisioner "remote-exec" {
     inline = [
       "chmod 400 /home/ubuntu/.ssh/ecs-key.pem",
     ]
   }
-
-  # TODO: Build and upload ~/.ssh/config
 }

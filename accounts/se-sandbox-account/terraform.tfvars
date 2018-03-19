@@ -1,3 +1,5 @@
+name = "se-app"
+
 region = "us-east-1"
 
 aws_account_id = "616175625615"

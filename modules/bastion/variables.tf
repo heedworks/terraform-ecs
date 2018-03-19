@@ -19,6 +19,10 @@ variable "key_name" {
   description = "The SSH key pair, key name"
 }
 
+variable "private_key" {
+  description = "The SSH private key value"
+}
+
 variable "subnet_id" {
   description = "A external subnet id"
 }

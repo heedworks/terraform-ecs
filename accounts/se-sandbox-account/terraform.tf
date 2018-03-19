@@ -157,13 +157,13 @@ variable "ecs_ami" {
 # NOTE: Terraform does not support variables in this block
 terraform {
   backend "s3" {
-    bucket         = "schedule-engine-terraform-integration"
+    bucket         = "schedule-engine-terraform-sandbox"
     key            = "terraform.tfstate"
     region         = "us-east-1"
     encrypt        = true
     dynamodb_table = "terraform_state_lock"
     acl            = "private"
-    profile        = "se-integration-account-terraform"
+    profile        = "se-sandbox-account-terraform"
   }
 }
 
@@ -183,7 +183,7 @@ module "se-stack" {
   name                  = "${var.name}"
   region                = "${var.region}"
   environment           = "${var.environment}"
-  aws_account_key       = "${aws_account_key}"
+  aws_account_key       = "${var.aws_account_key}"
   ecs_cluster_name      = "${coalesce(var.ecs_cluster_name, var.name)}"
   cloudwatch_prefix     = "${var.environment}"                          # See ecs-instances module when to set this and when not!
   vpc_cidr              = "${var.vpc_cidr}"
@@ -194,11 +194,11 @@ module "se-stack" {
   ecs_min_size          = "${var.ecs_min_size}"
   ecs_desired_capacity  = "${var.ecs_desired_capacity}"
   ecs_instance_type     = "${var.ecs_instance_type}"
-  bastion_instance_type = "${bastion_instance_type}"
+  bastion_instance_type = "${var.bastion_instance_type}"
   ecs_ami               = "${var.ecs_ami}"
   key_name              = "${var.key_name}"
-  internal_domain_name  = "${internal_domain_name}"
-  external_domain_name  = "${external_domain_name}"
+  internal_domain_name  = "${var.internal_domain_name}"
+  external_domain_name  = "${var.external_domain_name}"
 }
 
 # module "ecs" {

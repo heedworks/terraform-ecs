@@ -6,6 +6,11 @@ variable "environment" {
   description = "The name of the environment"
 }
 
+variable "name" {
+  description = "Name tag, e.g se-app"
+  default     = "se-app"
+}
+
 variable "destination_cidr_block" {
   default     = "0.0.0.0/0"
   description = "Specify all traffic to be routed either trough Internet Gateway or NAT to access the internet"

@@ -1,4 +1,4 @@
-module "alb" {
+module "external_alb" {
   source = "../alb"
 
   internal    = false
@@ -17,8 +17,10 @@ resource "aws_security_group_rule" "alb_to_ecs" {
   from_port                = 8000
   to_port                  = 9999
   protocol                 = "TCP"
-  source_security_group_id = "${module.alb.alb_security_group_id}"
-  security_group_id        = "${module.ecs_instances.ecs_instance_security_group_id}"
+  source_security_group_id = "${module.external_alb.alb_security_group_id}"
+  security_group_id        = "${aws_security_group.cluster.id}"
+
+  # security_group_id        = "${module.ecs_instances.ecs_instance_security_group_id}"
 }
 
 # resource "aws_alb_target_group" "default" {

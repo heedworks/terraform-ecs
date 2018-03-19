@@ -3,7 +3,10 @@
 # Some other ECS policy examples http://docs.aws.amazon.com/AmazonECS/latest/developerguide/IAMPolicyExamples.html 
 
 resource "aws_iam_role" "ecs_instance_role" {
-  name = "${var.environment}_ecs_instance_role"
+  # name = "${var.environment}_ecs_instance_role"
+
+  name        = "ecs-role-${var.name}-${var.environment}"
+  description = "Managed by Terraform"
 
   assume_role_policy = <<EOF
 {
@@ -22,7 +25,8 @@ EOF
 }
 
 resource "aws_iam_instance_profile" "ecs" {
-  name = "${var.environment}_ecs_instance_profile"
+  # name = "${var.environment}_ecs_instance_profile"
+  name = "ecs-instance-profile-${var.name}-${var.environment}"
   path = "/"
   role = "${aws_iam_role.ecs_instance_role.name}"
 }

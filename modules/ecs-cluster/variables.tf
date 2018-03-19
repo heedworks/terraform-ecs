@@ -57,6 +57,11 @@ variable "key_name" {
   description = "SSH key name to be used"
 }
 
+variable "security_groups" {
+  type        = "list"
+  description = "Comma separated list of security groups"
+}
+
 variable "instance_type" {
   description = "AWS instance type to use"
 }

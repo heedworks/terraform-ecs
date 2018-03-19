@@ -5,7 +5,7 @@ resource "aws_alb" "main" {
   name            = "${var.alb_name}"
   internal        = "${var.internal}"
   subnets         = ["${var.subnet_ids}"]
-  security_groups = ["${aws_security_group.main.arn}"]
+  security_groups = ["${aws_security_group.main.id}"]
 
   tags {
     Environment = "${var.environment}"

@@ -32,6 +32,7 @@ module "bastion" {
   key_name        = "${var.key_name}"
   environment     = "${var.environment}"
   cluster         = "${var.name}"
+  private_key     = "${file(format("%s/../../ssh-keys/se-%s-account.key", path.module, var.aws_account_key))}"
 
   # subnet_id       = "${element(module.vpc.external_subnets, 0)}"
   # instance_type   = "${var.bastion_instance_type}"
@@ -65,7 +66,8 @@ module "ecs_cluster" {
   environment = "${var.environment}"
 
   # cluster            = "${var.ecs_cluster_name}"
-  name = "${coalesce(var.ecs_cluster_name, var.name)}"
+  name            = "${coalesce(var.ecs_cluster_name, var.name)}"
+  security_groups = "[${module.security_groups.internal_ssh}, ${module.security_groups.internal_alb}, ${module.security_groups.external_alb}]"
 
   cloudwatch_prefix = "${var.environment}" # See ecs-instances module when to set this and when not!
   vpc_cidr          = "${var.vpc_cidr}"
