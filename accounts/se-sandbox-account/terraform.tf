@@ -204,7 +204,6 @@ module "se-stack" {
 # module "ecs" {
 #   source = "../../modules/ecs-cluster"
 
-
 #   region               = "${var.region}"
 #   environment          = "${var.environment}"
 #   cluster              = "${var.cluster}"
@@ -221,14 +220,32 @@ module "se-stack" {
 #   ecs_aws_ami          = "${var.ecs_aws_ami}"
 # }
 
-
 # resource "aws_key_pair" "ecs" {
 #   key_name   = "ecs-key-${var.environment}"
 #   public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDLbxjBtIjSLo7KQx24Ym/CGVl5FJyA2KbeL5WzMK58Zy6a5n0RbKEcr0HvdzdEHyG84sx7rkZdKryBQmFr4ov0tJ8UbXQ1SsHaRAE1KnJf3mHrBvNHHUF3yMFE5WGS7fT/iyEPqpVKJgyBRBKYAyoOcQmzAYA7ZE13cbrwqq9tYT+/lnmhr3/2IbISDnkkMwCjyp3WTXTmuKsLGtLGDnajExkZmj6EmekxTRW99ISVwm+k+oHzXx+FdMuyy/zkD8U6mQoB4+WK0HDEErol11puB4AWMH7FZlju893ao/LBg+XPz5g+JwrafQEUKy1jTHfosTgsRIYmIjRKW7hmFeL/9woca3in4osDZZ4VVvDfq+oiBhOVNlIC9N3bAU3ZiYZwu74LpF1K971r/8c9qIm8d7aXqZWl134Kc7zi4FRL5a6BqOWtGeR91GcXvJIqaTPa+TpgGsl0oT0Kugjzj/FoTVJe8l9GZJ/1HSYVB6/O0Ja584erdkEwyAM46t/y0YQgCtlc0KKBiN5TilbY7NToyouulNCvA9lIJVDdrLZF6LxXrPsvA4h4ow1TaA2QpgOcgF1XPdmuN8dUQ3KYL3ssw0DL56QF2dkDpDYHfyJQlBHyWpDwvX3EYYvZZq4V2BvXBKBMmplWx84UHfb5ulEXYdn/qq2Dl3rnMtqbkDX+Qw== ecs-key-staging"
 # }
 
+// The region in which the infrastructure lives.
+output "region" {
+  value = "${var.region}"
+}
 
-# output "default_alb_target_group" {
-#   value = "${module.ecs.default_alb_target_group}"
-# }
+// The AWS account key
+output "aws_account_key" {
+  value = "${var.aws_account_key}"
+}
 
+// The environment of the infrastructure
+output "environment" {
+  value = "${var.environment}"
+}
+
+// The bastion host IP.
+output "bastion_ip" {
+  value = "${module.se-stack.bastion_ip}"
+}
+
+// The bastion host IP.
+output "run_command_to_copy_bastion_private_key" {
+  value = "make copy-key IP=${module.se-stack.bastion_ip} ACCOUNT=${var.aws_account_key}"
+}

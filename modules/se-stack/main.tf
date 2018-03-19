@@ -6,6 +6,7 @@ module "defaults" {
 
 module "network" {
   source             = "../network"
+  name               = "${var.name}"
   environment        = "${var.environment}"
   vpc_cidr           = "${var.vpc_cidr}"
   external_subnets   = "${var.external_subnets}"
@@ -32,7 +33,7 @@ module "bastion" {
   key_name        = "${var.key_name}"
   environment     = "${var.environment}"
   cluster         = "${var.name}"
-  private_key     = "${file(format("%s/../../ssh-keys/se-%s-account.key", path.module, var.aws_account_key))}"
+  private_key     = "${format("%s/../../ssh-keys/se-%s-account.key", path.module, var.aws_account_key)}"
 
   # subnet_id       = "${element(module.vpc.external_subnets, 0)}"
   # instance_type   = "${var.bastion_instance_type}"
@@ -67,7 +68,7 @@ module "ecs_cluster" {
 
   # cluster            = "${var.ecs_cluster_name}"
   name            = "${coalesce(var.ecs_cluster_name, var.name)}"
-  security_groups = "[${module.security_groups.internal_ssh}, ${module.security_groups.internal_alb}, ${module.security_groups.external_alb}]"
+  security_groups = "${module.security_groups.internal_ssh},${module.security_groups.internal_alb},${module.security_groups.external_alb}"
 
   cloudwatch_prefix = "${var.environment}" # See ecs-instances module when to set this and when not!
   vpc_cidr          = "${var.vpc_cidr}"
@@ -86,7 +87,7 @@ module "ecs_cluster" {
   vpc_id              = "${module.network.vpc_id}"
   depends_id          = "${module.network.depends_id}"
   internal_subnet_ids = "${module.network.internal_subnet_ids}"
-  external_subnet_ids = "${module.network.internal_subnet_ids}"
+  external_subnet_ids = "${module.network.external_subnet_ids}"
 }
 
 resource "aws_key_pair" "ecs" {

@@ -48,4 +48,16 @@ terraform-show:
 	cd ./accounts/$(ACCOUNT) && \
 	terraform show
 
+copy-key:
+	@test "${IP}" || (echo 'bastion $$IP required' && exit 1)
+	@test "${ACCOUNT}" || (echo '$$ACCOUNT is required' && exit 1)
+	
+	@scp -i ssh-keys/se-$(ACCOUNT)-account.key \
+		ssh-keys/se-$(ACCOUNT)-account.key \
+		ubuntu@${IP}:/home/ubuntu/.ssh/ecs-key.pem
+	
+	@ssh -i ssh-keys/se-$(ACCOUNT)-account.key \
+		ubuntu@${IP} \
+		chmod 400 /home/ubuntu/.ssh/ecs-key.pem
+
 .PHONY: install-third-party-tools install-python-dependencies list-python-dependencies terraform-plan terraform-apply terraform-init terraform-show

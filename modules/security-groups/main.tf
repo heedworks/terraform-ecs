@@ -5,7 +5,7 @@
 resource "aws_security_group" "internal_alb" {
   name        = "${format("%s-%s-internal-alb", var.name, var.environment)}"
   vpc_id      = "${var.vpc_id}"
-  description = "Allows internal ALB traffic"
+  description = "Allows internal ALB traffic. Managed by Terraform."
 
   ingress {
     from_port   = 80
@@ -26,7 +26,7 @@ resource "aws_security_group" "internal_alb" {
   }
 
   tags {
-    Name        = "${format("%s internal alb", var.name)}"
+    Name        = "${format("%s-internal-alb", var.name)}"
     Environment = "${var.environment}"
   }
 }
@@ -34,7 +34,7 @@ resource "aws_security_group" "internal_alb" {
 resource "aws_security_group" "external_alb" {
   name        = "${format("%s-%s-external-alb", var.name, var.environment)}"
   vpc_id      = "${var.vpc_id}"
-  description = "Allows external ALB traffic"
+  description = "Allows external ALB traffic. Managed by Terraform."
 
   ingress {
     from_port   = 80
@@ -62,14 +62,14 @@ resource "aws_security_group" "external_alb" {
   }
 
   tags {
-    Name        = "${format("%s external alb", var.name)}"
+    Name        = "${format("%s-external-alb", var.name)}"
     Environment = "${var.environment}"
   }
 }
 
 resource "aws_security_group" "external_ssh" {
   name        = "${format("%s-%s-external-ssh", var.name, var.environment)}"
-  description = "Allows ssh from the world"
+  description = "Allows ssh from the world. Managed by Terraform."
   vpc_id      = "${var.vpc_id}"
 
   ingress {
@@ -91,14 +91,14 @@ resource "aws_security_group" "external_ssh" {
   }
 
   tags {
-    Name        = "${format("%s external ssh", var.name)}"
+    Name        = "${format("%s-external-ssh", var.name)}"
     Environment = "${var.environment}"
   }
 }
 
 resource "aws_security_group" "internal_ssh" {
   name        = "${format("%s-%s-internal-ssh", var.name, var.environment)}"
-  description = "Allows ssh from bastion"
+  description = "Allows ssh from bastion. Managed by Terraform."
   vpc_id      = "${var.vpc_id}"
 
   ingress {
@@ -120,7 +120,7 @@ resource "aws_security_group" "internal_ssh" {
   }
 
   tags {
-    Name        = "${format("%s internal ssh", var.name)}"
+    Name        = "${format("%s-internal-ssh", var.name)}"
     Environment = "${var.environment}"
   }
 }

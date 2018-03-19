@@ -8,20 +8,25 @@ module "external_alb" {
   subnet_ids  = "${var.external_subnet_ids}"
 }
 
-resource "aws_security_group_rule" "alb_to_ecs" {
-  type = "ingress"
+# TODO: temp remove for the add/remove toggle issue
+# resource "aws_security_group_rule" "alb_to_ecs" {
+#   type = "ingress"
 
-  # from_port                = 32768
-  # to_port                  = 61000
 
-  from_port                = 8000
-  to_port                  = 9999
-  protocol                 = "TCP"
-  source_security_group_id = "${module.external_alb.alb_security_group_id}"
-  security_group_id        = "${aws_security_group.cluster.id}"
+#   # from_port                = 32768
+#   # to_port                  = 61000
 
-  # security_group_id        = "${module.ecs_instances.ecs_instance_security_group_id}"
-}
+
+#   from_port                = 8000
+#   to_port                  = 9999
+#   protocol                 = "TCP"
+#   source_security_group_id = "${module.external_alb.alb_security_group_id}"
+#   security_group_id        = "${aws_security_group.cluster.id}"
+
+
+#   # security_group_id        = "${module.ecs_instances.ecs_instance_security_group_id}"
+# }
+
 
 # resource "aws_alb_target_group" "default" {
 #   name                 = "${var.cluster}-default"

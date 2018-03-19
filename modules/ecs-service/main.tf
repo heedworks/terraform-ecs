@@ -40,7 +40,7 @@ resource "aws_ecs_service" "main" {
   #   task_definition                    = "${module.task.arn}"
 
   load_balancer {
-    target_group_arn = "${aws_alb_target_group.se-mobile-api.arn}"
+    target_group_arn = "${aws_lb_target_group.main.arn}"
     container_name   = "${module.task.name}"
     container_port   = "${var.container_port}"
   }

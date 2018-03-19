@@ -112,35 +112,46 @@ resource "aws_eip" "bastion" {
 resource "null_resource" "provision-bastion-files" {
   depends_on = ["aws_eip.bastion"]
 
-  connection {
-    type    = "ssh"
-    host    = "${aws_eip.bastion.public_ip}"
-    port    = 22
-    user    = "ubuntu"
-    agent   = false
-    timeout = "3m"
+  # connection {
+  #   type = "ssh"
+  #   host = "${aws_eip.bastion.public_ip}"
+  #   port = 22
+  #   user = "ubuntu"
 
-    # private_key = "${file("~/.ssh/ecs-key-staging.key")}"
-    # private_key = "${var.long_key}"  
-    # private_key = "${file(format("%s/../../ssh-keys/se-%s-account.key.pub", path.module, var.aws_account_key))}"
-    private_key = "${var.private_key}"
-  }
 
-  provisioner "file" {
-    # source      = "${format("../../env/global/keys/%s.key", var.key_name)}"  # content     = "${var.long_key}"
+  #   agent   = true
+  #   timeout = "3m"
 
-    content     = "${var.private_key}"
-    destination = "/home/ubuntu/.ssh/ecs-key.pem"
+
+  #   # private_key = "${file("~/.ssh/ecs-key-staging.key")}"
+  #   # private_key = "${file(format("%s/../../ssh-keys/se-sandbox-account.key", path.module))}"
+
+
+  #   # private_key = "${var.long_key}"  
+  #   # private_key = "${file(format("%s/../../ssh-keys/se-%s-account.key.pub", path.module, var.aws_account_key))}"
+  #   # private_key = "${var.private_key}"
+  # }
+
+  provisioner "local-exec" {
+    command = "echo Bastion IP Address is: ${aws_eip.bastion.public_ip}"
   }
 
   # provisioner "file" {
-  #   content     = ":))"
-  #   destination = "/home/ubuntu/hello.txt"
+  #   # source      = "${format("../../env/global/keys/%s.key", var.key_name)}"  # content     = "${var.long_key}"
+
+  #   # content     = "${var.private_key}"
+  #   source      = "${var.private_key}"
+  #   destination = "/home/ubuntu/.ssh/ecs-key.pem"
   # }
 
-  provisioner "remote-exec" {
-    inline = [
-      "chmod 400 /home/ubuntu/.ssh/ecs-key.pem",
-    ]
-  }
+  # # provisioner "file" {
+  # #   content     = ":))"
+  # #   destination = "/home/ubuntu/hello.txt"
+  # # }
+
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "chmod 400 /home/ubuntu/.ssh/ecs-key.pem",
+  #   ]
+  # }
 }

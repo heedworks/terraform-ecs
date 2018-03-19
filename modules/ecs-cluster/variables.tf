@@ -58,7 +58,6 @@ variable "key_name" {
 }
 
 variable "security_groups" {
-  type        = "list"
   description = "Comma separated list of security groups"
 }
 
@@ -120,10 +119,12 @@ variable "vpc_id" {
 }
 
 variable "internal_subnet_ids" {
+  type        = "list"
   description = ""
 }
 
 variable "external_subnet_ids" {
+  type        = "list"
   description = ""
 }
 

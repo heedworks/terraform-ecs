@@ -2,6 +2,7 @@ module "vpc" {
   source = "../vpc"
 
   cidr        = "${var.vpc_cidr}"
+  name        = "${var.name}"
   environment = "${var.environment}"
 }
 

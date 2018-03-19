@@ -5,3 +5,8 @@ variable "cidr" {
 variable "environment" {
   description = "The name of the environment"
 }
+
+variable "name" {
+  description = "Name tag, e.g se-app"
+  default     = "se-app"
+}
