@@ -26,7 +26,7 @@ resource "aws_security_group" "internal_alb" {
   }
 
   tags {
-    Name        = "${format("%s-internal-alb", var.name)}"
+    Name        = "${format("%s internal alb", var.name)}"
     Environment = "${var.environment}"
   }
 }
@@ -62,7 +62,7 @@ resource "aws_security_group" "external_alb" {
   }
 
   tags {
-    Name        = "${format("%s-external-alb", var.name)}"
+    Name        = "${format("%s external alb", var.name)}"
     Environment = "${var.environment}"
   }
 }
@@ -91,7 +91,7 @@ resource "aws_security_group" "external_ssh" {
   }
 
   tags {
-    Name        = "${format("%s-external-ssh", var.name)}"
+    Name        = "${format("%s external ssh", var.name)}"
     Environment = "${var.environment}"
   }
 }
@@ -120,7 +120,7 @@ resource "aws_security_group" "internal_ssh" {
   }
 
   tags {
-    Name        = "${format("%s-internal-ssh", var.name)}"
+    Name        = "${format("%s internal ssh", var.name)}"
     Environment = "${var.environment}"
   }
 }

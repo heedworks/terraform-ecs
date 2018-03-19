@@ -35,7 +35,7 @@ resource "aws_ecs_service" "main" {
     create_before_destroy = true
   }
   # Track the latest ACTIVE revision
-  task_definition = "${module.task.family}:${module.task.max_revision}"
+  task_definition = "${module.task.name}:${module.task.max_revision}"
 
   #   task_definition                    = "${module.task.arn}"
 
@@ -47,14 +47,17 @@ resource "aws_ecs_service" "main" {
 }
 
 module "task" {
-  source        = "../task"
-  name          = "${var.name}"
-  image         = "${var.image}"
-  image_version = "${var.version}"
-  command       = "${var.command}"
-  env_vars      = "${var.env_vars}"
-  memory        = "${var.memory}"
-  cpu           = "${var.cpu}"
+  source                = "../ecs-task"
+  name                  = "${var.name}"
+  image                 = "${var.image}"
+  image_version         = "${var.version}"
+  command               = "${var.command}"
+  env_vars              = "${var.env_vars}"
+  memory                = "${var.memory}"
+  cpu                   = "${var.cpu}"
+  awslogs_group         = "${var.awslogs_group}"
+  awslogs_region        = "${var.awslogs_region}"
+  awslogs_stream_prefix = "${var.awslogs_stream_prefix}"
 
   ports = <<EOF
   [

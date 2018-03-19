@@ -1,6 +1,6 @@
 resource "aws_security_group" "main" {
   name        = "${var.name}-rds"
-  description = "Allows traffic to RDS from other security groups"
+  description = "Allows traffic to RDS from other security groups. Managed by Terraform."
   vpc_id      = "${var.vpc_id}"
 
   ingress {

@@ -10,6 +10,10 @@ variable "name" {
   description = "The worker name, if empty the service name is defaulted to the image name"
 }
 
+variable "environment" {
+  description = "The application environment. e.g. production"
+}
+
 /**
  * Optional Variables.
  */
@@ -51,10 +55,25 @@ variable "memory" {
 
 variable "log_driver" {
   description = "The log driver to use use for the container"
-  default     = "journald"
+  default     = "awslogs"
 }
 
 variable "role" {
   description = "The IAM Role to assign to the Container"
+  default     = ""
+}
+
+variable "awslogs_group" {
+  description = "The awslogs group. defaults to var.environment/ecs/tasks"
+  default     = ""
+}
+
+variable "awslogs_region" {
+  description = "The awslogs group. defaults to var.environment/ecs/tasks"
+  default     = ""
+}
+
+variable "awslogs_stream_prefix" {
+  description = "The awslogs stream prefix. defaults to var.environment/ecs/tasks"
   default     = ""
 }
