@@ -1,4 +1,4 @@
-resource "aws_alb_target_group" "main" {
+resource "aws_lb_target_group" "main" {
   name                 = "${var.name}"
   port                 = "${var.port}"
   protocol             = "${var.protocol}"

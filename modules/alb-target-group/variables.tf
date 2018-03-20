@@ -1,42 +1,41 @@
 variable "name" {
-  description = ""
+  description = "The name of the target group."
+}
+
+variable "environment" {
+  description = "The name of the environment"
 }
 
 variable "vpc_id" {
-  description = ""
+  description = "The identifier of the VPC in which to create the target group."
 }
 
 variable "port" {
-  default     = 80
   description = "The default ingress port"
+  default     = 80
 }
 
 variable "protocol" {
-  default = "Target Protocol for the ALB Listener"
-  default = "HTTP"
+  description = "The protocol to use for routing traffic to the targets."
+  default     = "HTTP"
 }
 
 variable "deregistration_delay" {
+  description = "The amount time for Elastic Load Balancing to wait before changing the state of a deregistering target from draining to unused. The range is 0-3600 seconds."
   default     = "300"
-  description = "The default alb deregistration delay"
 }
 
 variable "health_check_path" {
-  default     = "/"
   description = "The default health check path"
+  default     = "/"
 }
 
 variable "health_check_port" {
+  description = "The port to use to connect with the target. Valid values are either ports 1-65536, or traffic-port."
   default     = "traffic-port"
-  description = "The default health check port"
 }
 
 variable "health_check_protocol" {
+  description = "The protocol to use to connect with the target. Defaults to HTTP."
   default     = "HTTP"
-  description = "The default health check protocol"
-}
-
-variable "allow_cidr_block" {
-  default     = "0.0.0.0/0"
-  description = "Specify cidr block that is allowd to access the LoadBalancer"
 }

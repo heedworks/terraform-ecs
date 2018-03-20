@@ -1,3 +1,4 @@
-output "alb_listener_arn" {
-  value = "${aws_alb_listener.main.arn}"
+output "arn" {
+  description = "The ARN of the listener (matches id)"
+  value       = "${aws_lb_listener.main.arn}"
 }

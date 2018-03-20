@@ -4,14 +4,34 @@ module "external_alb" {
 
   internal    = false
   environment = "${var.environment}"
-  alb_name    = "${var.name}-external"
+  name        = "${var.name}-external"
   vpc_id      = "${var.vpc_id}"
   subnet_ids  = "${var.external_subnet_ids}"
-  port        = "80"
+
+  # port        = "80"
+}
+
+resource "aws_security_group_rule" "external_alb_ingress" {
+  type              = "ingress"
+  from_port         = "80"
+  to_port           = "80"
+  protocol          = "TCP"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = "${module.external_alb.security_group_id}"
+}
+
+resource "aws_security_group_rule" "external_alb_egress" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = "${module.external_alb.security_group_id}"
 }
 
 module "external_alb_target_group" {
-  source      = "../alb-target-group"
+  source = "../alb-target-group"
+
   name        = "${var.name}-external-default"
   environment = "${var.environment}"
   port        = "80"
@@ -20,6 +40,9 @@ module "external_alb_target_group" {
 
 module "external_alb_listener" {
   source = "../alb-listener"
+
+  load_balancer_arn = "${module.external_alb.arn}"
+  target_group_arn  = "${module.external_alb_target_group.arn}"
 }
 
 # Internal ALB
@@ -28,10 +51,11 @@ module "internal_alb" {
 
   internal    = true
   environment = "${var.environment}"
-  alb_name    = "${var.name}-internal"
+  name        = "${var.name}-internal"
   vpc_id      = "${var.vpc_id}"
   subnet_ids  = "${var.internal_subnet_ids}"
-  port        = "8000"
+
+  # port        = "8000"
 }
 
 # TODO: temp remove for the add/remove toggle issue
