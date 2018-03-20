@@ -1,23 +1,29 @@
 output "arn" {
-  value = "${aws_lb.main.arn}"
+  description = "The ARN of the load balancer (matches id)."
+  value       = "${aws_lb.main.arn}"
+}
+
+output "arn_suffix" {
+  description = "The ARN suffix for use with CloudWatch Metrics."
+  value       = "${aws_lb.main.arn}"
 }
 
 output "dns_name" {
-  value = "${aws_lb.main.dns_name}"
+  description = "The DNS name of the load balancer."
+  value       = "${aws_lb.main.dns_name}"
 }
 
 output "zone_id" {
-  value = "${aws_lb.main.zone_id}"
+  description = "The canonical hosted zone ID of the load balancer (to be used in a Route 53 Alias record)."
+  value       = "${aws_lb.main.zone_id}"
 }
 
-# output "alb_listener_arn" {
-#   value = "${aws_alb_listener.http.arn}"
-# }
-
-# output "default_alb_target_group_arn" {
-#   value = "${aws_alb_target_group.default.arn}"
-# }
+output "canonical_hosted_zone_id" {
+  description = "The canonical hosted zone ID of the load balancer."
+  value       = "${aws_lb.main.canonical_hosted_zone_id}"
+}
 
 output "security_group_id" {
-  value = "${aws_security_group.main.id}"
+  description = "The ID of the security group"
+  value       = "${aws_security_group.main.id}"
 }
