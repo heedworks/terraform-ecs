@@ -1,3 +1,7 @@
+variable "lb_listener_arn" {
+  default = ""
+}
+
 /**
  * Required Variables.
  */
@@ -7,7 +11,7 @@ variable "environment" {
 }
 
 variable "image" {
-  description = "The docker image name, e.g node:8.8-alpine"
+  description = "The docker image name, e.g node"
 }
 
 variable "name" {
@@ -19,13 +23,13 @@ variable "version" {
   default     = "latest"
 }
 
-variable "subnet_ids" {
-  description = "Comma separated list of subnet IDs that will be passed to the ELB module"
-}
+# variable "subnet_ids" {
+#   description = "Comma separated list of subnet IDs that will be passed to the ELB module"
+# }
 
-variable "security_groups" {
-  description = "Comma separated list of security group IDs that will be passed to the ELB module"
-}
+# variable "security_groups" {
+#   description = "Comma separated list of security group IDs that will be passed to the ELB module"
+# }
 
 variable "port" {
   description = "The container host port"
@@ -43,9 +47,9 @@ variable "zone_id" {
   description = "The zone ID to create the record in"
 }
 
-variable "log_bucket" {
-  description = "The S3 bucket ID to use for the ELB"
-}
+# variable "log_bucket" {
+#   description = "The S3 bucket ID to use for the ELB"
+# }
 
 variable "vpc_id" {
   description = "The VPC ID"
@@ -55,9 +59,24 @@ variable "vpc_id" {
  * Optional Variables
  */
 
-variable "healthcheck" {
-  description = "Path to a healthcheck endpoint"
+variable "deregistration_delay" {
+  default     = "300"
+  description = "The default deregistration delay"
+}
+
+variable "health_check_path" {
   default     = "/"
+  description = "The default health check path"
+}
+
+variable "health_check_port" {
+  default     = "traffic-port"
+  description = "The default health check port"
+}
+
+variable "health_check_protocol" {
+  default     = "HTTP"
+  description = "The default health check protocol"
 }
 
 variable "container_port" {
@@ -91,16 +110,13 @@ variable "cpu" {
 }
 
 variable "protocol" {
-  description = "The ELB protocol, HTTP or TCP"
+  description = "The ALB protocol, HTTP or TCP"
   default     = "HTTP"
 }
 
 variable "iam_role" {
   description = "IAM Role ARN to use"
-}
-
-variable "zone_id" {
-  description = "The zone ID to create the record in"
+  default     = ""
 }
 
 variable "deployment_minimum_healthy_percent" {
@@ -111,4 +127,19 @@ variable "deployment_minimum_healthy_percent" {
 variable "deployment_maximum_percent" {
   description = "upper limit (% of desired_count) of # of running tasks during a deployment"
   default     = 200
+}
+
+variable "awslogs_group" {
+  description = "The awslogs group. defaults to var.environment/ecs/tasks"
+  default     = ""
+}
+
+variable "awslogs_region" {
+  description = "The awslogs group. defaults to var.region"
+  default     = ""
+}
+
+variable "awslogs_stream_prefix" {
+  description = "The awslogs stream prefix. defaults to var.cluster"
+  default     = ""
 }

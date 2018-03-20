@@ -49,6 +49,7 @@ resource "aws_ecs_service" "main" {
 module "task" {
   source                = "../ecs-task"
   name                  = "${var.name}"
+  environment           = "${var.environment}"
   image                 = "${var.image}"
   image_version         = "${var.version}"
   command               = "${var.command}"

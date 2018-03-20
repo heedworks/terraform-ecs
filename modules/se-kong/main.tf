@@ -14,6 +14,10 @@ variable "vpc_id" {
   description = "The VPC ID to use"
 }
 
+variable "zone_id" {
+  description = "The zone ID to create the record in"
+}
+
 variable "db_subnet_ids" {
   description = "A list of subnet IDs"
   type        = "list"
@@ -51,7 +55,6 @@ variable "db_username" {
 
 variable "db_password" {
   description = "Postgres user password"
-  default     = "7dxvs>)Dmtc2nnc"
 }
 
 variable "db_multi_az" {
@@ -69,9 +72,17 @@ variable "ecr_domain" {
   description = "The domain name of the ECR registry, e.g account_id.dkr.ecr.region.amazonaws.com"
 }
 
+variable "node_env" {
+  description = "The NODE_ENV value to set in each kong task, e.g. development, production"
+}
+
+variable "aws_account_key" {
+  description = "The AWS_ACCOUNT_KEY value to set in each kong task, e.g. integration, sandbox, production"
+}
+
 variable "configuration_version" {
-  description = "The docker image version, e.g latest or 8.8-alpine"
-  default     = "latest"
+  description = "The docker image version, e.g latest or 8.8-alpine (if not specified, var.environment will be used)"
+  default     = ""
 }
 
 variable "configuration_cpu" {
@@ -104,6 +115,8 @@ variable "awslogs_stream_prefix" {
   default     = ""
 }
 
+# RDS database instance for se-kong
+
 module "db" {
   source                        = "../rds"
   vpc_id                        = "${var.vpc_id}"
@@ -118,13 +131,13 @@ module "db" {
   ingress_allow_security_groups = "${var.db_ingress_allow_security_groups}"
 }
 
+# ECS task and service for se-kong-configuration
+
 resource "aws_ecs_service" "configuration" {
   name          = "se-kong-configuration"
   cluster       = "${var.cluster}"
   desired_count = 1
 
-  # Track the latest ACTIVE revision
-  #   task_definition = "${aws_ecs_task_definition.se-kong-configuration.family}:${max("${aws_ecs_task_definition.se-kong-configuration.revision}", "${data.aws_ecs_task_definition.se-kong-configuration.revision}")}"
   # Track the latest ACTIVE revision
   task_definition = "${module.configuration_task.name}:${module.configuration_task.max_revision}"
 }
@@ -135,7 +148,7 @@ module "configuration_task" {
   name                  = "se-kong-configuration"
   environment           = "${var.environment}"
   image                 = "${var.ecr_domain}/schedule-engine/se-kong-configuration"
-  image_version         = "${var.configuration_version}"
+  image_version         = "${coalesce(var.configuration_version, var.environment)}"
   command               = "${var.configuration_command}"
   memory                = "${var.configuration_memory}"
   cpu                   = "${var.configuration_cpu}"
@@ -147,9 +160,38 @@ module "configuration_task" {
   #   env_vars      = "${var.configuration_env_vars}"
   env_vars = <<EOF
 [
-  { "name": "NODE_ENV",                  "value": "integration" }, 
-  { "name": "AWS_ACCOUNT_KEY",           "value": "sandbox" },
+  { "name": "NODE_ENV",                  "value": "${var.node_env}" }, 
+  { "name": "AWS_ACCOUNT_KEY",           "value": "${var.aws_account_key}" },
   { "name": "KONG_PG_CONNECTION_STRING", "value": "${module.db.url}" }
 ]
 EOF
 }
+
+# ECS task and service for se-kong-admin
+
+module "admin" {
+  source = "../ecs-service"
+
+  cluster               = "${var.cluster}"
+  name                  = "se-kong-admin"
+  environment           = "${var.environment}"
+  vpc_id                = "${var.vpc_id}"
+  image                 = "${var.ecr_domain}/schedule-engine/se-kong-admin"
+  version               = "${coalesce(var.configuration_version, var.environment)}"
+  dns_name              = "se-kong-admin"
+  port                  = "8022"
+  zone_id               = "${var.zone_id}"
+  awslogs_group         = "${var.awslogs_group}"
+  awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
+  awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
+
+  env_vars = <<EOF
+[
+  { "name": "NODE_ENV",                  "value": "${var.node_env}" }, 
+  { "name": "AWS_ACCOUNT_KEY",           "value": "${var.aws_account_key}" }
+]
+EOF
+}
+
+# ECS task and service for se-kong-proxy
+

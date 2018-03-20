@@ -91,14 +91,21 @@ resource "aws_key_pair" "ecs" {
 }
 
 module "se_kong" {
-  source                           = "../se-kong"
-  cluster                          = "${module.ecs_cluster.name}"
-  environment                      = "${var.environment}"
-  region                           = "${var.region}"
-  vpc_id                           = "${module.network.vpc_id}"
+  source      = "../se-kong"
+  cluster     = "${module.ecs_cluster.name}"
+  environment = "${var.environment}"
+  region      = "${var.region}"
+  vpc_id      = "${module.network.vpc_id}"
+  zone_id     = "${module.dns.zone_id}"
+
+  // RDS Variables
   db_subnet_ids                    = "${module.network.internal_subnet_ids}"
   db_ingress_allow_security_groups = ["${module.ecs_cluster.security_group_id}"]
-  ecr_domain                       = "${module.defaults.ecr_domain}"
-  awslogs_group                    = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"
-  configuration_version            = "integration"
+  db_password                      = "7dxvs>)Dmtc2nnc"
+
+  ecr_domain            = "${module.defaults.ecr_domain}"
+  awslogs_group         = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"
+  configuration_version = "integration"
+  node_env              = "development"
+  aws_account_key       = "${var.aws_account_key}"
 }
