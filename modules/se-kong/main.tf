@@ -115,6 +115,14 @@ variable "awslogs_stream_prefix" {
   default     = ""
 }
 
+variable "external_alb_arn" {}
+variable "external_alb_dns_name" {}
+variable "external_alb_listener_arn" {}
+
+variable "internal_alb_arn" {}
+variable "internal_alb_dns_name" {}
+variable "internal_alb_listener_arn" {}
+
 # RDS database instance for se-kong
 
 module "db" {
@@ -145,24 +153,50 @@ resource "aws_ecs_service" "configuration" {
 module "configuration_task" {
   source = "../ecs-task"
 
-  name                  = "se-kong-configuration"
-  environment           = "${var.environment}"
-  image                 = "${var.ecr_domain}/schedule-engine/se-kong-configuration"
-  image_version         = "${coalesce(var.configuration_version, var.environment)}"
+  name        = "se-kong-configuration"
+  environment = "${var.environment}"
+  image       = "${var.ecr_domain}/schedule-engine/se-kong-configuration"
+
+  # image_version         = "${coalesce(var.configuration_version, var.environment)}"
+
+  image_version         = "integration"
   command               = "${var.configuration_command}"
-  memory                = "${var.configuration_memory}"
-  cpu                   = "${var.configuration_cpu}"
   ports                 = "[]"
   awslogs_group         = "${var.awslogs_group}"
   awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
   awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
-
-  #   env_vars      = "${var.configuration_env_vars}"
   env_vars = <<EOF
 [
   { "name": "NODE_ENV",                  "value": "${var.node_env}" }, 
   { "name": "AWS_ACCOUNT_KEY",           "value": "${var.aws_account_key}" },
-  { "name": "KONG_PG_CONNECTION_STRING", "value": "${module.db.url}" }
+  { "name": "KONG_PG_CONNECTION_STRING", "value": "${module.db.db_connection_string}" }
+]
+EOF
+}
+
+module "migrations_task" {
+  source = "../ecs-task"
+
+  name          = "se-kong-migrations"
+  environment   = "${var.environment}"
+  image         = "${var.ecr_domain}/schedule-engine/se-kong"
+  image_version = "${coalesce(var.configuration_version, var.environment)}"
+  env_vars      = "${var.env_vars}"
+  command       = "[\"kong\",\"migrations\",\"up\"]"
+  ports         = "[]"
+
+  // AWS CloudWatch Log Variables
+  awslogs_group         = "${var.awslogs_group}"
+  awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
+  awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
+
+  env_vars = <<EOF
+[
+  { "name": "KONG_DATABASE",    "value": "postgres" }, 
+  { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
+  { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" },
+  { "name": "KONG_PG_USER",     "value": "${module.db.username}" },
+  { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" }
 ]
 EOF
 }
@@ -172,26 +206,63 @@ EOF
 module "admin" {
   source = "../ecs-service"
 
-  cluster               = "${var.cluster}"
-  name                  = "se-kong-admin"
-  environment           = "${var.environment}"
-  vpc_id                = "${var.vpc_id}"
-  image                 = "${var.ecr_domain}/schedule-engine/se-kong-admin"
-  version               = "${coalesce(var.configuration_version, var.environment)}"
-  dns_name              = "se-kong-admin"
-  port                  = "8022"
-  zone_id               = "${var.zone_id}"
-  awslogs_group         = "${var.awslogs_group}"
-  awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
-  awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
+  cluster          = "${var.cluster}"
+  name             = "se-kong-admin"
+  environment      = "${var.environment}"
+  vpc_id           = "${var.vpc_id}"
+  image            = "${var.ecr_domain}/schedule-engine/se-kong"
+  image_version    = "${coalesce(var.configuration_version, var.environment)}"
+  dns_name         = "se-kong-admin"
+  port             = "8022"
+  zone_id          = "${var.zone_id}"
+  alb_dns_name     = "${var.internal_alb_dns_name}"
+  alb_listener_arn = "${var.internal_alb_listener_arn}"
 
   env_vars = <<EOF
 [
-  { "name": "NODE_ENV",                  "value": "${var.node_env}" }, 
-  { "name": "AWS_ACCOUNT_KEY",           "value": "${var.aws_account_key}" }
+  { "name": "KONG_DATABASE",    "value": "postgres" }, 
+  { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
+  { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" },
+  { "name": "KONG_PG_USER",     "value": "${module.db.username}" },
+  { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" }
 ]
 EOF
+
+  // AWS CloudWatch Log Variables
+  awslogs_group         = "${var.awslogs_group}"
+  awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
+  awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
 }
 
 # ECS task and service for se-kong-proxy
 
+module "proxy" {
+  source = "../ecs-service"
+
+  cluster          = "${var.cluster}"
+  name             = "se-kong-proxy"
+  environment      = "${var.environment}"
+  vpc_id           = "${var.vpc_id}"
+  image            = "${var.ecr_domain}/schedule-engine/se-kong"
+  image_version    = "${coalesce(var.configuration_version, var.environment)}"
+  dns_name         = "se-kong-proxy"
+  port             = "8021"
+  zone_id          = "${var.zone_id}"
+  alb_dns_name     = "${var.internal_alb_dns_name}"
+  alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  env_vars = <<EOF
+[
+  { "name": "KONG_DATABASE",    "value": "postgres" }, 
+  { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
+  { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" },
+  { "name": "KONG_PG_USER",     "value": "${module.db.username}" },
+  { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" }
+]
+EOF
+
+  // AWS CloudWatch Log Variables
+  awslogs_group         = "${var.awslogs_group}"
+  awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
+  awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
+}

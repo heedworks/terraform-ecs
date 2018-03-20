@@ -31,6 +31,10 @@ output "external_alb_arn" {
   value = "${module.external_alb.arn}"
 }
 
+output "external_alb_dns_name" {
+  value = "${module.external_alb.dns_name}"
+}
+
 output "external_alb_security_group_id" {
   value = "${module.external_alb.security_group_id}"
 }
@@ -45,6 +49,10 @@ output "default_external_alb_target_group_arn" {
 
 output "internal_alb_arn" {
   value = "${module.internal_alb.arn}"
+}
+
+output "internal_alb_dns_name" {
+  value = "${module.internal_alb.dns_name}"
 }
 
 output "internal_alb_security_group_id" {

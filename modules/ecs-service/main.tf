@@ -25,19 +25,12 @@ resource "aws_ecs_service" "main" {
   deployment_minimum_healthy_percent = "${var.deployment_minimum_healthy_percent}"
   deployment_maximum_percent         = "${var.deployment_maximum_percent}"
 
-  #   load_balancer {
-  #     elb_name       = "${module.elb.id}"
-  #     container_name = "${module.task.name}"
-  #     container_port = "${var.container_port}"
-  #   }
-
   lifecycle {
     create_before_destroy = true
   }
+
   # Track the latest ACTIVE revision
   task_definition = "${module.task.name}:${module.task.max_revision}"
-
-  #   task_definition                    = "${module.task.arn}"
 
   load_balancer {
     target_group_arn = "${aws_lb_target_group.main.arn}"
@@ -47,11 +40,12 @@ resource "aws_ecs_service" "main" {
 }
 
 module "task" {
-  source                = "../ecs-task"
+  source = "../ecs-task"
+
   name                  = "${var.name}"
   environment           = "${var.environment}"
   image                 = "${var.image}"
-  image_version         = "${var.version}"
+  image_version         = "${coalesce(var.image_version, var.environment)}"
   command               = "${var.command}"
   env_vars              = "${var.env_vars}"
   memory                = "${var.memory}"
@@ -102,12 +96,13 @@ resource "aws_lb_target_group" "main" {
   }
 
   tags {
+    Cluster     = "${var.cluster}"
     Environment = "${var.environment}"
   }
 }
 
 resource "aws_lb_listener_rule" "main" {
-  listener_arn = "${var.lb_listener_arn}"
+  listener_arn = "${var.alb_listener_arn}"
 
   priority = "${var.port}"
 
@@ -137,7 +132,7 @@ resource "aws_route53_record" "main" {
   #   }
 
   #   set_identifier = "dev"
-  records = ["${var.lb_listener_arn}"]
+  records = ["${var.alb_dns_name}"]
 }
 
 # resource "aws_ecs_service" "se-mobile-api" {

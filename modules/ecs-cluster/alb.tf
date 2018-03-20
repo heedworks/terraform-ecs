@@ -57,8 +57,6 @@ module "internal_alb" {
   name        = "${var.name}-internal"
   vpc_id      = "${var.vpc_id}"
   subnet_ids  = "${var.internal_subnet_ids}"
-
-  # port        = "8000"
 }
 
 module "internal_alb_target_group" {
@@ -74,10 +72,10 @@ module "internal_alb_listener" {
   source = "../alb-listener"
 
   port              = "8000"
-  load_balancer_arn = "${module.external_alb.arn}"
+  load_balancer_arn = "${module.internal_alb.arn}"
 
   // Default Action
-  target_group_arn = "${module.external_alb_target_group.arn}"
+  target_group_arn = "${module.internal_alb_target_group.arn}"
 }
 
 # TODO: temp remove for the add/remove toggle issue

@@ -1,6 +1,5 @@
-variable "lb_listener_arn" {
-  default = ""
-}
+variable "alb_listener_arn" {}
+variable "alb_dns_name" {}
 
 /**
  * Required Variables.
@@ -18,9 +17,9 @@ variable "name" {
   description = "The service name"
 }
 
-variable "version" {
+variable "image_version" {
   description = "The docker image version"
-  default     = "latest"
+  default     = ""
 }
 
 # variable "subnet_ids" {

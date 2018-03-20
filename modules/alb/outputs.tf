@@ -18,11 +18,6 @@ output "zone_id" {
   value       = "${aws_lb.main.zone_id}"
 }
 
-output "canonical_hosted_zone_id" {
-  description = "The canonical hosted zone ID of the load balancer."
-  value       = "${aws_lb.main.canonical_hosted_zone_id}"
-}
-
 output "security_group_id" {
   description = "The ID of the security group"
   value       = "${aws_security_group.main.id}"
