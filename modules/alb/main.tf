@@ -12,12 +12,19 @@ resource "aws_alb" "main" {
   }
 }
 
+resource "aws_security_group" "main" {
+  name   = "${var.alb_name}-alb"
+  vpc_id = "${var.vpc_id}"
+
+  tags {
+    Environment = "${var.environment}"
+  }
+}
+
 resource "aws_alb_listener" "http" {
   load_balancer_arn = "${aws_alb.main.id}"
   port              = "${var.port}"
   protocol          = "HTTP"
-
-  # port              = "80"
 
   default_action {
     target_group_arn = "${aws_alb_target_group.default.arn}"
@@ -32,21 +39,11 @@ resource "aws_alb_target_group" "default" {
   vpc_id               = "${var.vpc_id}"
   deregistration_delay = "${var.deregistration_delay}"
 
-  # port                 = "80"
-
   health_check {
     path     = "${var.health_check_path}"
     protocol = "${var.health_check_protocol}"
     port     = "${var.health_check_port}"
   }
-  tags {
-    Environment = "${var.environment}"
-  }
-}
-
-resource "aws_security_group" "main" {
-  name   = "${var.alb_name}-alb"
-  vpc_id = "${var.vpc_id}"
 
   tags {
     Environment = "${var.environment}"

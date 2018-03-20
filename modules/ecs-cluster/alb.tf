@@ -1,11 +1,37 @@
+# External (internet-facing ALB)
 module "external_alb" {
   source = "../alb"
 
   internal    = false
   environment = "${var.environment}"
-  alb_name    = "${var.name}"
+  alb_name    = "${var.name}-external"
   vpc_id      = "${var.vpc_id}"
   subnet_ids  = "${var.external_subnet_ids}"
+  port        = "80"
+}
+
+module "external_alb_target_group" {
+  source      = "../alb-target-group"
+  name        = "${var.name}-external-default"
+  environment = "${var.environment}"
+  port        = "80"
+  vpc_id      = "${var.vpc_id}"
+}
+
+module "external_alb_listener" {
+  source = "../alb-listener"
+}
+
+# Internal ALB
+module "internal_alb" {
+  source = "../alb"
+
+  internal    = true
+  environment = "${var.environment}"
+  alb_name    = "${var.name}-internal"
+  vpc_id      = "${var.vpc_id}"
+  subnet_ids  = "${var.internal_subnet_ids}"
+  port        = "8000"
 }
 
 # TODO: temp remove for the add/remove toggle issue
