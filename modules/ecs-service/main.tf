@@ -13,6 +13,10 @@
  *
  */
 
+data "aws_lb" "main" {
+  arn = "${var.alb_arn}"
+}
+
 /**
  * Resources
  */
@@ -86,8 +90,7 @@ resource "aws_lb_target_group" "main" {
 
 resource "aws_lb_listener_rule" "main" {
   listener_arn = "${var.alb_listener_arn}"
-
-  priority = "${var.port}"
+  priority     = "${var.port}"
 
   action {
     type             = "forward"
@@ -100,31 +103,12 @@ resource "aws_lb_listener_rule" "main" {
   }
 }
 
-# resource "aws_route53_record" "non_alias" {
-#   zone_id = "${var.zone_id}"
-#   name    = "${coalesce(var.dns_name, module.task.name)}"
-#   type    = "CNAME"
-#   ttl     = "5"
-
-#   records = ["${var.alb_dns_name}"]
-# }
-
-variable "alb_arn" {}
-
-data "aws_lb" "main" {
-  arn = "${var.alb_arn}"
-}
-
 resource "aws_route53_record" "main" {
   zone_id = "${var.zone_id}"
   name    = "${coalesce(var.dns_name, module.task.name)}"
-  type    = "CNAME"
+  type    = "A"
 
   alias {
-    # name                   = "${aws_elb.main.dns_name}"
-
-    # zone_id                = "${aws_elb.main.zone_id}"
-
     name                   = "${data.aws_lb.main.dns_name}"
     zone_id                = "${data.aws_lb.main.zone_id}"
     evaluate_target_health = true

@@ -114,9 +114,10 @@ module "se_kong" {
   aws_account_key       = "${var.aws_account_key}"
 
   // ALB Variables
-  external_alb_arn          = "${module.ecs_cluster.external_alb_arn}"
-  external_alb_listener_arn = "${module.ecs_cluster.default_external_alb_listener_arn}"
+  # external_alb_arn = "${module.ecs_cluster.external_alb_arn}"
 
+  # external_alb_listener_arn     = "${module.ecs_cluster.default_external_alb_listener_arn}"
+  external_alb_target_group_arn = "${module.ecs_cluster.default_external_alb_target_group_arn}"
   internal_alb_arn          = "${module.ecs_cluster.internal_alb_arn}"
   internal_alb_listener_arn = "${module.ecs_cluster.default_internal_alb_listener_arn}"
 

@@ -39,3 +39,8 @@ variable "health_check_protocol" {
   description = "The protocol to use to connect with the target. Defaults to HTTP."
   default     = "HTTP"
 }
+
+variable "health_check_matcher" {
+  description = "The HTTP codes to use when checking for a successful response from a target. You can specify multiple values (for example, 200,202) or a range of values (for example, 200-299)."
+  default     = "200"
+}

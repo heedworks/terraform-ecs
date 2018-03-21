@@ -31,10 +31,11 @@ module "external_alb" {
 module "external_alb_target_group" {
   source = "../alb-target-group"
 
-  name        = "${var.name}-external-default"
-  environment = "${var.environment}"
-  vpc_id      = "${var.vpc_id}"
-  port        = "80"
+  name                 = "${var.name}-external-default"
+  environment          = "${var.environment}"
+  vpc_id               = "${var.vpc_id}"
+  port                 = "8000"
+  health_check_matcher = "200,404"
 }
 
 module "external_alb_listener" {

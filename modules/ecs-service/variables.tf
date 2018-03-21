@@ -1,3 +1,4 @@
+variable "alb_arn" {}
 variable "alb_listener_arn" {}
 
 # variable "alb_dns_name" {}

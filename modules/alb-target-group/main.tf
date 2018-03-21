@@ -9,6 +9,7 @@ resource "aws_lb_target_group" "main" {
     path     = "${var.health_check_path}"
     protocol = "${var.health_check_protocol}"
     port     = "${var.health_check_port}"
+    matcher  = "${var.health_check_matcher}"
   }
 
   tags {

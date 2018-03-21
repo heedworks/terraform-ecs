@@ -119,17 +119,12 @@ variable "awslogs_stream_prefix" {
   default     = ""
 }
 
-variable "external_alb_arn" {}
+# variable "external_alb_arn" {}
+# variable "external_alb_listener_arn" {}
+
 variable "internal_alb_arn" {}
-variable "external_alb_listener_arn" {}
+variable "external_alb_target_group_arn" {}
 variable "internal_alb_listener_arn" {}
-
-# variable "external_alb_dns_name" {}
-# variable "internal_alb_dns_name" {}
-
-data "aws_lb" "external_alb" {
-  arn = "${var.external_alb_arn}"
-}
 
 data "aws_lb" "internal_alb" {
   arn = "${var.internal_alb_arn}"
@@ -181,12 +176,12 @@ module "configuration_task" {
   awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
   awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
   env_vars = <<EOF
-[
-  { "name": "NODE_ENV",                  "value": "${var.node_env}" }, 
-  { "name": "AWS_ACCOUNT_KEY",           "value": "${var.aws_account_key}" },
-  { "name": "KONG_PG_CONNECTION_STRING", "value": "${module.db.db_connection_string}" }
-]
-EOF
+  [
+    { "name": "NODE_ENV",                  "value": "${var.node_env}" }, 
+    { "name": "AWS_ACCOUNT_KEY",           "value": "${var.aws_account_key}" },
+    { "name": "KONG_PG_CONNECTION_STRING", "value": "${module.db.db_connection_string}" }
+  ]
+  EOF
 }
 
 module "migrations_task" {
@@ -206,14 +201,14 @@ module "migrations_task" {
   awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
 
   env_vars = <<EOF
-[
-  { "name": "KONG_DATABASE",    "value": "postgres" }, 
-  { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
-  { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" },
-  { "name": "KONG_PG_USER",     "value": "${module.db.username}" },
-  { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" }
-]
-EOF
+  [
+    { "name": "KONG_DATABASE",    "value": "postgres" }, 
+    { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
+    { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" },
+    { "name": "KONG_PG_USER",     "value": "${module.db.username}" },
+    { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" }
+  ]
+  EOF
 }
 
 # ECS task and service for se-kong-admin
@@ -232,25 +227,23 @@ module "admin" {
   port             = "8022"
   zone_id          = "${var.zone_id}"
   cname_record     = "${data.aws_lb.internal_alb.dns_name}"
+  alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
 
-  alb_arn = "${var.internal_alb_arn}"
-
-  # alb_dns_name = "${var.internal_alb_dns_name}"
-
-  env_vars = <<EOF
-[
-  { "name": "KONG_DATABASE",    "value": "postgres" }, 
-  { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
-  { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" },
-  { "name": "KONG_PG_USER",     "value": "${module.db.username}" },
-  { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" }
-]
-EOF
-  // AWS CloudWatch Log Variables
+  # AWS CloudWatch Log Variables
   awslogs_group         = "${var.awslogs_group}"
   awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
   awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
+
+  env_vars = <<EOF
+  [
+    { "name": "KONG_DATABASE",    "value": "postgres" }, 
+    { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
+    { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" },
+    { "name": "KONG_PG_USER",     "value": "${module.db.username}" },
+    { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" }
+  ]
+  EOF
 }
 
 # ECS task and service for se-kong-proxy
@@ -286,6 +279,67 @@ EOF
 #   awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
 # }
 
+resource "aws_ecs_service" "proxy" {
+  name          = "se-kong-proxy"
+  cluster       = "${var.cluster}"
+  desired_count = "2"
+
+  # iam_role                           = ""
+  deployment_minimum_healthy_percent = "100"
+  deployment_maximum_percent         = "200"
+
+  lifecycle {
+    create_before_destroy = false
+  }
+
+  # Track the latest ACTIVE revision
+  task_definition = "${module.proxy_task.name}:${module.proxy_task.max_revision}"
+
+  load_balancer {
+    target_group_arn = "${var.external_alb_target_group_arn}"
+    container_name   = "${module.proxy_task.name}"
+    container_port   = "8000"
+  }
+}
+
+module "proxy_task" {
+  source = "../ecs-task"
+
+  name          = "se-kong-proxy"
+  environment   = "${var.environment}"
+  image         = "${var.ecr_domain}/schedule-engine/se-kong"
+  image_version = "integration"
+
+  # image_version         = "${coalesce(var.configuration_version, var.environment)}"
+
+  # AWS CloudWatch Log Variables
+  awslogs_group         = "${var.awslogs_group}"
+  awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
+  awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
+  ports = <<EOF
+    [
+      {
+        "protocol": "tcp",
+        "containerPort": 8000,
+        "hostPort": 8021
+      }
+    ]
+  EOF
+  env_vars = <<EOF
+  [
+    { "name": "KONG_DATABASE",    "value": "postgres" }, 
+    { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
+    { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" },
+    { "name": "KONG_PG_USER",     "value": "${module.db.username}" },
+    { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" }
+  ]
+  EOF
+}
+
+#
+# ECS task and service for se-mobile-api
+#
+
 module "se_mobile_api" {
   source = "../ecs-service"
 
@@ -301,23 +355,19 @@ module "se_mobile_api" {
   zone_id        = "${var.zone_id}"
   cname_record   = "${data.aws_lb.internal_alb.dns_name}"
 
-  # alb_dns_name     = "${data.aws_lb.internal_alb.dns_name}"
-  alb_listener_arn = "${var.internal_alb_listener_arn}"
   alb_arn          = "${var.internal_alb_arn}"
-  env_vars         = "[]"
+  alb_listener_arn = "${var.internal_alb_listener_arn}"
 
-  #   env_vars = <<EOF
-  # [
-  #   { "name": "KONG_DATABASE",    "value": "postgres" }, 
-  #   { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
-  #   { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" },
-  #   { "name": "KONG_PG_USER",     "value": "${module.db.username}" },
-  #   { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" }
-  # ]
-  # EOF
-
-  // AWS CloudWatch Log Variables
+  # AWS CloudWatch Log Variables
   awslogs_group         = "${var.awslogs_group}"
   awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
   awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
+
+  env_vars = <<EOF
+  [
+    { "name": "NODE_ENV",                "value": "development" }, 
+    { "name": "AWS_ACCOUNT_KEY",         "value": "sandbox" },
+    { "name": "MONGO_CONNECTION_STRING", "value": "mongodb://" }
+  ]
+  EOF
 }
