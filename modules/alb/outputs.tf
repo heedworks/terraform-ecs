@@ -18,7 +18,8 @@ output "zone_id" {
   value       = "${aws_lb.main.zone_id}"
 }
 
-output "security_group_id" {
-  description = "The ID of the security group"
-  value       = "${aws_security_group.main.id}"
-}
+# output "security_group_id" {
+#   description = "The ID of the security group"
+#   value       = "${aws_security_group.main.id}"
+# }
+

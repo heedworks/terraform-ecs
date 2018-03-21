@@ -1,3 +1,6 @@
+variable "internal_alb_security_group" {}
+variable "external_alb_security_group" {}
+
 variable "region" {
   description = "The AWS region"
 }

@@ -213,6 +213,7 @@ module "admin" {
   image            = "${var.ecr_domain}/schedule-engine/se-kong"
   image_version    = "${coalesce(var.configuration_version, var.environment)}"
   dns_name         = "se-kong-admin"
+  container_port   = "8001"
   port             = "8022"
   zone_id          = "${var.zone_id}"
   alb_dns_name     = "${var.internal_alb_dns_name}"
@@ -236,30 +237,63 @@ EOF
 
 # ECS task and service for se-kong-proxy
 
-module "proxy" {
+# module "proxy" {
+#   source = "../ecs-service"
+
+#   cluster          = "${var.cluster}"
+#   name             = "se-kong-proxy"
+#   environment      = "${var.environment}"
+#   vpc_id           = "${var.vpc_id}"
+#   image            = "${var.ecr_domain}/schedule-engine/se-kong"
+#   image_version    = "${coalesce(var.configuration_version, var.environment)}"
+#   dns_name         = "se-kong-proxy"
+#   port             = "8021"
+#   zone_id          = "${var.zone_id}"
+#   alb_dns_name     = "${var.external_alb_dns_name}"
+#   alb_listener_arn = "${var.external_alb_listener_arn}"
+
+#   env_vars = <<EOF
+# [
+#   { "name": "KONG_DATABASE",    "value": "postgres" }, 
+#   { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
+#   { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" },
+#   { "name": "KONG_PG_USER",     "value": "${module.db.username}" },
+#   { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" }
+# ]
+# EOF
+
+#   // AWS CloudWatch Log Variables
+#   awslogs_group         = "${var.awslogs_group}"
+#   awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
+#   awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
+# }
+
+module "se_mobile_api" {
   source = "../ecs-service"
 
   cluster          = "${var.cluster}"
-  name             = "se-kong-proxy"
+  name             = "se-mobile-api"
   environment      = "${var.environment}"
   vpc_id           = "${var.vpc_id}"
-  image            = "${var.ecr_domain}/schedule-engine/se-kong"
+  image            = "${var.ecr_domain}/schedule-engine/se-mobile-api"
   image_version    = "${coalesce(var.configuration_version, var.environment)}"
-  dns_name         = "se-kong-proxy"
-  port             = "8021"
+  dns_name         = "se-mobile-api"
+  container_port   = "8000"
+  port             = "8011"
   zone_id          = "${var.zone_id}"
   alb_dns_name     = "${var.internal_alb_dns_name}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
+  env_vars         = "[]"
 
-  env_vars = <<EOF
-[
-  { "name": "KONG_DATABASE",    "value": "postgres" }, 
-  { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
-  { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" },
-  { "name": "KONG_PG_USER",     "value": "${module.db.username}" },
-  { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" }
-]
-EOF
+  #   env_vars = <<EOF
+  # [
+  #   { "name": "KONG_DATABASE",    "value": "postgres" }, 
+  #   { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
+  #   { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" },
+  #   { "name": "KONG_PG_USER",     "value": "${module.db.username}" },
+  #   { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" }
+  # ]
+  # EOF
 
   // AWS CloudWatch Log Variables
   awslogs_group         = "${var.awslogs_group}"

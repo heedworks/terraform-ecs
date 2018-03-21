@@ -79,10 +79,12 @@ module "ecs_cluster" {
   instance_type    = "${var.ecs_instance_type}"
   image_id         = "${coalesce(var.ecs_ami, module.defaults.ecs_ami)}"
   # new variables
-  vpc_id              = "${module.network.vpc_id}"
-  depends_id          = "${module.network.depends_id}"
-  internal_subnet_ids = "${module.network.internal_subnet_ids}"
-  external_subnet_ids = "${module.network.external_subnet_ids}"
+  vpc_id                      = "${module.network.vpc_id}"
+  depends_id                  = "${module.network.depends_id}"
+  internal_subnet_ids         = "${module.network.internal_subnet_ids}"
+  external_subnet_ids         = "${module.network.external_subnet_ids}"
+  internal_alb_security_group = "${module.security_groups.internal_alb}"
+  external_alb_security_group = "${module.security_groups.external_alb}"
 }
 
 resource "aws_key_pair" "ecs" {

@@ -9,7 +9,12 @@ variable "vpc_id" {
 }
 
 variable "subnet_ids" {
-  description = "List of public subnet ids to place the loadbalancer in"
+  description = "List of subnet ids to place the load balancer in"
+  type        = "list"
+}
+
+variable "security_groups" {
+  description = "List of security groups to attach to the load balancer"
   type        = "list"
 }
 

@@ -2,32 +2,31 @@
 module "external_alb" {
   source = "../alb"
 
-  internal    = false
-  environment = "${var.environment}"
-  name        = "${var.name}-external"
-  vpc_id      = "${var.vpc_id}"
-  subnet_ids  = "${var.external_subnet_ids}"
-
-  # port        = "80"
+  internal        = false
+  environment     = "${var.environment}"
+  name            = "${var.name}-external"
+  vpc_id          = "${var.vpc_id}"
+  subnet_ids      = "${var.external_subnet_ids}"
+  security_groups = ["${var.external_alb_security_group}"]
 }
 
-resource "aws_security_group_rule" "external_alb_ingress" {
-  type              = "ingress"
-  from_port         = "80"
-  to_port           = "80"
-  protocol          = "TCP"
-  cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = "${module.external_alb.security_group_id}"
-}
+# resource "aws_security_group_rule" "external_alb_ingress" {
+#   type              = "ingress"
+#   from_port         = "80"
+#   to_port           = "80"
+#   protocol          = "TCP"
+#   cidr_blocks       = ["0.0.0.0/0"]
+#   security_group_id = "${module.external_alb.security_group_id}"
+# }
 
-resource "aws_security_group_rule" "external_alb_egress" {
-  type              = "egress"
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"
-  cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = "${module.external_alb.security_group_id}"
-}
+# resource "aws_security_group_rule" "external_alb_egress" {
+#   type              = "egress"
+#   from_port         = 0
+#   to_port           = 0
+#   protocol          = "-1"
+#   cidr_blocks       = ["0.0.0.0/0"]
+#   security_group_id = "${module.external_alb.security_group_id}"
+# }
 
 module "external_alb_target_group" {
   source = "../alb-target-group"
@@ -52,11 +51,12 @@ module "external_alb_listener" {
 module "internal_alb" {
   source = "../alb"
 
-  internal    = true
-  environment = "${var.environment}"
-  name        = "${var.name}-internal"
-  vpc_id      = "${var.vpc_id}"
-  subnet_ids  = "${var.internal_subnet_ids}"
+  internal        = true
+  environment     = "${var.environment}"
+  name            = "${var.name}-internal"
+  vpc_id          = "${var.vpc_id}"
+  subnet_ids      = "${var.internal_subnet_ids}"
+  security_groups = ["${var.internal_alb_security_group}"]
 }
 
 module "internal_alb_target_group" {

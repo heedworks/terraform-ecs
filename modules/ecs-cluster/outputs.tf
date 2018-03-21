@@ -35,9 +35,9 @@ output "external_alb_dns_name" {
   value = "${module.external_alb.dns_name}"
 }
 
-output "external_alb_security_group_id" {
-  value = "${module.external_alb.security_group_id}"
-}
+# output "external_alb_security_group_id" {
+#   value = "${module.external_alb.security_group_id}"
+# }
 
 output "default_external_alb_listener_arn" {
   value = "${module.external_alb_listener.arn}"
@@ -55,9 +55,9 @@ output "internal_alb_dns_name" {
   value = "${module.internal_alb.dns_name}"
 }
 
-output "internal_alb_security_group_id" {
-  value = "${module.internal_alb.security_group_id}"
-}
+# output "internal_alb_security_group_id" {
+#   value = "${module.internal_alb.security_group_id}"
+# }
 
 output "default_internal_alb_listener_arn" {
   value = "${module.internal_alb_listener.arn}"
