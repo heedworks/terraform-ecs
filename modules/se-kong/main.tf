@@ -68,6 +68,10 @@ variable "db_ingress_allow_security_groups" {
   default     = []
 }
 
+variable "db_security_groups" {
+  description = "Comma separated list of security group IDs to allow traffic from"
+}
+
 variable "ecr_domain" {
   description = "The domain name of the ECR registry, e.g account_id.dkr.ecr.region.amazonaws.com"
 }
@@ -126,7 +130,8 @@ variable "internal_alb_listener_arn" {}
 # RDS database instance for se-kong
 
 module "db" {
-  source                        = "../rds"
+  source = "../rds"
+
   vpc_id                        = "${var.vpc_id}"
   name                          = "${var.db_name}"
   engine                        = "${var.db_engine}"
@@ -136,7 +141,9 @@ module "db" {
   password                      = "${var.db_password}"
   multi_az                      = "${var.db_multi_az}"
   subnet_ids                    = "${var.db_subnet_ids}"
-  ingress_allow_security_groups = "${var.db_ingress_allow_security_groups}"
+  ingress_allow_security_groups = ["${split(",",var.db_security_groups)}"]
+
+  # ingress_allow_security_groups = "${var.db_ingress_allow_security_groups}"
 }
 
 # ECS task and service for se-kong-configuration

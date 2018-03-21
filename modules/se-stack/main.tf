@@ -101,9 +101,11 @@ module "se_kong" {
   zone_id     = "${module.dns.zone_id}"
 
   // RDS Variables
-  db_subnet_ids                    = "${module.network.internal_subnet_ids}"
-  db_ingress_allow_security_groups = ["${module.ecs_cluster.security_group_id}"]
-  db_password                      = "7dxvs>)Dmtc2nnc"
+  db_subnet_ids = "${module.network.internal_subnet_ids}"
+
+  # db_ingress_allow_security_groups = ["${module.ecs_cluster.security_group_id}"]
+  db_security_groups = "${module.ecs_cluster.security_group_id},${module.security_groups.external_ssh}"
+  db_password        = "7dxvs>)Dmtc2nnc"
 
   ecr_domain            = "${module.defaults.ecr_domain}"
   awslogs_group         = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"

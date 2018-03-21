@@ -27,8 +27,6 @@ resource "aws_security_group" "cluster" {
     protocol        = -1
     security_groups = ["${split(",",var.security_groups)}"]
     description     = "Managed by Terraform"
-
-    # security_groups = ["${var.security_groups}"]
   }
 
   // Allows all outbound internet traffic
