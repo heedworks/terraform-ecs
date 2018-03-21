@@ -65,23 +65,6 @@ module "task" {
 EOF
 }
 
-# name = "${coalesce(var.name, replace(var.image, "/", "-"))}"
-
-# module "elb" {
-#   source = "../elb"
-
-#   name            = "${module.task.name}"
-#   port            = "${var.port}"
-#   environment     = "${var.environment}"
-#   subnet_ids      = "${var.subnet_ids}"
-#   security_groups = "${var.security_groups}"
-#   dns_name        = "${coalesce(var.dns_name, module.task.name)}"
-#   healthcheck     = "${var.healthcheck}"
-#   protocol        = "${var.protocol}"
-#   zone_id         = "${var.zone_id}"
-#   log_bucket      = "${var.log_bucket}"
-# }
-
 resource "aws_lb_target_group" "main" {
   name                 = "${module.task.name}"
   port                 = "${var.container_port}"
@@ -114,41 +97,36 @@ resource "aws_lb_listener_rule" "main" {
   condition {
     field  = "host-header"
     values = ["${coalesce(var.dns_name, module.task.name)}.*"]
-
-    # values = ["se-mobile-api.internal"]
   }
+}
 
-  # listener_arn = "arn:aws:elasticloadbalancing:us-east-1:205210731340:listener/app/se-app-private/61d58b85637e36d1/1bc654dfce4b6de4"
+# resource "aws_route53_record" "non_alias" {
+#   zone_id = "${var.zone_id}"
+#   name    = "${coalesce(var.dns_name, module.task.name)}"
+#   type    = "CNAME"
+#   ttl     = "5"
+
+#   records = ["${var.alb_dns_name}"]
+# }
+
+variable "alb_arn" {}
+
+data "aws_lb" "main" {
+  arn = "${var.alb_arn}"
 }
 
 resource "aws_route53_record" "main" {
   zone_id = "${var.zone_id}"
   name    = "${coalesce(var.dns_name, module.task.name)}"
   type    = "CNAME"
-  ttl     = "5"
 
-  #   weighted_routing_policy {
-  #     weight = 10
-  #   }
+  alias {
+    # name                   = "${aws_elb.main.dns_name}"
 
-  #   set_identifier = "dev"
-  records = ["${var.alb_dns_name}"]
+    # zone_id                = "${aws_elb.main.zone_id}"
+
+    name                   = "${data.aws_lb.main.dns_name}"
+    zone_id                = "${data.aws_lb.main.zone_id}"
+    evaluate_target_health = true
+  }
 }
-
-# resource "aws_ecs_service" "se-mobile-api" {
-#   name          = "se-mobile-api"
-#   cluster       = "${var.cluster}"
-#   desired_count = 2
-
-
-#   # Track the latest ACTIVE revision
-#   task_definition = "${aws_ecs_task_definition.se-mobile-api.family}:${max("${aws_ecs_task_definition.se-mobile-api.revision}", "${data.aws_ecs_task_definition.se-mobile-api.revision}")}"
-
-
-#   load_balancer {
-#     target_group_arn = "${aws_lb_target_group.main.arn}"
-#     container_name   = "${var.name}"
-#     container_port   = "${var.container_port}"
-#   }
-# }
-

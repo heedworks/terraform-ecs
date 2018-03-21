@@ -120,12 +120,20 @@ variable "awslogs_stream_prefix" {
 }
 
 variable "external_alb_arn" {}
-variable "external_alb_dns_name" {}
-variable "external_alb_listener_arn" {}
-
 variable "internal_alb_arn" {}
-variable "internal_alb_dns_name" {}
+variable "external_alb_listener_arn" {}
 variable "internal_alb_listener_arn" {}
+
+# variable "external_alb_dns_name" {}
+# variable "internal_alb_dns_name" {}
+
+data "aws_lb" "external_alb" {
+  arn = "${var.external_alb_arn}"
+}
+
+data "aws_lb" "internal_alb" {
+  arn = "${var.internal_alb_arn}"
+}
 
 # RDS database instance for se-kong
 
@@ -223,8 +231,12 @@ module "admin" {
   container_port   = "8001"
   port             = "8022"
   zone_id          = "${var.zone_id}"
-  alb_dns_name     = "${var.internal_alb_dns_name}"
+  cname_record     = "${data.aws_lb.internal_alb.dns_name}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  alb_arn = "${var.internal_alb_arn}"
+
+  # alb_dns_name = "${var.internal_alb_dns_name}"
 
   env_vars = <<EOF
 [
@@ -235,7 +247,6 @@ module "admin" {
   { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" }
 ]
 EOF
-
   // AWS CloudWatch Log Variables
   awslogs_group         = "${var.awslogs_group}"
   awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
@@ -278,18 +289,21 @@ EOF
 module "se_mobile_api" {
   source = "../ecs-service"
 
-  cluster          = "${var.cluster}"
-  name             = "se-mobile-api"
-  environment      = "${var.environment}"
-  vpc_id           = "${var.vpc_id}"
-  image            = "${var.ecr_domain}/schedule-engine/se-mobile-api"
-  image_version    = "${coalesce(var.configuration_version, var.environment)}"
-  dns_name         = "se-mobile-api"
-  container_port   = "8000"
-  port             = "8011"
-  zone_id          = "${var.zone_id}"
-  alb_dns_name     = "${var.internal_alb_dns_name}"
+  cluster        = "${var.cluster}"
+  name           = "se-mobile-api"
+  environment    = "${var.environment}"
+  vpc_id         = "${var.vpc_id}"
+  image          = "${var.ecr_domain}/schedule-engine/se-mobile-api"
+  image_version  = "${coalesce(var.configuration_version, var.environment)}"
+  dns_name       = "se-mobile-api"
+  container_port = "8000"
+  port           = "8011"
+  zone_id        = "${var.zone_id}"
+  cname_record   = "${data.aws_lb.internal_alb.dns_name}"
+
+  # alb_dns_name     = "${data.aws_lb.internal_alb.dns_name}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
+  alb_arn          = "${var.internal_alb_arn}"
   env_vars         = "[]"
 
   #   env_vars = <<EOF

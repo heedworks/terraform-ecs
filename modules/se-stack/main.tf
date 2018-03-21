@@ -115,10 +115,11 @@ module "se_kong" {
 
   // ALB Variables
   external_alb_arn          = "${module.ecs_cluster.external_alb_arn}"
-  external_alb_dns_name     = "${module.ecs_cluster.external_alb_dns_name}"
   external_alb_listener_arn = "${module.ecs_cluster.default_external_alb_listener_arn}"
 
   internal_alb_arn          = "${module.ecs_cluster.internal_alb_arn}"
-  internal_alb_dns_name     = "${module.ecs_cluster.internal_alb_dns_name}"
   internal_alb_listener_arn = "${module.ecs_cluster.default_internal_alb_listener_arn}"
+
+  # external_alb_dns_name     = "${module.ecs_cluster.external_alb_dns_name}"
+  # internal_alb_dns_name     = "${module.ecs_cluster.internal_alb_dns_name}"
 }

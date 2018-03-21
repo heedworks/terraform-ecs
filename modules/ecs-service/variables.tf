@@ -1,5 +1,7 @@
 variable "alb_listener_arn" {}
-variable "alb_dns_name" {}
+
+# variable "alb_dns_name" {}
+variable "cname_record" {}
 
 /**
  * Required Variables.
