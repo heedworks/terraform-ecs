@@ -22,74 +22,64 @@ variable "se_env" {
   default     = ""
 }
 
-variable "service_port" {
+variable "service_port_map" {
   description = ""
   type        = "map"
 
   default = {}
-}
-
-variable "deployment_minimum_healthy_percent" {
-  description = "lower limit (% of desired_count) of # of running tasks during a deployment"
-  default     = 100
-}
-
-variable "deployment_maximum_percent" {
-  description = "upper limit (% of desired_count) of # of running tasks during a deployment"
-  default     = 200
 }
 
 #------------------------------------------------------------------------------
 # Service Override Maps
 #------------------------------------------------------------------------------
-variable "service_container_port_override" {
+variable "service_container_port_map" {
   description = ""
   type        = "map"
 
   default = {}
 }
 
-variable "service_image_tag_override" {
+variable "service_image_tag_map" {
   description = ""
   type        = "map"
 
   default = {}
 }
 
-variable "service_se_env_override" {
+variable "service_se_env_map" {
   description = ""
   type        = "map"
 
   default = {}
 }
 
-variable "service_node_env_override" {
+variable "service_node_env_map" {
   description = ""
   type        = "map"
 
   default = {}
 }
 
-variable "service_desired_count_override" {
-  description = ""
-  type        = "map"
+# variable "desired_count_service_map" {
+#   description = ""
+#   type        = "map"
 
-  default = {}
-}
+#   default = {}
+# }
 
-variable "service_deployment_minimum_healthy_percent_override" {
-  description = ""
-  type        = "map"
+# variable "deployment_minimum_healthy_percent_service_override" {
+#   description = ""
+#   type        = "map"
 
-  default = {}
-}
+#   default = {}
+# }
 
-variable "service_deployment_maximum_percent_override" {
-  description = ""
-  type        = "map"
+# variable "service_deployment_maximum_percent_override" {
+#   description = ""
+#   type        = "map"
 
-  default = {}
-}
+#   default = {}
+# }
 
 variable "kong_db_password" {
   description = "Postgres user password"
@@ -118,6 +108,11 @@ variable "external_alb_target_group_arn" {}
 variable "internal_alb_listener_arn" {}
 variable "ecs_tasks_cloudwatch_log_group" {}
 
+# 
+variable "mongo_connection_string_template" {
+  description = ""
+}
+
 # -----------------------------------------------------------------------------
 # Kong Admin and Proxy services and tasks
 # -----------------------------------------------------------------------------
@@ -144,6 +139,36 @@ module "se_kong" {
   internal_alb_arn              = "${var.internal_alb_arn}"
   internal_alb_listener_arn     = "${var.internal_alb_listener_arn}"
   external_alb_target_group_arn = "${var.external_alb_target_group_arn}"
+}
+
+# -----------------------------------------------------------------------------
+# ECS task and service for se-mobile-api
+# -----------------------------------------------------------------------------
+module "se_mobile_api" {
+  source = "../se-service"
+
+  name        = "se-mobile-api"
+  cluster     = "${var.cluster}"
+  environment = "${var.environment}"
+  vpc_id      = "${var.vpc_id}"
+  image       = "${var.ecr_domain}/schedule-engine/se-mobile-api"
+  image_tag   = "${var.aws_account_key}"
+
+  port = "${lookup(var.service_port_map, "se-mobile-api")}"
+
+  zone_id          = "${var.zone_id}"
+  alb_arn          = "${var.internal_alb_arn}"
+  alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  # Environment Variables
+  aws_account_id          = "${var.aws_account_id}"
+  aws_account_key         = "${var.aws_account_key}"
+  aws_account_name        = "${var.aws_account_name}"
+  mongo_connection_string = "${format(var.mongo_connection_string_template, "se_mobile_api")}"
+
+  # AWS CloudWatch Log Variables
+  awslogs_group  = "${var.ecs_tasks_cloudwatch_log_group}"
+  awslogs_region = "${var.region}"
 }
 
 # # -----------------------------------------------------------------------------

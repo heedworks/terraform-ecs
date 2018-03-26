@@ -205,7 +205,7 @@ module "se_stack" {
   external_domain_name  = "${var.external_domain_name}"
 }
 
-variable "se_service_port" {
+variable "se_service_port_map" {
   type = "map"
 
   default = {
@@ -252,7 +252,7 @@ variable "se_service_port" {
   }
 }
 
-variable "se_service_container_port_override" {
+variable "se_service_container_port_map" {
   type = "map"
 
   default = {
@@ -260,7 +260,7 @@ variable "se_service_container_port_override" {
   }
 }
 
-variable "se_service_image_tag_override" {
+variable "se_service_image_tag_map" {
   type = "map"
 
   default = {
@@ -268,7 +268,7 @@ variable "se_service_image_tag_override" {
   }
 }
 
-variable "se_service_se_env_override" {
+variable "se_service_se_env_map" {
   type = "map"
 
   default = {
@@ -276,7 +276,7 @@ variable "se_service_se_env_override" {
   }
 }
 
-variable "se_service_node_env_override" {
+variable "se_service_node_env_map" {
   type = "map"
 
   default = {
@@ -284,7 +284,7 @@ variable "se_service_node_env_override" {
   }
 }
 
-variable "se_service_desired_count_override" {
+variable "se_service_desired_count_map" {
   type = "map"
 
   default = {
@@ -292,7 +292,7 @@ variable "se_service_desired_count_override" {
   }
 }
 
-variable "se_service_deployment_minimum_healthy_percent_override" {
+variable "se_service_deployment_minimum_healthy_percent_map" {
   type = "map"
 
   default = {
@@ -300,7 +300,7 @@ variable "se_service_deployment_minimum_healthy_percent_override" {
   }
 }
 
-variable "se_service_deployment_maximum_percent_override" {
+variable "se_service_deployment_maximum_percent_map" {
   type = "map"
 
   default = {
@@ -316,6 +316,8 @@ module "se_service_list" {
   vpc_id      = "${module.se_stack.vpc_id}"
   zone_id     = "${module.se_stack.zone_id}"
   environment = "${var.environment}"
+
+  mongo_connection_string_template = "mongodb://admin:rGmGTpEnhf2%3E%253frvpDXMPUP@cluster0-shard-00-00-hulfh.mongodb.net:27017,cluster0-shard-00-01-hulfh.mongodb.net:27017,cluster0-shard-00-02-hulfh.mongodb.net:27017/%s?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin"
 
   kong_db_password        = "7dxvs>)Dmtc2nnc"
   kong_db_security_groups = "${module.se_stack.ecs_cluster_security_group_id},${module.se_stack.external_ssh_security_group_id}"
