@@ -66,6 +66,11 @@ variable "dns_name" {
   default     = ""
 }
 
+variable "domain_name" {
+  description = "the internal DNS name to use with services"
+  default     = "internal"
+}
+
 variable "deregistration_delay" {
   default     = "300"
   description = "The default deregistration delay"
