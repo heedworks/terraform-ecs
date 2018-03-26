@@ -8,6 +8,11 @@ output "arn" {
   value       = "${aws_db_instance.main.arn}"
 }
 
+output "name" {
+  description = "The database name."
+  value       = "${aws_db_instance.main.name}"
+}
+
 output "username" {
   description = "The master username for the database."
   value       = "${aws_db_instance.main.username}"

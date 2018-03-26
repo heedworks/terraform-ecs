@@ -1,13 +1,11 @@
 module "defaults" {
   source = "../defaults"
-
   region = "${var.region}"
   cidr   = "${var.vpc_cidr}"
 }
 
 module "network" {
-  source = "../network"
-
+  source             = "../network"
   name               = "${var.name}"
   environment        = "${var.environment}"
   vpc_cidr           = "${var.vpc_cidr}"
@@ -26,9 +24,7 @@ module "security_groups" {
 }
 
 module "bastion" {
-  source = "../bastion"
-
-  cluster         = "${var.name}"
+  source          = "../bastion"
   region          = "${var.region}"
   instance_type   = "${var.bastion_instance_type}"
   subnet_id       = "${element(module.network.external_subnet_ids, 0)}"
@@ -36,6 +32,7 @@ module "bastion" {
   vpc_id          = "${module.network.vpc_id}"
   key_name        = "${var.key_name}"
   environment     = "${var.environment}"
+  cluster         = "${var.name}"
 
   # subnet_id       = "${element(module.vpc.external_subnets, 0)}"
   # instance_type   = "${var.bastion_instance_type}"
@@ -43,8 +40,7 @@ module "bastion" {
 }
 
 module "dhcp" {
-  source = "../dhcp"
-
+  source  = "../dhcp"
   name    = "${module.dns.name}"
   vpc_id  = "${module.network.vpc_id}"
   servers = "${module.defaults.domain_name_servers}"
@@ -55,7 +51,6 @@ module "dhcp" {
 
 module "dns" {
   source = "../dns"
-
   name   = "${var.internal_domain_name}"
   vpc_id = "${module.network.vpc_id}"
 }
@@ -100,23 +95,25 @@ resource "aws_key_pair" "ecs" {
 module "se_kong" {
   source = "../se-kong"
 
-  aws_account_key = "${var.aws_account_key}"
-  cluster         = "${module.ecs_cluster.name}"
-  vpc_id          = "${module.network.vpc_id}"
-  zone_id         = "${module.dns.zone_id}"
-  environment     = "${var.environment}"
-
-  # region          = "${var.region}"
+  cluster     = "${module.ecs_cluster.name}"
+  vpc_id      = "${module.network.vpc_id}"
+  zone_id     = "${module.dns.zone_id}"
+  environment = "${var.environment}"
+  region      = "${var.region}"
 
   # RDS Variables
   db_subnet_ids      = "${module.network.internal_subnet_ids}"
   db_security_groups = "${module.ecs_cluster.security_group_id},${module.security_groups.external_ssh}"
   db_password        = "7dxvs>)Dmtc2nnc"
-  ecr_domain         = "${module.defaults.ecr_domain}"
-  awslogs_group      = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"
-  # configuration_image_version = "integration"
+
+  ecr_domain            = "${module.defaults.ecr_domain}"
+  awslogs_group         = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"
+  configuration_version = "integration"
+  node_env              = "development"
+  aws_account_key       = "${var.aws_account_key}"
+
   # ALB Variables
-  internal_alb_arn = "${module.ecs_cluster.internal_alb_arn}"
+  internal_alb_arn              = "${module.ecs_cluster.internal_alb_arn}"
   internal_alb_listener_arn     = "${module.ecs_cluster.default_internal_alb_listener_arn}"
   external_alb_target_group_arn = "${module.ecs_cluster.default_external_alb_target_group_arn}"
 }

@@ -177,7 +177,7 @@ provider "aws" {
   }
 }
 
-module "se-stack" {
+module "se_stack" {
   source = "../../modules/se-stack"
 
   name                  = "${var.name}"
@@ -244,10 +244,10 @@ output "environment" {
 
 // The bastion host IP.
 output "bastion_ip" {
-  value = "${module.se-stack.bastion_ip}"
+  value = "${module.se_stack.bastion_ip}"
 }
 
 // The bastion host IP.
 output "run_command_to_copy_bastion_private_key" {
-  value = "make copy-key IP=${module.se-stack.bastion_ip} ACCOUNT=${var.aws_account_key}"
+  value = "make copy-key IP=${module.se_stack.bastion_ip} ACCOUNT=${var.aws_account_key}"
 }

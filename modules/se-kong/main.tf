@@ -1,142 +1,6 @@
-variable "cluster" {
-  description = "The name of the ECS cluster"
-}
-
-variable "region" {
-  description = "The AWS region of the ECS cluster"
-}
-
-variable "environment" {
-  description = "Environment tag, e.g prod"
-}
-
-variable "vpc_id" {
-  description = "The VPC ID to use"
-}
-
-variable "zone_id" {
-  description = "The zone ID to create the record in"
-}
-
-variable "db_subnet_ids" {
-  description = "A list of subnet IDs"
-  type        = "list"
-}
-
-variable "db_name" {
-  description = "RDS instance name"
-  default     = "se-kong-postgres"
-}
-
-variable "db_engine" {
-  description = "Database engine: mysql, postgres, etc."
-  default     = "postgres"
-}
-
-variable "db_engine_version" {
-  description = "Database version"
-  default     = "10.1"
-}
-
-variable "db_port" {
-  description = "Port for database to listen on"
-  default     = 5432
-}
-
-variable "db_database" {
-  description = "The database name for the RDS instance (if not specified, `var.db_name` will be used)"
-  default     = "se_kong"
-}
-
-variable "db_username" {
-  description = "The username for the RDS instance (if not specified, `var.db_name` will be used)"
-  default     = "se_admin"
-}
-
-variable "db_password" {
-  description = "Postgres user password"
-}
-
-variable "db_multi_az" {
-  description = "If true, database will be placed in multiple AZs for HA"
-  default     = false
-}
-
-variable "db_ingress_allow_security_groups" {
-  description = "A list of security group IDs to allow traffic from"
-  type        = "list"
-  default     = []
-}
-
-variable "db_security_groups" {
-  description = "Comma separated list of security group IDs to allow traffic from"
-}
-
-variable "ecr_domain" {
-  description = "The domain name of the ECR registry, e.g account_id.dkr.ecr.region.amazonaws.com"
-}
-
-variable "node_env" {
-  description = "The NODE_ENV value to set in each kong task, e.g. development, production"
-}
-
-variable "aws_account_key" {
-  description = "The AWS_ACCOUNT_KEY value to set in each kong task, e.g. integration, sandbox, production"
-}
-
-variable "configuration_version" {
-  description = "The docker image version, e.g latest or 8.8-alpine (if not specified, var.environment will be used)"
-  default     = ""
-}
-
-variable "configuration_cpu" {
-  description = "The number of cpu units to reserve for the container"
-  default     = 128
-}
-
-variable "configuration_command" {
-  description = "The raw json of the task command"
-  default     = "[]"
-} # ["--key=foo","--port=bar"]
-
-variable "configuration_memory" {
-  description = "The number of MiB of memory to reserve for the container"
-  default     = 128
-}
-
-variable "awslogs_group" {
-  description = "The awslogs group. defaults to var.environment/ecs/tasks"
-  default     = ""
-}
-
-variable "awslogs_region" {
-  description = "The awslogs group. defaults to var.region"
-  default     = ""
-}
-
-variable "awslogs_stream_prefix" {
-  description = "The awslogs stream prefix. defaults to var.cluster"
-  default     = ""
-}
-
-variable "internal_alb_arn" {
-  description = "The ARN of the ALB target group for se-kong-admin"
-}
-
-variable "internal_alb_listener_arn" {
-  description = "The ARN of the ALB listener for se-kong-admin"
-}
-
-variable "external_alb_target_group_arn" {
-  description = "The ARN of the ALB target group for se-kong-proxy"
-}
-
-data "aws_lb" "internal_alb" {
-  arn = "${var.internal_alb_arn}"
-}
-
+# -----------------------------------------------------------------------------
 # RDS database instance for se-kong
-
+# -----------------------------------------------------------------------------
 module "db" {
   source = "../rds"
 
@@ -150,12 +14,11 @@ module "db" {
   multi_az                      = "${var.db_multi_az}"
   subnet_ids                    = "${var.db_subnet_ids}"
   ingress_allow_security_groups = ["${split(",",var.db_security_groups)}"]
-
-  # ingress_allow_security_groups = "${var.db_ingress_allow_security_groups}"
 }
 
-# ECS task and service for se-kong-configuration
-
+# -----------------------------------------------------------------------------
+# ECS service for se-kong-configuration
+# -----------------------------------------------------------------------------
 resource "aws_ecs_service" "configuration" {
   name          = "se-kong-configuration"
   cluster       = "${var.cluster}"
@@ -165,25 +28,25 @@ resource "aws_ecs_service" "configuration" {
   task_definition = "${module.configuration_task.name}:${module.configuration_task.max_revision}"
 }
 
+# -----------------------------------------------------------------------------
+# ECS task for se-kong-configuration
+# -----------------------------------------------------------------------------
 module "configuration_task" {
   source = "../ecs-task"
 
-  name        = "se-kong-configuration"
-  environment = "${var.environment}"
-  image       = "${var.ecr_domain}/schedule-engine/se-kong-configuration"
+  name          = "se-kong-configuration"
+  environment   = "${var.environment}"
+  image         = "${var.ecr_domain}/schedule-engine/se-kong-configuration"
+  image_version = "${coalesce(var.configuration_image_version, var.aws_account_key)}"
 
-  # image_version         = "${coalesce(var.configuration_version, var.environment)}"
-
-  image_version         = "integration"
   command               = "${var.configuration_command}"
   ports                 = "[]"
   awslogs_group         = "${var.awslogs_group}"
   awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
   awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
+
   env_vars = <<EOF
   [
-    { "name": "NODE_ENV",                  "value": "${var.node_env}" }, 
-    { "name": "AWS_ACCOUNT_KEY",           "value": "${var.aws_account_key}" },
     { "name": "KONG_PG_CONNECTION_STRING", "value": "${module.db.db_connection_string}" }
   ]
   EOF
@@ -195,45 +58,10 @@ module "migrations_task" {
   name          = "se-kong-migrations"
   environment   = "${var.environment}"
   image         = "${var.ecr_domain}/schedule-engine/se-kong"
-  image_version = "${coalesce(var.configuration_version, var.environment)}"
+  image_version = "${coalesce(var.image_version, var.aws_account_key)}"
   env_vars      = "${var.env_vars}"
   command       = "[\"kong\",\"migrations\",\"up\"]"
   ports         = "[]"
-
-  // AWS CloudWatch Log Variables
-  awslogs_group         = "${var.awslogs_group}"
-  awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
-  awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
-
-  env_vars = <<EOF
-  [
-    { "name": "KONG_DATABASE",    "value": "postgres" }, 
-    { "name": "KONG_PG_USER",     "value": "${module.db.username}" },
-    { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" },
-    { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
-    { "name": "KONG_PG_PORT",     "value": "${module.db.port}" },
-    { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" }
-  ]
-  EOF
-}
-
-# ECS task and service for se-kong-admin
-
-module "admin" {
-  source = "../ecs-service"
-
-  cluster          = "${var.cluster}"
-  name             = "se-kong-admin"
-  environment      = "${var.environment}"
-  vpc_id           = "${var.vpc_id}"
-  image            = "${var.ecr_domain}/schedule-engine/se-kong"
-  image_version    = "${coalesce(var.configuration_version, var.environment)}"
-  dns_name         = "se-kong-admin"
-  container_port   = "8001"
-  port             = "8022"
-  zone_id          = "${var.zone_id}"
-  alb_arn          = "${var.internal_alb_arn}"
-  alb_listener_arn = "${var.internal_alb_listener_arn}"
 
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.awslogs_group}"
@@ -252,19 +80,63 @@ module "admin" {
   EOF
 }
 
-# ECS task and service for se-kong-proxy
+# -----------------------------------------------------------------------------
+# ECS task and service for se-kong-admin
+# -----------------------------------------------------------------------------
+module "admin" {
+  source = "../ecs-service"
 
+  cluster     = "${var.cluster}"
+  environment = "${var.environment}"
+  vpc_id      = "${var.vpc_id}"
+
+  name     = "se-kong-admin"
+  dns_name = "se-kong-admin"
+
+  image         = "${var.ecr_domain}/schedule-engine/se-kong"
+  image_version = "${coalesce(var.image_version, var.aws_account_key)}"
+
+  container_port   = "${var.admin_container_port}"
+  port             = "${var.admin_port}"
+  zone_id          = "${var.zone_id}"
+  alb_arn          = "${var.internal_alb_arn}"
+  alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  # Deployment Variables
+  desired_count                      = "${var.admin_desired_count}"
+  deployment_minimum_healthy_percent = "${var.admin_deployment_minimum_healthy_percent}"
+  deployment_maximum_percent         = "${var.admin_deployment_maximum_percent}"
+
+  # AWS CloudWatch Log Variables
+  awslogs_group         = "${var.awslogs_group}"
+  awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
+  awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
+
+  env_vars = <<EOF
+  [
+    { "name": "KONG_DATABASE",    "value": "postgres" }, 
+    { "name": "KONG_PG_USER",     "value": "${module.db.username}" },
+    { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" },
+    { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
+    { "name": "KONG_PG_PORT",     "value": "${module.db.port}" },
+    { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" }
+  ]
+  EOF
+}
+
+# -----------------------------------------------------------------------------
+# ECS service for se-kong-proxy
+# -----------------------------------------------------------------------------
 resource "aws_ecs_service" "proxy" {
-  name          = "se-kong-proxy"
-  cluster       = "${var.cluster}"
-  desired_count = "2"
+  name    = "se-kong-proxy"
+  cluster = "${var.cluster}"
 
-  # iam_role                           = ""
-  deployment_minimum_healthy_percent = "100"
-  deployment_maximum_percent         = "200"
+  desired_count                      = "${var.proxy_desired_count}"
+  deployment_minimum_healthy_percent = "${var.proxy_deployment_minimum_healthy_percent}"
+  deployment_maximum_percent         = "${var.proxy_deployment_maximum_percent}"
 
   lifecycle {
-    create_before_destroy = false
+    create_before_destroy = true
   }
 
   # Track the latest ACTIVE revision
@@ -273,33 +145,36 @@ resource "aws_ecs_service" "proxy" {
   load_balancer {
     target_group_arn = "${var.external_alb_target_group_arn}"
     container_name   = "${module.proxy_task.name}"
-    container_port   = "8000"
+    container_port   = "${var.proxy_container_port}"
   }
 }
 
+# -----------------------------------------------------------------------------
+# ECS task for se-kong-proxy
+# -----------------------------------------------------------------------------
 module "proxy_task" {
   source = "../ecs-task"
 
   name          = "se-kong-proxy"
   environment   = "${var.environment}"
   image         = "${var.ecr_domain}/schedule-engine/se-kong"
-  image_version = "integration"
-
-  # image_version         = "${coalesce(var.configuration_version, var.environment)}"
+  image_version = "${coalesce(var.image_version, var.aws_account_key)}"
 
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.awslogs_group}"
   awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
   awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
+
   ports = <<EOF
     [
       {
-        "protocol": "tcp",
-        "containerPort": 8000,
-        "hostPort": 8021
+        "protocol": "TCP",
+        "containerPort": "${var.proxy_container_port}",
+        "hostPort": "${var.proxy_port}"
       }
     ]
   EOF
+
   env_vars = <<EOF
   [
     { "name": "KONG_DATABASE",    "value": "postgres" }, 
@@ -310,45 +185,3 @@ module "proxy_task" {
   ]
   EOF
 }
-
-# #
-# # ECS task and service for se-mobile-api
-# #
-
-
-# module "se_mobile_api" {
-#   source = "../ecs-service"
-
-
-#   cluster        = "${var.cluster}"
-#   name           = "se-mobile-api"
-#   environment    = "${var.environment}"
-#   vpc_id         = "${var.vpc_id}"
-#   image          = "${var.ecr_domain}/schedule-engine/se-mobile-api"
-#   image_version  = "${coalesce(var.configuration_version, var.environment)}"
-#   dns_name       = "se-mobile-api"
-#   container_port = "8000"
-#   port           = "8011"
-#   zone_id        = "${var.zone_id}"
-#   cname_record   = "${data.aws_lb.internal_alb.dns_name}"
-
-
-#   alb_arn          = "${var.internal_alb_arn}"
-#   alb_listener_arn = "${var.internal_alb_listener_arn}"
-
-
-#   # AWS CloudWatch Log Variables
-#   awslogs_group         = "${var.awslogs_group}"
-#   awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
-#   awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
-
-
-#   env_vars = <<EOF
-#   [
-#     { "name": "NODE_ENV",                "value": "development" }, 
-#     { "name": "AWS_ACCOUNT_KEY",         "value": "sandbox" },
-#     { "name": "MONGO_CONNECTION_STRING", "value": "mongodb://" }
-#   ]
-#   EOF
-# }
-
