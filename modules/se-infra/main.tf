@@ -125,12 +125,12 @@ module "se_kong" {
 module "se_mobile_api" {
   source = "../ecs-service"
 
-  cluster       = "${module.ecs_cluster.name}"
-  name          = "se-mobile-api"
-  environment   = "${var.environment}"
-  vpc_id        = "${module.network.vpc_id}"
-  image         = "${module.defaults.ecr_domain}/schedule-engine/se-mobile-api"
-  image_version = "integration"
+  cluster     = "${module.ecs_cluster.name}"
+  name        = "se-mobile-api"
+  environment = "${var.environment}"
+  vpc_id      = "${module.network.vpc_id}"
+  image       = "${module.defaults.ecr_domain}/schedule-engine/se-mobile-api"
+  image_tag   = "integration"
 
   port             = "8011"
   zone_id          = "${module.dns.zone_id}"
@@ -157,12 +157,12 @@ module "se_mobile_api" {
 module "se_client_service" {
   source = "../ecs-service"
 
-  cluster       = "${module.ecs_cluster.name}"
-  name          = "se-client-service"
-  environment   = "${var.environment}"
-  vpc_id        = "${module.network.vpc_id}"
-  image         = "${module.defaults.ecr_domain}/schedule-engine/se-client-service"
-  image_version = "integration"
+  cluster     = "${module.ecs_cluster.name}"
+  name        = "se-client-service"
+  environment = "${var.environment}"
+  vpc_id      = "${module.network.vpc_id}"
+  image       = "${module.defaults.ecr_domain}/schedule-engine/se-client-service"
+  image_tag   = "integration"
 
   port             = "8006"
   zone_id          = "${module.dns.zone_id}"
@@ -193,12 +193,12 @@ module "se_client_service" {
 module "se_geocoding_service" {
   source = "../ecs-service"
 
-  cluster       = "${module.ecs_cluster.name}"
-  name          = "se-geocoding-service"
-  environment   = "${var.environment}"
-  vpc_id        = "${module.network.vpc_id}"
-  image         = "${module.defaults.ecr_domain}/schedule-engine/se-geocoding-service"
-  image_version = "integration"
+  cluster     = "${module.ecs_cluster.name}"
+  name        = "se-geocoding-service"
+  environment = "${var.environment}"
+  vpc_id      = "${module.network.vpc_id}"
+  image       = "${module.defaults.ecr_domain}/schedule-engine/se-geocoding-service"
+  image_tag   = "integration"
 
   port             = "8037"
   zone_id          = "${module.dns.zone_id}"

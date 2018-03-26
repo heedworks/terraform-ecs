@@ -66,7 +66,6 @@ module "ecs_cluster" {
   region      = "${var.region}"
   environment = "${var.environment}"
 
-  # cluster            = "${var.ecs_cluster_name}"
   name            = "${coalesce(var.ecs_cluster_name, var.name)}"
   security_groups = "${module.security_groups.internal_ssh},${module.security_groups.internal_alb},${module.security_groups.external_alb}"
 
@@ -114,7 +113,7 @@ module "se_kong" {
   db_password        = "7dxvs>)Dmtc2nnc"
   ecr_domain         = "${module.defaults.ecr_domain}"
   awslogs_group      = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"
-  # configuration_image_version = "integration"
+  # configuration_image_tag = "integration"
   # ALB Variables
   internal_alb_arn = "${module.ecs_cluster.internal_alb_arn}"
   internal_alb_listener_arn     = "${module.ecs_cluster.default_internal_alb_listener_arn}"
@@ -128,12 +127,12 @@ module "se_kong" {
 module "se_mobile_api" {
   source = "../ecs-service"
 
-  cluster       = "${module.ecs_cluster.name}"
-  name          = "se-mobile-api"
-  environment   = "${var.environment}"
-  vpc_id        = "${module.network.vpc_id}"
-  image         = "${module.defaults.ecr_domain}/schedule-engine/se-mobile-api"
-  image_version = "integration"
+  name        = "se-mobile-api"
+  cluster     = "${module.ecs_cluster.name}"
+  environment = "${var.environment}"
+  vpc_id      = "${module.network.vpc_id}"
+  image       = "${module.defaults.ecr_domain}/schedule-engine/se-mobile-api"
+  image_tag   = "integration"
 
   port             = "8011"
   zone_id          = "${module.dns.zone_id}"
@@ -160,12 +159,12 @@ module "se_mobile_api" {
 module "se_client_service" {
   source = "../ecs-service"
 
-  cluster       = "${module.ecs_cluster.name}"
-  name          = "se-client-service"
-  environment   = "${var.environment}"
-  vpc_id        = "${module.network.vpc_id}"
-  image         = "${module.defaults.ecr_domain}/schedule-engine/se-client-service"
-  image_version = "integration"
+  cluster     = "${module.ecs_cluster.name}"
+  name        = "se-client-service"
+  environment = "${var.environment}"
+  vpc_id      = "${module.network.vpc_id}"
+  image       = "${module.defaults.ecr_domain}/schedule-engine/se-client-service"
+  image_tag   = "integration"
 
   port             = "8006"
   zone_id          = "${module.dns.zone_id}"
@@ -196,12 +195,12 @@ module "se_client_service" {
 module "se_geocoding_service" {
   source = "../ecs-service"
 
-  cluster       = "${module.ecs_cluster.name}"
-  name          = "se-geocoding-service"
-  environment   = "${var.environment}"
-  vpc_id        = "${module.network.vpc_id}"
-  image         = "${module.defaults.ecr_domain}/schedule-engine/se-geocoding-service"
-  image_version = "integration"
+  cluster     = "${module.ecs_cluster.name}"
+  name        = "se-geocoding-service"
+  environment = "${var.environment}"
+  vpc_id      = "${module.network.vpc_id}"
+  image       = "${module.defaults.ecr_domain}/schedule-engine/se-geocoding-service"
+  image_tag   = "integration"
 
   port             = "8037"
   zone_id          = "${module.dns.zone_id}"

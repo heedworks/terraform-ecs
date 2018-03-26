@@ -56,8 +56,8 @@ variable "alb_listener_arn" {
 /**
  * Optional Variables
  */
-variable "image_version" {
-  description = "The docker image version. defaults to environment variable"
+variable "image_tag" {
+  description = "The docker image tag. defaults to environment variable"
   default     = ""
 }
 

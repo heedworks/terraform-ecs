@@ -8,6 +8,7 @@ variable "cluster" {
 
 variable "region" {
   description = "The AWS region of the ECS cluster"
+  default     = "us-east-1"
 }
 
 variable "environment" {
@@ -80,17 +81,13 @@ variable "ecr_domain" {
   description = "The domain name of the ECR registry, e.g account_id.dkr.ecr.region.amazonaws.com"
 }
 
-# variable "node_env" {
-#   description = "The NODE_ENV value to set in each kong task, e.g. development, production"
-# }
-
-variable "image_version" {
-  description = "The docker image version, e.g latest or 8.8-alpine (if not specified, var.aws_account_key will be used)"
+variable "image_tag" {
+  description = "The docker image tag, e.g latest or 8.8-alpine (if not specified, var.aws_account_key will be used)"
   default     = ""
 }
 
-variable "configuration_image_version" {
-  description = "The docker image version, e.g latest or 8.8-alpine (if not specified, var.aws_account_key will be used)"
+variable "configuration_image_tag" {
+  description = "The docker image tag, e.g latest or 8.8-alpine (if not specified, var.aws_account_key will be used)"
   default     = ""
 }
 

@@ -43,8 +43,8 @@ variable "ports" {
   default     = "[]"
 }
 
-variable "image_version" {
-  description = "The docker image version"
+variable "image_tag" {
+  description = "The docker image tag"
   default     = "latest"
 }
 

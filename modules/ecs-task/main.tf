@@ -7,7 +7,7 @@
  *       source        = "../ecs-task"
  *       name          = "se-mobile-api"
  *       image         = "302058597523.dkr.ecr.us-east-1.amazonaws.com/schedule-engine/se-kong:integration"
- *       image_version = "integration"
+ *       image_tag = "integration"
  *     }
  *
  */
@@ -40,7 +40,7 @@ resource "aws_ecs_task_definition" "main" {
     "environment": ${var.env_vars},
     "essential": true,
     "command": ${var.command},
-    "image": "${var.image}:${var.image_version}",
+    "image": "${var.image}:${var.image_tag}",
     "memory": ${var.memory},
     "portMappings": ${var.ports},
     "entryPoint": ${var.entry_point},

@@ -40,7 +40,7 @@ resource "aws_ecs_service" "main" {
   }
 
   lifecycle {
-    create_before_destroy = false
+    create_before_destroy = true
   }
 
   # Track the latest ACTIVE revision
@@ -59,7 +59,7 @@ module "task" {
   name                  = "${var.name}"
   environment           = "${var.environment}"
   image                 = "${var.image}"
-  image_version         = "${coalesce(var.image_version, var.environment)}"
+  image_tag             = "${coalesce(var.image_tag, var.environment)}"
   command               = "${var.command}"
   env_vars              = "${var.env_vars}"
   memory                = "${var.memory}"
@@ -71,7 +71,7 @@ module "task" {
   ports = <<EOF
   [
     {
-      "protocol": "tcp",
+      "protocol": "TCP",
       "containerPort": ${var.container_port},
       "hostPort": ${var.port}
     }
@@ -109,7 +109,7 @@ resource "aws_lb_listener_rule" "main" {
 
   condition {
     field  = "host-header"
-    values = ["${coalesce(var.dns_name, module.task.name)}.*"]
+    values = ["${format("%s.%s", coalesce(var.dns_name, module.task.name), var.domain_name)}"]
   }
 }
 

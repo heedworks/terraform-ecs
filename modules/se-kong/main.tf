@@ -34,10 +34,10 @@ resource "aws_ecs_service" "configuration" {
 module "configuration_task" {
   source = "../ecs-task"
 
-  name          = "se-kong-configuration"
-  environment   = "${var.environment}"
-  image         = "${var.ecr_domain}/schedule-engine/se-kong-configuration"
-  image_version = "${coalesce(var.configuration_image_version, var.aws_account_key)}"
+  name        = "se-kong-configuration"
+  environment = "${var.environment}"
+  image       = "${var.ecr_domain}/schedule-engine/se-kong-configuration"
+  image_tag   = "${coalesce(var.configuration_image_tag, var.aws_account_key)}"
 
   command               = "${var.configuration_command}"
   ports                 = "[]"
@@ -55,13 +55,13 @@ module "configuration_task" {
 module "migrations_task" {
   source = "../ecs-task"
 
-  name          = "se-kong-migrations"
-  environment   = "${var.environment}"
-  image         = "${var.ecr_domain}/schedule-engine/se-kong"
-  image_version = "${coalesce(var.image_version, var.aws_account_key)}"
-  env_vars      = "${var.env_vars}"
-  command       = "[\"kong\",\"migrations\",\"up\"]"
-  ports         = "[]"
+  name        = "se-kong-migrations"
+  environment = "${var.environment}"
+  image       = "${var.ecr_domain}/schedule-engine/se-kong"
+  image_tag   = "${coalesce(var.image_tag, var.aws_account_key)}"
+  env_vars    = "${var.env_vars}"
+  command     = "[\"kong\",\"migrations\",\"up\"]"
+  ports       = "[]"
 
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.awslogs_group}"
@@ -86,16 +86,13 @@ module "migrations_task" {
 module "admin" {
   source = "../ecs-service"
 
+  name        = "se-kong-admin"
   cluster     = "${var.cluster}"
   environment = "${var.environment}"
   vpc_id      = "${var.vpc_id}"
 
-  name     = "se-kong-admin"
-  dns_name = "se-kong-admin"
-
-  image         = "${var.ecr_domain}/schedule-engine/se-kong"
-  image_version = "${coalesce(var.image_version, var.aws_account_key)}"
-
+  image            = "${var.ecr_domain}/schedule-engine/se-kong"
+  image_tag        = "${coalesce(var.image_tag, var.aws_account_key)}"
   container_port   = "${var.admin_container_port}"
   port             = "${var.admin_port}"
   zone_id          = "${var.zone_id}"
@@ -155,10 +152,10 @@ resource "aws_ecs_service" "proxy" {
 module "proxy_task" {
   source = "../ecs-task"
 
-  name          = "se-kong-proxy"
-  environment   = "${var.environment}"
-  image         = "${var.ecr_domain}/schedule-engine/se-kong"
-  image_version = "${coalesce(var.image_version, var.aws_account_key)}"
+  name        = "se-kong-proxy"
+  environment = "${var.environment}"
+  image       = "${var.ecr_domain}/schedule-engine/se-kong"
+  image_tag   = "${coalesce(var.image_tag, var.aws_account_key)}"
 
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.awslogs_group}"
