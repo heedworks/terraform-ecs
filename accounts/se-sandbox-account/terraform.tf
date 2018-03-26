@@ -11,15 +11,12 @@
 # variable "desired_capacity" {}
 # variable "instance_type" {}
 # variable "ecs_aws_ami" {}
-
 # variable "private_subnet_cidrs" {
 #   type = "list"
 # }
-
 # variable "public_subnet_cidrs" {
 #   type = "list"
 # }
-
 # variable "availability_zones" {
 #   type = "list"
 # }
@@ -34,6 +31,14 @@ variable "aws_creds_profile" {
 
 variable "aws_account_id" {
   description = ""
+}
+
+variable "aws_account_key" {
+  description = "the schedule engine aws account key"
+}
+
+variable "aws_account_name" {
+  description = "the schedule engine aws account key"
 }
 
 variable "environment" {
@@ -52,16 +57,6 @@ variable "external_domain_name" {
 variable "internal_domain_name" {
   description = "the internal DNS name to use with services"
   default     = "internal"
-}
-
-# variable "domain_name_servers" {
-#   description = "the internal DNS servers, defaults to the internal route53 server of the VPC"
-#   default     = ""
-# }
-
-variable "aws_account_key" {
-  description = "the schedule engine aws account key"
-  default     = ""
 }
 
 variable "region" {
@@ -138,6 +133,11 @@ variable "ecs_docker_volume_size" {
   default     = 25
 }
 
+variable "ecs_ami" {
+  description = "The AMI that will be used to launch EC2 instances in the ECS cluster, defaults to the default image for the selected region"
+  default     = ""
+}
+
 # variable "ecs_docker_auth_type" {
 #   description = "The docker auth type, see https://godoc.org/github.com/aws/amazon-ecs-agent/agent/engine/dockerauth for the possible values"
 #   default     = ""
@@ -148,10 +148,10 @@ variable "ecs_docker_volume_size" {
 #   default     = ""
 # }
 
-variable "ecs_ami" {
-  description = "The AMI that will be used to launch EC2 instances in the ECS cluster, defaults to the default image for the selected region"
-  default     = ""
-}
+# variable "domain_name_servers" {
+#   description = "the internal DNS servers, defaults to the internal route53 server of the VPC"
+#   default     = ""
+# }
 
 # Configure the Terraform backend storage
 # NOTE: Terraform does not support variables in this block
@@ -183,7 +183,9 @@ module "se-stack" {
   name                  = "${var.name}"
   region                = "${var.region}"
   environment           = "${var.environment}"
+  aws_account_id        = "${var.aws_account_id}"
   aws_account_key       = "${var.aws_account_key}"
+  aws_account_name      = "${var.aws_account_name}"
   ecs_cluster_name      = "${coalesce(var.ecs_cluster_name, var.name)}"
   cloudwatch_prefix     = "${var.environment}"                          # See ecs-instances module when to set this and when not!
   vpc_cidr              = "${var.vpc_cidr}"

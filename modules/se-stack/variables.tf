@@ -92,9 +92,16 @@ variable "internal_domain_name" {
 #   default     = ""
 # }
 
+variable "aws_account_id" {
+  description = ""
+}
+
 variable "aws_account_key" {
   description = "the schedule engine aws account key"
-  default     = ""
+}
+
+variable "aws_account_name" {
+  description = "the schedule engine aws account key"
 }
 
 variable "region" {

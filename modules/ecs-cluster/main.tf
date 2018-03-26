@@ -1,12 +1,15 @@
-# module "network" {
-#   source             = "../network"
-#   environment        = "${var.environment}"
-#   vpc_cidr           = "${var.vpc_cidr}"
-#   external_subnets   = "${var.external_subnets}"
-#   internal_subnets   = "${var.internal_subnets}"
-#   availability_zones = "${var.availability_zones}"
-#   depends_id         = ""
-# }
+data "template_file" "user_data" {
+  template = "${file("${path.module}/templates/user_data.sh")}"
+
+  vars {
+    ecs_config        = "${var.ecs_config}"
+    ecs_logging       = "${var.ecs_logging}"
+    cluster_name      = "${var.name}"
+    env_name          = "${var.environment}"
+    custom_userdata   = "${var.custom_userdata}"
+    cloudwatch_prefix = "${var.cloudwatch_prefix}"
+  }
+}
 
 resource "aws_ecs_cluster" "main" {
   name = "${var.name}"
@@ -58,8 +61,6 @@ resource "aws_launch_configuration" "main" {
   user_data            = "${data.template_file.user_data.rendered}"
   key_name             = "${var.key_name}"
 
-  # iam_instance_profile = "${var.iam_instance_profile_id}"
-
   # aws_launch_configuration can not be modified.
   # Therefore we use create_before_destroy so that a new modified aws_launch_configuration can be created 
   # before the old one get's destroyed. That's why we use name_prefix instead of name.
@@ -70,7 +71,8 @@ resource "aws_launch_configuration" "main" {
 
 # Instances are scaled across availability zones http://docs.aws.amazon.com/autoscaling/latest/userguide/auto-scaling-benefits.html 
 resource "aws_autoscaling_group" "main" {
-  name                 = "${var.name}"
+  name = "${var.name}"
+
   max_size             = "${var.max_size}"
   min_size             = "${var.min_size}"
   desired_capacity     = "${var.desired_capacity}"
@@ -78,13 +80,12 @@ resource "aws_autoscaling_group" "main" {
   launch_configuration = "${aws_launch_configuration.main.id}"
   vpc_zone_identifier  = ["${var.internal_subnet_ids}"]
   load_balancers       = ["${var.load_balancers}"]
+  termination_policies = ["OldestLaunchConfiguration", "Default"]
 
   tag {
     key                 = "Name"
     value               = "${var.name}"
     propagate_at_launch = "true"
-
-    # value               = "ecs-${var.name}"
   }
 
   tag {
@@ -108,180 +109,126 @@ resource "aws_autoscaling_group" "main" {
   }
 }
 
-data "template_file" "user_data" {
-  template = "${file("${path.module}/templates/user_data.sh")}"
+resource "aws_autoscaling_policy" "scale_up" {
+  name                   = "${var.name}-scaleup"
+  scaling_adjustment     = 1
+  adjustment_type        = "ChangeInCapacity"
+  cooldown               = 300
+  autoscaling_group_name = "${aws_autoscaling_group.main.name}"
 
-  vars {
-    ecs_config        = "${var.ecs_config}"
-    ecs_logging       = "${var.ecs_logging}"
-    cluster_name      = "${var.name}"
-    env_name          = "${var.environment}"
-    custom_userdata   = "${var.custom_userdata}"
-    cloudwatch_prefix = "${var.cloudwatch_prefix}"
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
-# module "ecs_instances" {
-#   source = "../ecs-instances"
+resource "aws_autoscaling_policy" "scale_down" {
+  name                   = "${var.name}-scaledown"
+  scaling_adjustment     = -1
+  adjustment_type        = "ChangeInCapacity"
+  cooldown               = 300
+  autoscaling_group_name = "${aws_autoscaling_group.main.name}"
 
+  lifecycle {
+    create_before_destroy = true
+  }
+}
 
-#   cluster             = "${var.name}"
-#   environment         = "${var.environment}"
-#   instance_group      = "${var.instance_group}"
-#   internal_subnet_ids = "${var.internal_subnet_ids}"
+resource "aws_cloudwatch_metric_alarm" "cpu_high" {
+  alarm_name          = "${var.name}-cpu-reservation-high"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUReservation"
+  namespace           = "AWS/ECS"
+  period              = "300"
+  statistic           = "Maximum"
+  threshold           = "90"
 
+  dimensions {
+    ClusterName = "${aws_ecs_cluster.main.name}"
+  }
 
-#   # aws_ami                 = "${var.ecs_aws_ami}"
-#   image_id = "${var.image_id}"
+  alarm_description = "Scale up if the cpu reservation is above 90% for 10 minutes"
+  alarm_actions     = ["${aws_autoscaling_policy.scale_up.arn}"]
 
+  lifecycle {
+    create_before_destroy = true
+  }
+}
 
-#   instance_type           = "${var.instance_type}"
-#   max_size                = "${var.max_size}"
-#   min_size                = "${var.min_size}"
-#   desired_capacity        = "${var.desired_capacity}"
-#   vpc_id                  = "${var.vpc_id}"
-#   iam_instance_profile_id = "${aws_iam_instance_profile.ecs.id}"
-#   key_name                = "${var.key_name}"
-#   load_balancers          = "${var.load_balancers}"
-#   depends_id              = "${var.depends_id}"
-#   custom_userdata         = "${var.custom_userdata}"
-#   cloudwatch_prefix       = "${var.cloudwatch_prefix}"
+resource "aws_cloudwatch_metric_alarm" "memory_high" {
+  alarm_name          = "${var.name}-memory-reservation-high"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "MemoryReservation"
+  namespace           = "AWS/ECS"
+  period              = "300"
+  statistic           = "Maximum"
+  threshold           = "90"
 
+  dimensions {
+    ClusterName = "${aws_ecs_cluster.main.name}"
+  }
 
-#   # internal_ssh_security_group = "${aws_security_group.internal_ssh.id}"
-#   # external_ssh_security_group = "${aws_security_group.external_ssh.id}"
-#   internal_ssh_security_group = ""
+  alarm_description = "Scale up if the memory reservation is above 90% for 10 minutes"
+  alarm_actions     = ["${aws_autoscaling_policy.scale_up.arn}"]
 
+  lifecycle {
+    create_before_destroy = true
+  }
 
-#   external_ssh_security_group = ""
+  # This is required to make cloudwatch alarms creation sequential, AWS doesn't
+  # support modifying alarms concurrently.
+  depends_on = ["aws_cloudwatch_metric_alarm.cpu_high"]
+}
 
+resource "aws_cloudwatch_metric_alarm" "cpu_low" {
+  alarm_name          = "${var.name}-cpu-reservation-low"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUReservation"
+  namespace           = "AWS/ECS"
+  period              = "300"
+  statistic           = "Maximum"
+  threshold           = "10"
 
-#   vpc_cidr = "${var.vpc_cidr}"
-# }
+  dimensions {
+    ClusterName = "${aws_ecs_cluster.main.name}"
+  }
 
+  alarm_description = "Scale down if the cpu reservation is below 10% for 10 minutes"
+  alarm_actions     = ["${aws_autoscaling_policy.scale_down.arn}"]
 
-# module "ecs_tasks" {
-#   source = "../ecs-tasks"
+  lifecycle {
+    create_before_destroy = true
+  }
 
+  # This is required to make cloudwatch alarms creation sequential, AWS doesn't
+  # support modifying alarms concurrently.
+  depends_on = ["aws_cloudwatch_metric_alarm.memory_high"]
+}
 
-#   vpc_id                   = "${module.network.vpc_id}"
-#   cluster                  = "${var.cluster}"
-#   environment              = "${var.environment}"
-#   default_alb_target_group = "${aws_alb_target_group.default.arn}"
-#   private_alb_target_group = "${module.alb_private.private_alb_target_group}"
-# }
+resource "aws_cloudwatch_metric_alarm" "memory_low" {
+  alarm_name          = "${var.name}-memory-reservation-low"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "MemoryReservation"
+  namespace           = "AWS/ECS"
+  period              = "300"
+  statistic           = "Maximum"
+  threshold           = "10"
 
+  dimensions {
+    ClusterName = "${aws_ecs_cluster.main.name}"
+  }
 
-# bastion
-# resource "aws_security_group" "external_ssh" {
-#   name        = "${format("%s-external-ssh", var.name)}"
-#   description = "Allows ssh from the world"
-#   vpc_id      = "${module.network.vpc_id}"
+  alarm_description = "Scale down if the memory reservation is below 10% for 10 minutes"
+  alarm_actions     = ["${aws_autoscaling_policy.scale_down.arn}"]
 
+  lifecycle {
+    create_before_destroy = true
+  }
 
-#   ingress {
-#     from_port   = 22
-#     to_port     = 22
-#     protocol    = "tcp"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
-
-
-#   egress {
-#     from_port   = 0
-#     to_port     = 0
-#     protocol    = "-1"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
-
-
-#   lifecycle {
-#     create_before_destroy = true
-#   }
-
-
-#   tags {
-#     Name        = "${format("%s-external-ssh", var.name)}"
-#     Environment = "${var.environment}"
-#   }
-# }
-
-
-# resource "aws_security_group" "internal_ssh" {
-#   name        = "${format("%s-internal-ssh", var.name)}"
-#   description = "Allows ssh from bastion"
-#   vpc_id      = "${module.network.vpc_id}"
-
-
-#   ingress {
-#     from_port       = 22
-#     to_port         = 22
-#     protocol        = "tcp"
-#     security_groups = ["${aws_security_group.external_ssh.id}"]
-#   }
-
-
-#   egress {
-#     from_port   = 0
-#     to_port     = 0
-#     protocol    = "tcp"
-#     cidr_blocks = ["${var.vpc_cidr}"]
-
-
-#     # cidr_blocks = ["${var.cidr}"]
-#   }
-
-
-#   lifecycle {
-#     create_before_destroy = true
-#   }
-
-
-#   tags {
-#     Name        = "${format("%s-internal-ssh", var.name)}"
-#     Environment = "${var.environment}"
-#   }
-# }
-
-
-# module "bastion" {
-#   source          = "../bastion"
-#   region          = "${var.region}"
-#   instance_type   = "${var.bastion_instance_type}"
-#   subnet_id       = "${element(module.network.external_subnet_ids, 0)}"
-#   security_groups = "${aws_security_group.external_ssh.id},${aws_security_group.internal_ssh.id}"
-#   vpc_id          = "${module.network.vpc_id}"
-#   key_name        = "${var.key_name}"
-#   environment     = "${var.environment}"
-#   cluster         = "${var.name}"
-
-
-#   # subnet_id       = "${element(module.vpc.external_subnets, 0)}"
-#   # instance_type   = "${var.bastion_instance_type}"
-#   # security_groups = "${module.security_groups.external_ssh},${module.security_groups.internal_ssh}"
-# }
-
-
-# module "dhcp" {
-#   source = "../dhcp"
-#   name   = "${module.dns.name}"
-
-
-#   # vpc_id  = "${module.vpc.id}"
-#   vpc_id = "${module.network.vpc_id}"
-
-
-#   # servers = "${coalesce(var.domain_name_servers, module.defaults.domain_name_servers)}"
-#   servers = "${cidrhost(var.vpc_cidr, 2)}"
-# }
-
-
-# module "dns" {
-#   source = "../dns"
-
-
-#   # name   = "${var.domain_name}"
-#   name   = "internal"
-#   vpc_id = "${module.network.vpc_id}"
-# }
-
+  # This is required to make cloudwatch alarms creation sequential, AWS doesn't
+  # support modifying alarms concurrently.
+  depends_on = ["aws_cloudwatch_metric_alarm.cpu_low"]
+}

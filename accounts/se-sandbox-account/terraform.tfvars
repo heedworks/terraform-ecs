@@ -1,18 +1,20 @@
 name = "se-app"
 
-region = "us-east-1"
+environment = "sandbox"
+
+aws_account_key = "sandbox"
 
 aws_account_id = "616175625615"
+
+aws_account_name = "se-sandbox-account"
+
+region = "us-east-1"
 
 aws_creds_profile = "se-ops-account-terraform"
 
 external_domain_name = "integration.sedev.net"
 
 internal_domain_name = "internal"
-
-environment = "sandbox"
-
-aws_account_key = "sandbox"
 
 vpc_cidr = "10.0.0.0/16"
 

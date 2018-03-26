@@ -29,8 +29,18 @@ resource "aws_ecs_service" "main" {
   deployment_minimum_healthy_percent = "${var.deployment_minimum_healthy_percent}"
   deployment_maximum_percent         = "${var.deployment_maximum_percent}"
 
+  placement_strategy {
+    type  = "spread"
+    field = "attribute:ecs.availability-zone"
+  }
+
+  placement_strategy {
+    type  = "spread"
+    field = "instanceId"
+  }
+
   lifecycle {
-    create_before_destroy = true
+    create_before_destroy = false
   }
 
   # Track the latest ACTIVE revision

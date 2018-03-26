@@ -18,6 +18,11 @@ output "engine" {
   value       = "${aws_db_instance.main.engine}"
 }
 
+output "port" {
+  description = "The database port."
+  value       = "${aws_db_instance.main.port}"
+}
+
 output "endpoint" {
   description = "The connection endpoint. e.g. se-kong-postgres.cpudfuwsfqhu.us-east-1.rds.amazonaws.com:5432"
   value       = "${aws_db_instance.main.endpoint}"

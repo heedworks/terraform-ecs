@@ -119,12 +119,17 @@ variable "awslogs_stream_prefix" {
   default     = ""
 }
 
-# variable "external_alb_arn" {}
-# variable "external_alb_listener_arn" {}
+variable "internal_alb_arn" {
+  description = "The ARN of the ALB target group for se-kong-admin"
+}
 
-variable "internal_alb_arn" {}
-variable "external_alb_target_group_arn" {}
-variable "internal_alb_listener_arn" {}
+variable "internal_alb_listener_arn" {
+  description = "The ARN of the ALB listener for se-kong-admin"
+}
+
+variable "external_alb_target_group_arn" {
+  description = "The ARN of the ALB target group for se-kong-proxy"
+}
 
 data "aws_lb" "internal_alb" {
   arn = "${var.internal_alb_arn}"
@@ -203,10 +208,11 @@ module "migrations_task" {
   env_vars = <<EOF
   [
     { "name": "KONG_DATABASE",    "value": "postgres" }, 
-    { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
-    { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" },
     { "name": "KONG_PG_USER",     "value": "${module.db.username}" },
-    { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" }
+    { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" },
+    { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
+    { "name": "KONG_PG_PORT",     "value": "${module.db.port}" },
+    { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" }
   ]
   EOF
 }
@@ -226,7 +232,6 @@ module "admin" {
   container_port   = "8001"
   port             = "8022"
   zone_id          = "${var.zone_id}"
-  cname_record     = "${data.aws_lb.internal_alb.dns_name}"
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
 
@@ -238,46 +243,16 @@ module "admin" {
   env_vars = <<EOF
   [
     { "name": "KONG_DATABASE",    "value": "postgres" }, 
-    { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
-    { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" },
     { "name": "KONG_PG_USER",     "value": "${module.db.username}" },
-    { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" }
+    { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" },
+    { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
+    { "name": "KONG_PG_PORT",     "value": "${module.db.port}" },
+    { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" }
   ]
   EOF
 }
 
 # ECS task and service for se-kong-proxy
-
-# module "proxy" {
-#   source = "../ecs-service"
-
-#   cluster          = "${var.cluster}"
-#   name             = "se-kong-proxy"
-#   environment      = "${var.environment}"
-#   vpc_id           = "${var.vpc_id}"
-#   image            = "${var.ecr_domain}/schedule-engine/se-kong"
-#   image_version    = "${coalesce(var.configuration_version, var.environment)}"
-#   dns_name         = "se-kong-proxy"
-#   port             = "8021"
-#   zone_id          = "${var.zone_id}"
-#   alb_dns_name     = "${var.external_alb_dns_name}"
-#   alb_listener_arn = "${var.external_alb_listener_arn}"
-
-#   env_vars = <<EOF
-# [
-#   { "name": "KONG_DATABASE",    "value": "postgres" }, 
-#   { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
-#   { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" },
-#   { "name": "KONG_PG_USER",     "value": "${module.db.username}" },
-#   { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" }
-# ]
-# EOF
-
-#   // AWS CloudWatch Log Variables
-#   awslogs_group         = "${var.awslogs_group}"
-#   awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
-#   awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
-# }
 
 resource "aws_ecs_service" "proxy" {
   name          = "se-kong-proxy"
@@ -336,38 +311,44 @@ module "proxy_task" {
   EOF
 }
 
-#
-# ECS task and service for se-mobile-api
-#
+# #
+# # ECS task and service for se-mobile-api
+# #
 
-module "se_mobile_api" {
-  source = "../ecs-service"
 
-  cluster        = "${var.cluster}"
-  name           = "se-mobile-api"
-  environment    = "${var.environment}"
-  vpc_id         = "${var.vpc_id}"
-  image          = "${var.ecr_domain}/schedule-engine/se-mobile-api"
-  image_version  = "${coalesce(var.configuration_version, var.environment)}"
-  dns_name       = "se-mobile-api"
-  container_port = "8000"
-  port           = "8011"
-  zone_id        = "${var.zone_id}"
-  cname_record   = "${data.aws_lb.internal_alb.dns_name}"
+# module "se_mobile_api" {
+#   source = "../ecs-service"
 
-  alb_arn          = "${var.internal_alb_arn}"
-  alb_listener_arn = "${var.internal_alb_listener_arn}"
 
-  # AWS CloudWatch Log Variables
-  awslogs_group         = "${var.awslogs_group}"
-  awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
-  awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
+#   cluster        = "${var.cluster}"
+#   name           = "se-mobile-api"
+#   environment    = "${var.environment}"
+#   vpc_id         = "${var.vpc_id}"
+#   image          = "${var.ecr_domain}/schedule-engine/se-mobile-api"
+#   image_version  = "${coalesce(var.configuration_version, var.environment)}"
+#   dns_name       = "se-mobile-api"
+#   container_port = "8000"
+#   port           = "8011"
+#   zone_id        = "${var.zone_id}"
+#   cname_record   = "${data.aws_lb.internal_alb.dns_name}"
 
-  env_vars = <<EOF
-  [
-    { "name": "NODE_ENV",                "value": "development" }, 
-    { "name": "AWS_ACCOUNT_KEY",         "value": "sandbox" },
-    { "name": "MONGO_CONNECTION_STRING", "value": "mongodb://" }
-  ]
-  EOF
-}
+
+#   alb_arn          = "${var.internal_alb_arn}"
+#   alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+
+#   # AWS CloudWatch Log Variables
+#   awslogs_group         = "${var.awslogs_group}"
+#   awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
+#   awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
+
+
+#   env_vars = <<EOF
+#   [
+#     { "name": "NODE_ENV",                "value": "development" }, 
+#     { "name": "AWS_ACCOUNT_KEY",         "value": "sandbox" },
+#     { "name": "MONGO_CONNECTION_STRING", "value": "mongodb://" }
+#   ]
+#   EOF
+# }
+

@@ -4,9 +4,10 @@
  * Usage:
  *
  *     module "se-mobile-api" {
- *       source = "../ecs-tasks"
- *       name   = "se-mobile-api"
- *       image  = "302058597523.dkr.ecr.us-east-1.amazonaws.com/schedule-engine/se-kong:integration"
+ *       source        = "../ecs-task"
+ *       name          = "se-mobile-api"
+ *       image         = "302058597523.dkr.ecr.us-east-1.amazonaws.com/schedule-engine/se-kong:integration"
+ *       image_version = "integration"
  *     }
  *
  */
@@ -27,12 +28,9 @@ resource "aws_ecs_task_definition" "main" {
   task_role_arn = "${var.role}"
 
   lifecycle {
-    # ignore_changes        = ["image"]
+    ignore_changes        = ["image"]
     create_before_destroy = true
   }
-
-  // "image": "${var.image}:${var.image_version}",
-  // "image": "302058597523.dkr.ecr.us-east-1.amazonaws.com/schedule-engine/se-kong:integration", 
 
   container_definitions = <<EOF
 [
@@ -42,7 +40,7 @@ resource "aws_ecs_task_definition" "main" {
     "environment": ${var.env_vars},
     "essential": true,
     "command": ${var.command},
-    "image": "${var.image}:${var.image_version}",    
+    "image": "${var.image}:${var.image_version}",
     "memory": ${var.memory},
     "portMappings": ${var.ports},
     "entryPoint": ${var.entry_point},

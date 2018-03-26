@@ -1,8 +1,5 @@
-variable "alb_arn" {}
-variable "alb_listener_arn" {}
-
 # variable "alb_dns_name" {}
-variable "cname_record" {}
+# variable "cname_record" {}
 
 /**
  * Required Variables.
@@ -12,17 +9,12 @@ variable "environment" {
   description = "Environment tag, e.g production"
 }
 
-variable "image" {
-  description = "The docker image name, e.g node"
-}
-
 variable "name" {
   description = "The service name"
 }
 
-variable "image_version" {
-  description = "The docker image version"
-  default     = ""
+variable "image" {
+  description = "The docker image name, e.g node"
 }
 
 # variable "subnet_ids" {
@@ -41,10 +33,6 @@ variable "cluster" {
   description = "The cluster name or ARN"
 }
 
-variable "dns_name" {
-  description = "The DNS name to use, e.g se-mobile-api"
-}
-
 variable "zone_id" {
   description = "The zone ID to create the record in"
 }
@@ -57,9 +45,26 @@ variable "vpc_id" {
   description = "The VPC ID"
 }
 
+variable "alb_arn" {
+  description = "The ARN of the ALB for the service"
+}
+
+variable "alb_listener_arn" {
+  description = "The ARN of the ALB listener for the service"
+}
+
 /**
  * Optional Variables
  */
+variable "image_version" {
+  description = "The docker image version. defaults to environment variable"
+  default     = ""
+}
+
+variable "dns_name" {
+  description = "The DNS name to use, e.g se-mobile-api, defaults to name variable"
+  default     = ""
+}
 
 variable "deregistration_delay" {
   default     = "300"
