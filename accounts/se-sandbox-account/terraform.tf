@@ -180,12 +180,14 @@ provider "aws" {
 module "se_stack" {
   source = "../../modules/se-stack"
 
-  name                  = "${var.name}"
-  region                = "${var.region}"
-  environment           = "${var.environment}"
-  aws_account_id        = "${var.aws_account_id}"
-  aws_account_key       = "${var.aws_account_key}"
-  aws_account_name      = "${var.aws_account_name}"
+  name        = "${var.name}"
+  region      = "${var.region}"
+  environment = "${var.environment}"
+
+  aws_account_id   = "${var.aws_account_id}"
+  aws_account_key  = "${var.aws_account_key}"
+  aws_account_name = "${var.aws_account_name}"
+
   ecs_cluster_name      = "${coalesce(var.ecs_cluster_name, var.name)}"
   cloudwatch_prefix     = "${var.environment}"                          # See ecs-instances module when to set this and when not!
   vpc_cidr              = "${var.vpc_cidr}"
@@ -201,6 +203,143 @@ module "se_stack" {
   key_name              = "${var.key_name}"
   internal_domain_name  = "${var.internal_domain_name}"
   external_domain_name  = "${var.external_domain_name}"
+}
+
+variable "se_service_port" {
+  type = "map"
+
+  default = {
+    se-address-service          = "8028"
+    se-admin-console-api        = "8001"
+    se-admin-auth-service       = "8002"
+    se-admin-console            = "8018"
+    se-agent-api                = "8004"
+    se-agent-auth-service       = "8041"
+    se-appointment-service      = "8040"
+    se-certification-service    = "8034"
+    se-client-auth-service      = "8005"
+    se-client-dashboard         = "8003"
+    se-client-dashboard-api     = "8036"
+    se-client-service           = "8006"
+    se-communication-service    = "8007"
+    se-contract-service         = "8044"
+    se-customer-auth-service    = "8008"
+    se-customer-service         = "8009"
+    se-device-auth-service      = "8038"
+    se-dispatch-service         = "8010"
+    se-erp-notification-service = "8035"
+    se-geocoding-service        = "8037"
+    se-kafka                    = "8019"
+    se-kafka-rest               = "8026"
+    se-kafka-topics-ui          = "8027"
+    se-kafka-zookeeper          = "8020"
+    se-kong-admin               = "8022"
+    se-kong-proxy               = "8021"
+    se-kong-konga               = "8025"
+    se-location-service         = "8029"
+    se-media-service            = "8043"
+    se-mobile-api               = "8011"
+    se-notification-service     = "8042"
+    se-payment-service          = "8012"
+    se-phone-lookup-service     = "8039"
+    se-room-service             = "8032"
+    se-sampro-service           = "8013"
+    se-scheduling-service       = "8014"
+    se-technician-service       = "8015"
+    se-trade-service            = "8033"
+    se-vehicle-service          = "8030"
+    se-web-api                  = "8016"
+  }
+}
+
+variable "se_service_container_port_override" {
+  type = "map"
+
+  default = {
+    se-kong-admin = "8001"
+  }
+}
+
+variable "se_service_image_tag_override" {
+  type = "map"
+
+  default = {
+    se-mobile-api = "sandbox"
+  }
+}
+
+variable "se_service_se_env_override" {
+  type = "map"
+
+  default = {
+    se-mobile-api = "integration"
+  }
+}
+
+variable "se_service_node_env_override" {
+  type = "map"
+
+  default = {
+    se-mobile-api = "development"
+  }
+}
+
+variable "se_service_desired_count_override" {
+  type = "map"
+
+  default = {
+    se-mobile-api = 2
+  }
+}
+
+variable "se_service_deployment_minimum_healthy_percent_override" {
+  type = "map"
+
+  default = {
+    se-mobile-api = 100
+  }
+}
+
+variable "se_service_deployment_maximum_percent_override" {
+  type = "map"
+
+  default = {
+    se-mobile-api = 200
+  }
+}
+
+module "se_service_list" {
+  source = "../../modules/se-service-list"
+
+  region      = "${var.region}"
+  cluster     = "${module.se_stack.cluster}"
+  vpc_id      = "${module.se_stack.vpc_id}"
+  zone_id     = "${module.se_stack.zone_id}"
+  environment = "${var.environment}"
+
+  kong_db_password        = "7dxvs>)Dmtc2nnc"
+  kong_db_security_groups = "${module.se_stack.ecs_cluster_security_group_id},${module.se_stack.external_ssh_security_group_id}"
+
+  ecs_cluster_security_group_id = "${module.se_stack.ecs_cluster_security_group_id}"
+
+  internal_alb_arn              = "${module.se_stack.internal_alb_arn}"
+  internal_alb_listener_arn     = "${module.se_stack.default_internal_alb_listener_arn}"
+  external_alb_target_group_arn = "${module.se_stack.default_external_alb_target_group_arn}"
+
+  internal_subnet_ids = "${module.se_stack.internal_subnet_ids}"
+  external_subnet_ids = "${module.se_stack.external_subnet_ids}"
+
+  # external_ssh_security_group_id = "${module.se_stack.external_ssh_security_group_id}"
+  # internal_ssh_security_group_id = "${module.se_stack.internal_ssh_security_group_id}"
+
+  external_alb_security_group_id = "${module.se_stack.external_alb_security_group_id}"
+  internal_alb_security_group_id = "${module.se_stack.internal_alb_security_group_id}"
+  aws_account_id                 = "${var.aws_account_id}"
+  aws_account_key                = "${var.aws_account_key}"
+  aws_account_name               = "${var.aws_account_name}"
+  service_port                   = "${var.se_service_port}"
+  ecr_domain                     = "${module.se_stack.ecr_domain}"
+  ecs_tasks_cloudwatch_log_group = "${module.se_stack.ecs_tasks_cloudwatch_log_group}"
 }
 
 # module "ecs" {

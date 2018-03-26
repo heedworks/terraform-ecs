@@ -9,6 +9,20 @@ variable "environment" {
   description = "Environment tag, e.g production"
 }
 
+variable "aws_account_key" {
+  description = ""
+}
+
+variable "se_env" {
+  description = "SE_ENV environment variable, e.g. integration, production, defaults to environment variable"
+  default     = ""
+}
+
+variable "node_env" {
+  description = "NODE_ENV environment variable, e.g. integration, production, defaults to environment variable"
+  default     = ""
+}
+
 variable "name" {
   description = "The service name"
 }
@@ -57,7 +71,7 @@ variable "alb_listener_arn" {
  * Optional Variables
  */
 variable "image_tag" {
-  description = "The docker image tag. defaults to environment variable"
+  description = "The docker image tag. defaults to aws_account_key variable"
   default     = ""
 }
 

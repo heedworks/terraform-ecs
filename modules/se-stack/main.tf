@@ -96,130 +96,156 @@ resource "aws_key_pair" "ecs" {
   public_key = "${file(format("%s/../../ssh-keys/se-%s-account.key.pub", path.module, var.aws_account_key))}"
 }
 
-module "se_kong" {
-  source = "../se-kong"
+# module "se_kong" {
+#   source = "../se-kong"
 
-  aws_account_key = "${var.aws_account_key}"
-  cluster         = "${module.ecs_cluster.name}"
-  vpc_id          = "${module.network.vpc_id}"
-  zone_id         = "${module.dns.zone_id}"
-  environment     = "${var.environment}"
 
-  # region          = "${var.region}"
+#   aws_account_key = "${var.aws_account_key}"
+#   cluster         = "${module.ecs_cluster.name}"
+#   vpc_id          = "${module.network.vpc_id}"
+#   zone_id         = "${module.dns.zone_id}"
+#   environment     = "${var.environment}"
 
-  # RDS Variables
-  db_subnet_ids      = "${module.network.internal_subnet_ids}"
-  db_security_groups = "${module.ecs_cluster.security_group_id},${module.security_groups.external_ssh}"
-  db_password        = "7dxvs>)Dmtc2nnc"
-  ecr_domain         = "${module.defaults.ecr_domain}"
-  awslogs_group      = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"
-  # configuration_image_tag = "integration"
-  # ALB Variables
-  internal_alb_arn = "${module.ecs_cluster.internal_alb_arn}"
-  internal_alb_listener_arn     = "${module.ecs_cluster.default_internal_alb_listener_arn}"
-  external_alb_target_group_arn = "${module.ecs_cluster.default_external_alb_target_group_arn}"
-}
 
-#
-# ECS task and service for se-mobile-api
-#
+#   # region          = "${var.region}"
 
-module "se_mobile_api" {
-  source = "../ecs-service"
 
-  name        = "se-mobile-api"
-  cluster     = "${module.ecs_cluster.name}"
-  environment = "${var.environment}"
-  vpc_id      = "${module.network.vpc_id}"
-  image       = "${module.defaults.ecr_domain}/schedule-engine/se-mobile-api"
-  image_tag   = "integration"
+#   # RDS Variables
+#   db_subnet_ids      = "${module.network.internal_subnet_ids}"
+#   db_security_groups = "${module.ecs_cluster.security_group_id},${module.security_groups.external_ssh}"
+#   db_password        = "7dxvs>)Dmtc2nnc"
+#   ecr_domain         = "${module.defaults.ecr_domain}"
+#   awslogs_group      = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"
 
-  port             = "8011"
-  zone_id          = "${module.dns.zone_id}"
-  alb_arn          = "${module.ecs_cluster.internal_alb_arn}"
-  alb_listener_arn = "${module.ecs_cluster.default_internal_alb_listener_arn}"
 
-  # AWS CloudWatch Log Variables
-  awslogs_group         = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"
-  awslogs_region        = "${var.region}"
-  awslogs_stream_prefix = "${module.ecs_cluster.name}"
+#   # configuration_image_tag = "integration"
 
-  env_vars = <<EOF
-  [
-    { "name": "NODE_ENV",        "value": "development" }, 
-    { "name": "AWS_ACCOUNT_KEY", "value": "sandbox" }
-  ]
-  EOF
-}
 
-#
-# ECS task and service for se-client-service
-#
+#   # ALB Variables
+#   internal_alb_arn              = "${module.ecs_cluster.internal_alb_arn}"
+#   internal_alb_listener_arn     = "${module.ecs_cluster.default_internal_alb_listener_arn}"
+#   external_alb_target_group_arn = "${module.ecs_cluster.default_external_alb_target_group_arn}"
+# }
 
-module "se_client_service" {
-  source = "../ecs-service"
 
-  cluster     = "${module.ecs_cluster.name}"
-  name        = "se-client-service"
-  environment = "${var.environment}"
-  vpc_id      = "${module.network.vpc_id}"
-  image       = "${module.defaults.ecr_domain}/schedule-engine/se-client-service"
-  image_tag   = "integration"
+# #
+# # ECS task and service for se-mobile-api
+# #
 
-  port             = "8006"
-  zone_id          = "${module.dns.zone_id}"
-  alb_arn          = "${module.ecs_cluster.internal_alb_arn}"
-  alb_listener_arn = "${module.ecs_cluster.default_internal_alb_listener_arn}"
 
-  # AWS CloudWatch Log Variables
-  awslogs_group         = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"
-  awslogs_region        = "${var.region}"
-  awslogs_stream_prefix = "${module.ecs_cluster.name}"
+# module "se_mobile_api" {
+#   source = "../ecs-service"
 
-  env_vars = <<EOF
-  [
-    { "name": "NODE_ENV",                "value": "development" }, 
-    { "name": "SE_ENV",                  "value": "development" },
-    { "name": "AWS_ACCOUNT_ID",          "value": "${var.aws_account_id}" },
-    { "name": "AWS_ACCOUNT_KEY",         "value": "${var.aws_account_key}" },
-    { "name": "AWS_ACCOUNT_NAME",        "value": "${var.aws_account_name}" },
-    { "name": "MONGO_CONNECTION_STRING", "value": "mongodb://admin:rGmGTpEnhf2%3E%253frvpDXMPUP@cluster0-shard-00-00-hulfh.mongodb.net:27017,cluster0-shard-00-01-hulfh.mongodb.net:27017,cluster0-shard-00-02-hulfh.mongodb.net:27017/se_client_service?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin" }
-  ]
-  EOF
-}
 
-#
-# ECS task and service for se-geocoding-service
-#
+#   name        = "se-mobile-api"
+#   cluster     = "${module.ecs_cluster.name}"
+#   environment = "${var.environment}"
+#   vpc_id      = "${module.network.vpc_id}"
+#   image       = "${module.defaults.ecr_domain}/schedule-engine/se-mobile-api"
+#   image_tag   = "${var.aws_account_key}"
 
-module "se_geocoding_service" {
-  source = "../ecs-service"
 
-  cluster     = "${module.ecs_cluster.name}"
-  name        = "se-geocoding-service"
-  environment = "${var.environment}"
-  vpc_id      = "${module.network.vpc_id}"
-  image       = "${module.defaults.ecr_domain}/schedule-engine/se-geocoding-service"
-  image_tag   = "integration"
+#   port             = "8011"
+#   zone_id          = "${module.dns.zone_id}"
+#   alb_arn          = "${module.ecs_cluster.internal_alb_arn}"
+#   alb_listener_arn = "${module.ecs_cluster.default_internal_alb_listener_arn}"
 
-  port             = "8037"
-  zone_id          = "${module.dns.zone_id}"
-  alb_arn          = "${module.ecs_cluster.internal_alb_arn}"
-  alb_listener_arn = "${module.ecs_cluster.default_internal_alb_listener_arn}"
 
-  # AWS CloudWatch Log Variables
-  awslogs_group         = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"
-  awslogs_region        = "${var.region}"
-  awslogs_stream_prefix = "${module.ecs_cluster.name}"
+#   # AWS CloudWatch Log Variables
+#   awslogs_group         = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"
+#   awslogs_region        = "${var.region}"
+#   awslogs_stream_prefix = "${module.ecs_cluster.name}"
 
-  env_vars = <<EOF
-  [
-    { "name": "NODE_ENV",                "value": "development" }, 
-    { "name": "SE_ENV",                  "value": "development" },
-    { "name": "AWS_ACCOUNT_ID",          "value": "${var.aws_account_id}" },
-    { "name": "AWS_ACCOUNT_KEY",         "value": "${var.aws_account_key}" },
-    { "name": "AWS_ACCOUNT_NAME",        "value": "${var.aws_account_name}" },
-    { "name": "MONGO_CONNECTION_STRING", "value": "mongodb://admin:rGmGTpEnhf2%3E%253frvpDXMPUP@cluster0-shard-00-00-hulfh.mongodb.net:27017,cluster0-shard-00-01-hulfh.mongodb.net:27017,cluster0-shard-00-02-hulfh.mongodb.net:27017/se_geocoding_service?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin" }
-  ]
-  EOF
-}
+
+#   env_vars = <<EOF
+#   [
+#     { "name": "NODE_ENV",        "value": "development" }, 
+#     { "name": "AWS_ACCOUNT_KEY", "value": "${var.aws_account_key}" }
+#   ]
+#   EOF
+# }
+
+
+# #
+# # ECS task and service for se-client-service
+# #
+
+
+# module "se_client_service" {
+#   source = "../ecs-service"
+
+
+#   cluster     = "${module.ecs_cluster.name}"
+#   name        = "se-client-service"
+#   environment = "${var.environment}"
+#   vpc_id      = "${module.network.vpc_id}"
+#   image       = "${module.defaults.ecr_domain}/schedule-engine/se-client-service"
+#   image_tag   = "${var.aws_account_key}"
+
+
+#   port             = "8006"
+#   zone_id          = "${module.dns.zone_id}"
+#   alb_arn          = "${module.ecs_cluster.internal_alb_arn}"
+#   alb_listener_arn = "${module.ecs_cluster.default_internal_alb_listener_arn}"
+
+
+#   # AWS CloudWatch Log Variables
+#   awslogs_group         = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"
+#   awslogs_region        = "${var.region}"
+#   awslogs_stream_prefix = "${module.ecs_cluster.name}"
+
+
+#   env_vars = <<EOF
+#   [
+#     { "name": "NODE_ENV",                "value": "development" }, 
+#     { "name": "SE_ENV",                  "value": "development" },
+#     { "name": "AWS_ACCOUNT_ID",          "value": "${var.aws_account_id}" },
+#     { "name": "AWS_ACCOUNT_KEY",         "value": "${var.aws_account_key}" },
+#     { "name": "AWS_ACCOUNT_NAME",        "value": "${var.aws_account_name}" },
+#     { "name": "MONGO_CONNECTION_STRING", "value": "mongodb://admin:rGmGTpEnhf2%3E%253frvpDXMPUP@cluster0-shard-00-00-hulfh.mongodb.net:27017,cluster0-shard-00-01-hulfh.mongodb.net:27017,cluster0-shard-00-02-hulfh.mongodb.net:27017/se_client_service?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin" }
+#   ]
+#   EOF
+# }
+
+
+# #
+# # ECS task and service for se-geocoding-service
+# #
+
+
+# module "se_geocoding_service" {
+#   source = "../ecs-service"
+
+
+#   cluster     = "${module.ecs_cluster.name}"
+#   name        = "se-geocoding-service"
+#   environment = "${var.environment}"
+#   vpc_id      = "${module.network.vpc_id}"
+#   image       = "${module.defaults.ecr_domain}/schedule-engine/se-geocoding-service"
+#   image_tag   = "${var.aws_account_key}"
+
+
+#   port             = "8037"
+#   zone_id          = "${module.dns.zone_id}"
+#   alb_arn          = "${module.ecs_cluster.internal_alb_arn}"
+#   alb_listener_arn = "${module.ecs_cluster.default_internal_alb_listener_arn}"
+
+
+#   # AWS CloudWatch Log Variables
+#   awslogs_group         = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"
+#   awslogs_region        = "${var.region}"
+#   awslogs_stream_prefix = "${module.ecs_cluster.name}"
+
+
+#   env_vars = <<EOF
+#   [
+#     { "name": "NODE_ENV",                "value": "development" }, 
+#     { "name": "SE_ENV",                  "value": "development" },
+#     { "name": "AWS_ACCOUNT_ID",          "value": "${var.aws_account_id}" },
+#     { "name": "AWS_ACCOUNT_KEY",         "value": "${var.aws_account_key}" },
+#     { "name": "AWS_ACCOUNT_NAME",        "value": "${var.aws_account_name}" },
+#     { "name": "MONGO_CONNECTION_STRING", "value": "mongodb://admin:rGmGTpEnhf2%3E%253frvpDXMPUP@cluster0-shard-00-00-hulfh.mongodb.net:27017,cluster0-shard-00-01-hulfh.mongodb.net:27017,cluster0-shard-00-02-hulfh.mongodb.net:27017/se_geocoding_service?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin" }
+#   ]
+#   EOF
+# }
+

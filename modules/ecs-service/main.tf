@@ -59,7 +59,7 @@ module "task" {
   name                  = "${var.name}"
   environment           = "${var.environment}"
   image                 = "${var.image}"
-  image_tag             = "${coalesce(var.image_tag, var.environment)}"
+  image_tag             = "${coalesce(var.image_tag, var.aws_account_key)}"
   command               = "${var.command}"
   env_vars              = "${var.env_vars}"
   memory                = "${var.memory}"

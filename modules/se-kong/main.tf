@@ -86,10 +86,11 @@ module "migrations_task" {
 module "admin" {
   source = "../ecs-service"
 
-  name        = "se-kong-admin"
-  cluster     = "${var.cluster}"
-  environment = "${var.environment}"
-  vpc_id      = "${var.vpc_id}"
+  name            = "se-kong-admin"
+  aws_account_key = "${var.aws_account_key}"
+  cluster         = "${var.cluster}"
+  environment     = "${var.environment}"
+  vpc_id          = "${var.vpc_id}"
 
   image            = "${var.ecr_domain}/schedule-engine/se-kong"
   image_tag        = "${coalesce(var.image_tag, var.aws_account_key)}"

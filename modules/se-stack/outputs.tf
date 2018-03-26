@@ -5,6 +5,10 @@
 #   value = ":))"
 # }
 
+output "cluster" {
+  value = "${module.ecs_cluster.name}"
+}
+
 // The region in which the infrastructure lives.
 output "region" {
   value = "${var.region}"
@@ -56,10 +60,6 @@ output "internal_alb_security_group_id" {
   value = "${module.security_groups.internal_alb}"
 }
 
-output "cluster" {
-  value = "${module.ecs_cluster.name}"
-}
-
 output "awslogs_group" {
   value = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"
 }
@@ -68,26 +68,34 @@ output "internal_alb_arn" {
   value = "${module.ecs_cluster.internal_alb_arn}"
 }
 
-output "internal_alb_target_group_arn" {
+output "default_internal_alb_target_group_arn" {
   value = "${module.ecs_cluster.default_internal_alb_target_group_arn}"
 }
 
-output "internal_alb_listener_arn" {
+output "default_internal_alb_listener_arn" {
   value = "${module.ecs_cluster.default_internal_alb_listener_arn}"
 }
 
 output "external_alb_arn" {
-  value = "${module.ecs_cluster.internal_alb_arn}"
+  value = "${module.ecs_cluster.external_alb_arn}"
 }
 
-output "external_alb_target_group_arn" {
+output "default_external_alb_target_group_arn" {
   value = "${module.ecs_cluster.default_external_alb_target_group_arn}"
 }
 
-output "external_alb_listener_arn" {
+output "default_external_alb_listener_arn" {
   value = "${module.ecs_cluster.default_external_alb_listener_arn}"
 }
 
 output "external_alb_dns_name" {
   value = "${module.ecs_cluster.external_alb_dns_name}"
+}
+
+output "ecr_domain" {
+  value = "${module.defaults.ecr_domain}"
+}
+
+output "ecs_tasks_cloudwatch_log_group" {
+  value = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"
 }
