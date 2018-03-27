@@ -50,6 +50,8 @@ ecs_instance_type = "t2.large"
 
 # mongo_connection_string_template = "mongodb://admin:rGmGTpEnhf2%3E%253frvpDXMPUP@cluster0-shard-00-00-hulfh.mongodb.net:27017,cluster0-shard-00-01-hulfh.mongodb.net:27017,cluster0-shard-00-02-hulfh.mongodb.net:27017/%s?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin"
 
-default_node_env = "integration"
+default_image_tag = "integration"
 
-default_se_env = "sandbox"
+default_node_env = "development"
+
+default_se_env = "development"

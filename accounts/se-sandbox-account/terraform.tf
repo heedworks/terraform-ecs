@@ -151,17 +151,14 @@ variable "service_port_map" {
 # TODO: remove these default values
 variable "default_image_tag" {
   description = "default value for the task ECR image tag, e.g. integration"
-  default     = "integration"
 }
 
 variable "default_node_env" {
   description = "default value for NODE_ENV, e.g. integration"
-  default     = "integration"
 }
 
 variable "default_se_env" {
   description = "default value for SE_ENV, e.g. integration"
-  default     = "sandbox"
 }
 
 variable "service_container_port_map" {
@@ -176,7 +173,7 @@ variable "service_image_tag_map" {
   type = "map"
 
   default = {
-    se-mobile-api = "sandbox"
+    se-mobile-api = "integration"
   }
 }
 
@@ -244,6 +241,9 @@ provider "aws" {
   }
 }
 
+# -----------------------------------------------------------------------------
+# se-stack module (infrastructure)
+# -----------------------------------------------------------------------------
 module "se_stack" {
   source = "../../modules/se-stack"
 
@@ -272,6 +272,9 @@ module "se_stack" {
   external_domain_name  = "${var.external_domain_name}"
 }
 
+# -----------------------------------------------------------------------------
+# se-service-list module (SE Tasks and Services)
+# -----------------------------------------------------------------------------
 module "se_service_list" {
   source = "../../modules/se-service-list"
 

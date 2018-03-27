@@ -41,6 +41,7 @@ variable "image" {
 
 variable "port" {
   description = "The container host port"
+  default     = 0
 }
 
 variable "cluster" {

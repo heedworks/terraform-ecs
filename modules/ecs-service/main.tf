@@ -52,7 +52,6 @@ resource "aws_ecs_service" "main" {
     container_port   = "${var.container_port}"
   }
 
-  # "aws_lb_target_group.main",
   depends_on = [
     "aws_lb_listener_rule.main",
   ]
@@ -78,7 +77,7 @@ module "task" {
     {
       "protocol": "TCP",
       "containerPort": ${var.container_port},
-      "hostPort": ${var.port}
+      "hostPort": 0
     }
   ]
 EOF
