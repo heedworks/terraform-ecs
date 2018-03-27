@@ -33,16 +33,16 @@ variable "vpc_cidr" {
 #   description = "List of external cidrs, for every avalibility zone you want you need one. Example: 10.0.0.0/16 and 10.0.1.0/16"
 # }
 
+# variable "availability_zones" {
+#   type        = "list"
+#   description = "List of avalibility zones you want. Example: eu-west-1a and eu-west-1b"
+# }
+
 variable "load_balancers" {
   type        = "list"
   default     = []
   description = "The load balancers to couple to the instances"
 }
-
-# variable "availability_zones" {
-#   type        = "list"
-#   description = "List of avalibility zones you want. Example: eu-west-1a and eu-west-1b"
-# }
 
 variable "max_size" {
   description = "Maximum size of the nodes in the cluster"
@@ -118,17 +118,17 @@ variable "alb_health_check_protocol" {
 }
 
 variable "vpc_id" {
-  description = ""
+  description = "The VPC id"
 }
 
 variable "internal_subnet_ids" {
-  type        = "list"
   description = ""
+  type        = "list"
 }
 
 variable "external_subnet_ids" {
-  type        = "list"
   description = ""
+  type        = "list"
 }
 
 variable "depends_id" {

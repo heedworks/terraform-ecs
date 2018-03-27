@@ -24,24 +24,32 @@ external_subnets = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"]
 
 availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
 
-key_name = "internal-key"
+key_name = "se-app-internal-key"
 
 bastion_instance_type = "t2.micro"
 
-ecs_task_image_key = "sandbox"
+# ecs_task_image_key = "sandbox"
 
-ecs_cluster_name = "se-app"
-
-ecs_max_size = 100
+# ecs_cluster_name = "se-app"
 
 ecs_min_size = 3
+
+ecs_max_size = 100
 
 ecs_desired_capacity = 3
 
 ecs_instance_type = "t2.large"
 
-ecs_root_volume_size = "25"
+# ecs_root_volume_size = "25"
 
-ecs_docker_volume_size = "25"
+# ecs_docker_volume_size = "25"
 
-ecs_ami = "ami-a7a242da"
+# ecs_ami = "ami-a7a242da"
+
+# kong_db_password = "7dxvs>)Dmtc2nnc"
+
+# mongo_connection_string_template = "mongodb://admin:rGmGTpEnhf2%3E%253frvpDXMPUP@cluster0-shard-00-00-hulfh.mongodb.net:27017,cluster0-shard-00-01-hulfh.mongodb.net:27017,cluster0-shard-00-02-hulfh.mongodb.net:27017/%s?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin"
+
+default_node_env = "integration"
+
+default_se_env = "sandbox"

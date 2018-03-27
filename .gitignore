@@ -4,3 +4,4 @@ aws.tf
 .terraform
 terraform.tfstate*
 *.tfplan
+secret.tfvars
