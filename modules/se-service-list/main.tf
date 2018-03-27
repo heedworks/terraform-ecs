@@ -17,12 +17,16 @@ variable "default_container_port" {
   default     = 8000
 }
 
+variable "default_image_tag" {
+  description = "The default image_tag for ECR images"
+}
+
 variable "default_node_env" {
-  description = "The default NODE_ENV environment variable, defaults to environment variable"
+  description = "The default NODE_ENV environment variable"
 }
 
 variable "default_se_env" {
-  description = "The default SE_ENV environment variable, defaults to environment variable"
+  description = "The default SE_ENV environment variable"
 }
 
 variable "default_desired_count" {
@@ -76,8 +80,13 @@ variable "node_env_map" {
   default = {}
 }
 
+variable "kong_db_name" {
+  description = "RDS instance name"
+  default     = "se-kong-postgres"
+}
+
 variable "kong_db_password" {
-  description = "Postgres user password"
+  description = "RDS user password"
 }
 
 variable "aws_account_key" {
@@ -89,7 +98,7 @@ variable "vpc_id" {
 }
 
 variable "zone_id" {
-  description = "The AWS route53 zone_id"
+  description = "The ID of the hosted zone to contain this record."
 }
 
 variable "aws_account_name" {
@@ -155,28 +164,29 @@ variable "mongo_connection_string_template" {
 # -----------------------------------------------------------------------------
 # Kong Admin and Proxy services and tasks
 # -----------------------------------------------------------------------------
-module "se_kong" {
-  source = "../se-kong"
+# module "se_kong" {
+#   source = "../se-kong"
 
-  aws_account_key = "${var.aws_account_key}"
-  cluster         = "${var.cluster}"
-  region          = "${var.region}"
-  environment     = "${var.environment}"
-  vpc_id          = "${var.vpc_id}"
-  zone_id         = "${var.zone_id}"
-  ecr_domain      = "${var.ecr_domain}"
+#   aws_account_key = "${var.aws_account_key}"
+#   cluster         = "${var.cluster}"
+#   region          = "${var.region}"
+#   environment     = "${var.environment}"
+#   vpc_id          = "${var.vpc_id}"
+#   zone_id         = "${var.zone_id}"
+#   ecr_domain      = "${var.ecr_domain}"
 
-  # RDS Variables
-  db_subnet_ids      = "${var.internal_subnet_ids}"
-  db_security_groups = "${var.kong_db_security_groups}"
-  db_password        = "${var.kong_db_password}"
-  awslogs_group      = "${var.ecs_tasks_cloudwatch_log_group}"
+#   # RDS Variables
+#   db_subnet_ids      = "${var.internal_subnet_ids}"
+#   db_security_groups = "${var.kong_db_security_groups}"
+#   db_name            = "${var.kong_db_name}"
+#   db_password        = "${var.kong_db_password}"
+#   awslogs_group      = "${var.ecs_tasks_cloudwatch_log_group}"
 
-  # ALB Variables
-  internal_alb_arn              = "${var.internal_alb_arn}"
-  internal_alb_listener_arn     = "${var.internal_alb_listener_arn}"
-  external_alb_target_group_arn = "${var.external_alb_target_group_arn}"
-}
+#   # ALB Variables
+#   internal_alb_arn              = "${var.internal_alb_arn}"
+#   internal_alb_listener_arn     = "${var.internal_alb_listener_arn}"
+#   external_alb_target_group_arn = "${var.external_alb_target_group_arn}"
+# }
 
 # -----------------------------------------------------------------------------
 # ECS task and service for se-mobile-api
@@ -192,7 +202,7 @@ module "se_mobile_api" {
   zone_id         = "${var.zone_id}"
 
   image     = "${var.ecr_domain}/schedule-engine/se-mobile-api"
-  image_tag = "${lookup(var.image_tag_map, "se-mobile-api", var.aws_account_key)}"
+  image_tag = "${lookup(var.image_tag_map, "se-mobile-api", var.default_image_tag)}"
 
   port           = "${lookup(var.port_map, "se-mobile-api")}"
   container_port = "${lookup(var.container_port_map, "se-mobile-api", var.default_container_port)}"
@@ -231,7 +241,7 @@ module "se_client_service" {
   zone_id         = "${var.zone_id}"
 
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
-  image_tag = "${lookup(var.image_tag_map, "se-client-service", var.aws_account_key)}"
+  image_tag = "${lookup(var.image_tag_map, "se-client-service", var.default_image_tag)}"
 
   port           = "${lookup(var.port_map, "se-client-service")}"
   container_port = "${lookup(var.container_port_map, "se-client-service", var.default_container_port)}"
@@ -252,6 +262,81 @@ module "se_client_service" {
     { "name": "AWS_ACCOUNT_KEY",         "value": "${var.aws_account_key}" },
     { "name": "AWS_ACCOUNT_NAME",        "value": "${var.aws_account_name}" },
     { "name": "MONGO_CONNECTION_STRING", "value": "${format(var.mongo_connection_string_template, "se_client_service")}" }
+  ]
+  EOF
+}
+
+# -----------------------------------------------------------------------------
+# ECS task and service for se-notification-service
+# -----------------------------------------------------------------------------
+module "se_notification_service" {
+  source = "../ecs-service"
+
+  name             = "se-notification-service"
+  cluster          = "${var.cluster}"
+  environment      = "${var.environment}"
+  aws_account_key  = "${var.aws_account_key}"
+  vpc_id           = "${var.vpc_id}"
+  image            = "${var.ecr_domain}/schedule-engine/se-notification-service"
+  image_tag        = "${lookup(var.image_tag_map, "se-notification-service", var.default_image_tag)}"
+  port             = "${lookup(var.port_map, "se-notification-service")}"
+  container_port   = "${lookup(var.container_port_map, "se-notification-service", var.default_container_port)}"
+  zone_id          = "${var.zone_id}"
+  alb_arn          = "${var.internal_alb_arn}"
+  alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  # AWS CloudWatch Log Variables
+  awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
+  awslogs_region        = "${var.region}"
+  awslogs_stream_prefix = "${var.cluster}"
+
+  env_vars = <<EOF
+  [
+    { "name": "NODE_ENV",                "value": "${lookup(var.node_env_map, "se-notification-service", var.default_node_env)}" }, 
+    { "name": "SE_ENV",                  "value": "${lookup(var.se_env_map, "se-notification-service", var.default_se_env)}" },
+    { "name": "AWS_ACCOUNT_ID",          "value": "${var.aws_account_id}" },
+    { "name": "AWS_ACCOUNT_KEY",         "value": "${var.aws_account_key}" },
+    { "name": "AWS_ACCOUNT_NAME",        "value": "${var.aws_account_name}" },
+    { "name": "MONGO_CONNECTION_STRING", "value": "${format(var.mongo_connection_string_template, "se_notification_service")}" }
+  ]
+  EOF
+}
+
+# -----------------------------------------------------------------------------
+# ECS task and service for se-web-api
+# -----------------------------------------------------------------------------
+module "se_web_api" {
+  source = "../ecs-service"
+
+  name            = "se-web-api"
+  cluster         = "${var.cluster}"
+  environment     = "${var.environment}"
+  aws_account_key = "${var.aws_account_key}"
+  vpc_id          = "${var.vpc_id}"
+  zone_id         = "${var.zone_id}"
+
+  image     = "${var.ecr_domain}/schedule-engine/se-web-api"
+  image_tag = "${lookup(var.image_tag_map, "se-web-api", var.default_image_tag)}"
+
+  port           = "${lookup(var.port_map, "se-web-api")}"
+  container_port = "${lookup(var.container_port_map, "se-web-api", var.default_container_port)}"
+
+  alb_arn          = "${var.internal_alb_arn}"
+  alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  # AWS CloudWatch Log Variables
+  awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
+  awslogs_region        = "${var.region}"
+  awslogs_stream_prefix = "${var.cluster}"
+
+  env_vars = <<EOF
+  [
+    { "name": "NODE_ENV",                "value": "${lookup(var.node_env_map, "se-web-api", var.default_node_env)}" }, 
+    { "name": "SE_ENV",                  "value": "${lookup(var.se_env_map, "se-web-api", var.default_se_env)}" },
+    { "name": "AWS_ACCOUNT_ID",          "value": "${var.aws_account_id}" },
+    { "name": "AWS_ACCOUNT_KEY",         "value": "${var.aws_account_key}" },
+    { "name": "AWS_ACCOUNT_NAME",        "value": "${var.aws_account_name}" },
+    { "name": "MONGO_CONNECTION_STRING", "value": "${format(var.mongo_connection_string_template, "se_web_api")}" }
   ]
   EOF
 }

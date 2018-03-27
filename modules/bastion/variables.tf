@@ -12,7 +12,7 @@ variable "security_groups" {
 }
 
 variable "vpc_id" {
-  description = "VPC ID"
+  description = "The VPC ID."
 }
 
 variable "key_name" {

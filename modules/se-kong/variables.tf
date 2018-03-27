@@ -20,7 +20,7 @@ variable "vpc_id" {
 }
 
 variable "zone_id" {
-  description = "The zone ID to create the record in"
+  description = "The ID of the hosted zone to contain this record."
 }
 
 variable "db_subnet_ids" {

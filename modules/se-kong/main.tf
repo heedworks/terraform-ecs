@@ -164,13 +164,13 @@ module "proxy_task" {
   awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
 
   ports = <<EOF
-    [
-      {
-        "protocol": "TCP",
-        "containerPort": "${var.proxy_container_port}",
-        "hostPort": "${var.proxy_port}"
-      }
-    ]
+  [
+    {
+      "protocol": "TCP",
+      "containerPort": ${var.proxy_container_port},
+      "hostPort": ${var.proxy_port}
+    }
+  ]
   EOF
 
   env_vars = <<EOF

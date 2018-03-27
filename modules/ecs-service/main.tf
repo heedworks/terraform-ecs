@@ -51,6 +51,11 @@ resource "aws_ecs_service" "main" {
     container_name   = "${module.task.name}"
     container_port   = "${var.container_port}"
   }
+
+  # "aws_lb_target_group.main",
+  depends_on = [
+    "aws_lb_listener_rule.main",
+  ]
 }
 
 module "task" {
@@ -111,6 +116,10 @@ resource "aws_lb_listener_rule" "main" {
     field  = "host-header"
     values = ["${format("%s.%s", coalesce(var.dns_name, module.task.name), var.domain_name)}"]
   }
+
+  depends_on = [
+    "aws_lb_target_group.main",
+  ]
 }
 
 resource "aws_route53_record" "main" {

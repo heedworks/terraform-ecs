@@ -17,7 +17,7 @@ variable "instance_group" {
 }
 
 variable "vpc_id" {
-  description = "The VPC id"
+  description = "The VPC ID."
 }
 
 variable "image_id" {

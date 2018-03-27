@@ -1,18 +1,3 @@
-# variable "ecs_task_image_key" {
-#   description = "the key used to reference task images, defaults to aws_account_key variable"
-#   default     = ""
-# }
-
-# variable "ecs_root_volume_size" {
-#   description = "the size of the ecs instance root volume"
-#   default     = 25
-# }
-
-# variable "ecs_docker_volume_size" {
-#   description = "the size of the ecs instance docker volume"
-#   default     = 25
-# }
-
 variable "name" {
   description = "the name of your stack, e.g. se-app"
   default     = "se-app"
@@ -163,6 +148,12 @@ variable "service_port_map" {
   }
 }
 
+# TODO: remove these default values
+variable "default_image_tag" {
+  description = "default value for the task ECR image tag, e.g. integration"
+  default     = "integration"
+}
+
 variable "default_node_env" {
   description = "default value for NODE_ENV, e.g. integration"
   default     = "integration"
@@ -301,6 +292,8 @@ module "se_service_list" {
 
   internal_subnet_ids = "${module.se_stack.internal_subnet_ids}"
   external_subnet_ids = "${module.se_stack.external_subnet_ids}"
+
+  default_image_tag = "${var.default_image_tag}"
 
   # Environment Variables
   default_node_env                 = "${var.default_node_env}"
