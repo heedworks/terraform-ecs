@@ -205,7 +205,7 @@ module "se_stack" {
   external_domain_name  = "${var.external_domain_name}"
 }
 
-variable "se_service_port_map" {
+variable "service_port_map" {
   type = "map"
 
   default = {
@@ -252,7 +252,7 @@ variable "se_service_port_map" {
   }
 }
 
-variable "se_service_container_port_map" {
+variable "service_container_port_map" {
   type = "map"
 
   default = {
@@ -260,7 +260,7 @@ variable "se_service_container_port_map" {
   }
 }
 
-variable "se_service_image_tag_map" {
+variable "service_image_tag_map" {
   type = "map"
 
   default = {
@@ -268,7 +268,7 @@ variable "se_service_image_tag_map" {
   }
 }
 
-variable "se_service_se_env_map" {
+variable "service_se_env_map" {
   type = "map"
 
   default = {
@@ -276,7 +276,7 @@ variable "se_service_se_env_map" {
   }
 }
 
-variable "se_service_node_env_map" {
+variable "service_node_env_map" {
   type = "map"
 
   default = {
@@ -284,7 +284,7 @@ variable "se_service_node_env_map" {
   }
 }
 
-variable "se_service_desired_count_map" {
+variable "service_desired_count_map" {
   type = "map"
 
   default = {
@@ -292,7 +292,7 @@ variable "se_service_desired_count_map" {
   }
 }
 
-variable "se_service_deployment_minimum_healthy_percent_map" {
+variable "service_deployment_minimum_healthy_percent_map" {
   type = "map"
 
   default = {
@@ -300,7 +300,7 @@ variable "se_service_deployment_minimum_healthy_percent_map" {
   }
 }
 
-variable "se_service_deployment_maximum_percent_map" {
+variable "service_deployment_maximum_percent_map" {
   type = "map"
 
   default = {
@@ -339,9 +339,14 @@ module "se_service_list" {
   aws_account_id                 = "${var.aws_account_id}"
   aws_account_key                = "${var.aws_account_key}"
   aws_account_name               = "${var.aws_account_name}"
-  service_port                   = "${var.se_service_port}"
   ecr_domain                     = "${module.se_stack.ecr_domain}"
   ecs_tasks_cloudwatch_log_group = "${module.se_stack.ecs_tasks_cloudwatch_log_group}"
+  # Maps
+  port_map           = "${var.service_port_map}"
+  container_port_map = "${var.service_container_port_map}"
+  node_env_map       = "${var.service_node_env_map}"
+  se_env_map         = "${var.service_se_env_map}"
+  image_tag_map      = "${var.service_image_tag_map}"
 }
 
 # module "ecs" {

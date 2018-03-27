@@ -9,9 +9,9 @@ variable "environment" {
   description = "Environment tag, e.g production"
 }
 
-# variable "aws_account_key" {
-#   description = ""
-# }
+variable "aws_account_key" {
+  description = "AWS account key e.g. integration"
+}
 
 # variable "se_env" {
 #   description = "SE_ENV environment variable, e.g. integration, production, defaults to environment variable"

@@ -2,6 +2,14 @@ variable "name" {
   description = ""
 }
 
+variable "aws_account_id" {
+  description = ""
+}
+
+variable "aws_account_name" {
+  description = ""
+}
+
 variable "aws_account_key" {
   description = ""
 }
@@ -35,6 +43,10 @@ variable "image" {
   description = ""
 }
 
+variable "ecr_domain" {
+  description = ""
+}
+
 variable "image_tag" {
   description = ""
 }
@@ -56,7 +68,7 @@ variable "awslogs_region" {
   default     = "us-east-1"
 }
 
-variable "wslogs_stream_prefix" {
+variable "awslogs_stream_prefix" {
   description = ""
   default     = ""
 }
@@ -84,8 +96,9 @@ module "ecs_service" {
   name             = "${var.name}"
   cluster          = "${var.cluster}"
   environment      = "${var.environment}"
+  aws_account_key  = "${var.aws_account_key}"
   vpc_id           = "${var.vpc_id}"
-  image            = "${var.image}"
+  image            = "${var.ecr_domain}/schedule-engine/${var.name}"
   image_tag        = "${var.aws_account_key}"
   port             = "${var.port}"
   container_port   = "${var.container_port}"

@@ -12,74 +12,71 @@ variable "environment" {
   description = ""
 }
 
-variable "node_env" {
+variable "default_container_port" {
+  description = "default container port"
+  default     = 8000
+}
+
+variable "default_node_env" {
   description = "The default NODE_ENV environment variable, defaults to environment variable"
   default     = ""
 }
 
-variable "se_env" {
+variable "default_se_env" {
   description = "The default SE_ENV environment variable, defaults to environment variable"
   default     = ""
 }
 
-variable "service_port_map" {
-  description = ""
-  type        = "map"
+variable "default_desired_count" {
+  description = "The desired task instance count"
+  default     = 2
+}
 
-  default = {}
+variable "default_deployment_minimum_healthy_percent" {
+  description = "default lower limit (% of desired_count) of # of running tasks during a deployment"
+  default     = 100
+}
+
+variable "default_deployment_maximum_percent" {
+  description = "default upper limit (% of desired_count) of # of running tasks during a deployment"
+  default     = 200
+}
+
+variable "port_map" {
+  description = "map of service name and host port"
+  type        = "map"
 }
 
 #------------------------------------------------------------------------------
 # Service Override Maps
 #------------------------------------------------------------------------------
-variable "service_container_port_map" {
-  description = ""
+variable "container_port_map" {
+  description = "map of service name to container port to override the default_container_port variable, if applicable"
   type        = "map"
 
   default = {}
 }
 
-variable "service_image_tag_map" {
-  description = ""
+variable "image_tag_map" {
+  description = "map of service name to container port to override the default_image_tag variable, if applicable"
   type        = "map"
 
   default = {}
 }
 
-variable "service_se_env_map" {
-  description = ""
+variable "se_env_map" {
+  description = "map of service name to container port to override the default_se_env variable, if applicable"
   type        = "map"
 
   default = {}
 }
 
-variable "service_node_env_map" {
-  description = ""
+variable "node_env_map" {
+  description = "map of service name to container port to override the default_node_env variable, if applicable"
   type        = "map"
 
   default = {}
 }
-
-# variable "desired_count_service_map" {
-#   description = ""
-#   type        = "map"
-
-#   default = {}
-# }
-
-# variable "deployment_minimum_healthy_percent_service_override" {
-#   description = ""
-#   type        = "map"
-
-#   default = {}
-# }
-
-# variable "service_deployment_maximum_percent_override" {
-#   description = ""
-#   type        = "map"
-
-#   default = {}
-# }
 
 variable "kong_db_password" {
   description = "Postgres user password"
@@ -108,9 +105,8 @@ variable "external_alb_target_group_arn" {}
 variable "internal_alb_listener_arn" {}
 variable "ecs_tasks_cloudwatch_log_group" {}
 
-# 
 variable "mongo_connection_string_template" {
-  description = ""
+  description = "Mongo connection string with a '%s' placeholder for the database name, e.g. mongodb://user:password@cluster0-shard-00-01-hulfh.mongodb.net:27017/%s"
 }
 
 # -----------------------------------------------------------------------------
@@ -133,8 +129,6 @@ module "se_kong" {
   db_password        = "${var.kong_db_password}"
   awslogs_group      = "${var.ecs_tasks_cloudwatch_log_group}"
 
-  # configuration_image_tag = "integration"
-
   # ALB Variables
   internal_alb_arn              = "${var.internal_alb_arn}"
   internal_alb_listener_arn     = "${var.internal_alb_listener_arn}"
@@ -151,16 +145,20 @@ module "se_mobile_api" {
   cluster     = "${var.cluster}"
   environment = "${var.environment}"
   vpc_id      = "${var.vpc_id}"
+  ecr_domain  = "${var.ecr_domain}"
   image       = "${var.ecr_domain}/schedule-engine/se-mobile-api"
-  image_tag   = "${var.aws_account_key}"
+  image_tag   = "${lookup(var.image_tag_map, "se-mobile-api", var.aws_account_key)}"
 
-  port = "${lookup(var.service_port_map, "se-mobile-api")}"
+  container_port = "${lookup(var.container_port_map, "se-mobile-api", var.default_container_port)}"
+  port           = "${lookup(var.port_map, "se-mobile-api")}"
 
   zone_id          = "${var.zone_id}"
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
 
   # Environment Variables
+  node_env                = "${lookup(var.node_env_map, "se-mobile-api", var.default_node_env, var.environment)}"
+  se_env                  = "${lookup(var.se_env_map, "se-mobile-api", var.default_se_env, var.environment)}"
   aws_account_id          = "${var.aws_account_id}"
   aws_account_key         = "${var.aws_account_key}"
   aws_account_name        = "${var.aws_account_name}"
