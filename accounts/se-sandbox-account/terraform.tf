@@ -1,3 +1,118 @@
+# -----------------------------------------------------------------------------
+# Terraform Backend Configuration
+# 
+# Configure the Terraform backend storage
+# NOTE: Terraform does not support variables in this block
+# -----------------------------------------------------------------------------
+terraform {
+  backend "s3" {
+    bucket         = "schedule-engine-terraform-sandbox"
+    key            = "terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "terraform_state_lock"
+    acl            = "private"
+    profile        = "se-sandbox-account-terraform"
+  }
+}
+
+# -----------------------------------------------------------------------------
+# Terraform AWS Provider
+# -----------------------------------------------------------------------------
+provider "aws" {
+  region  = "${var.region}"
+  profile = "${var.aws_creds_profile}"
+
+  assume_role {
+    role_arn     = "arn:aws:iam::${var.aws_account_id}:role/TerraformRole"
+    session_name = "terraform"
+  }
+}
+
+# -----------------------------------------------------------------------------
+# se-stack module (infrastructure)
+# -----------------------------------------------------------------------------
+module "se_stack" {
+  source = "../../modules/se-stack"
+
+  name        = "${var.name}"
+  region      = "${var.region}"
+  environment = "${var.environment}"
+
+  aws_account_id   = "${var.aws_account_id}"
+  aws_account_key  = "${var.aws_account_key}"
+  aws_account_name = "${var.aws_account_name}"
+
+  ecs_cluster_name      = "${coalesce(var.ecs_cluster_name, var.name)}"
+  cloudwatch_prefix     = "${var.environment}"
+  vpc_cidr              = "${var.vpc_cidr}"
+  external_subnets      = "${var.external_subnets}"
+  internal_subnets      = "${var.internal_subnets}"
+  availability_zones    = "${var.availability_zones}"
+  ecs_max_size          = "${var.ecs_max_size}"
+  ecs_min_size          = "${var.ecs_min_size}"
+  ecs_desired_capacity  = "${var.ecs_desired_capacity}"
+  ecs_instance_type     = "${var.ecs_instance_type}"
+  bastion_instance_type = "${var.bastion_instance_type}"
+  ecs_ami               = "${var.ecs_ami}"
+  key_name              = "${var.key_name}"
+  internal_domain_name  = "${var.internal_domain_name}"
+  external_domain_name  = "${var.external_domain_name}"
+}
+
+# -----------------------------------------------------------------------------
+# se-service-list module (SE Tasks and Services)
+# -----------------------------------------------------------------------------
+module "se_service_list" {
+  source = "../../modules/se-service-list"
+
+  region      = "${var.region}"
+  cluster     = "${module.se_stack.cluster}"
+  environment = "${var.environment}"
+  vpc_id      = "${module.se_stack.vpc_id}"
+  zone_id     = "${module.se_stack.zone_id}"
+
+  kong_db_password        = "${var.kong_db_password}"
+  kong_db_security_groups = "${module.se_stack.ecs_cluster_security_group_id},${module.se_stack.external_ssh_security_group_id}"
+
+  ecs_cluster_security_group_id = "${module.se_stack.ecs_cluster_security_group_id}"
+
+  internal_alb_arn              = "${module.se_stack.internal_alb_arn}"
+  internal_alb_listener_arn     = "${module.se_stack.default_internal_alb_listener_arn}"
+  external_alb_target_group_arn = "${module.se_stack.default_external_alb_target_group_arn}"
+
+  internal_subnet_ids = "${module.se_stack.internal_subnet_ids}"
+  external_subnet_ids = "${module.se_stack.external_subnet_ids}"
+
+  default_image_tag = "${var.default_image_tag}"
+
+  # Environment Variables
+  default_node_env                 = "${var.default_node_env}"
+  default_se_env                   = "${var.default_se_env}"
+  aws_account_id                   = "${var.aws_account_id}"
+  aws_account_key                  = "${var.aws_account_key}"
+  aws_account_name                 = "${var.aws_account_name}"
+  mongo_connection_string_template = "${var.mongo_connection_string_template}"
+
+  ecr_domain                     = "${module.se_stack.ecr_domain}"
+  ecs_tasks_cloudwatch_log_group = "${module.se_stack.ecs_tasks_cloudwatch_log_group}"
+
+  # Service Maps
+  container_port_map = "${var.service_container_port_map}"
+
+  node_env_map  = "${var.service_node_env_map}"
+  se_env_map    = "${var.service_se_env_map}"
+  image_tag_map = "${var.service_image_tag_map}"
+
+  # Task Defaults
+  default_task_cpu                = "${var.default_task_cpu}"
+  default_task_memory             = "${var.default_task_memory}"
+  default_task_memory_reservation = "${var.default_task_memory_reservation}"
+}
+
+# -----------------------------------------------------------------------------
+# Module Variables
+# -----------------------------------------------------------------------------
 variable "name" {
   description = "the name of your stack, e.g. se-app"
   default     = "se-app"
@@ -109,43 +224,11 @@ variable "mongo_connection_string_template" {
   description = "Mongo connection string with a '%s' placeholder for the database name, e.g. mongodb://user:password@cluster0-shard-00-01-hulfh.mongodb.net:27017/%s"
 }
 
-# Varaibles for ./modules/se-service-list
 variable "service_port_map" {
-  type = "map"
+  description = "default value for the task ECR image tag, e.g. integration"
+  type        = "map"
 
-  default = {
-    se-address-service          = "8028"
-    se-admin-console-api        = "8001"
-    se-admin-auth-service       = "8002"
-    se-agent-api                = "8004"
-    se-agent-auth-service       = "8041"
-    se-appointment-service      = "8040"
-    se-certification-service    = "8034"
-    se-client-auth-service      = "8005"
-    se-client-dashboard-api     = "8036"
-    se-client-service           = "8006"
-    se-communication-service    = "8007"
-    se-contract-service         = "8044"
-    se-customer-auth-service    = "8008"
-    se-customer-service         = "8009"
-    se-device-auth-service      = "8038"
-    se-dispatch-service         = "8010"
-    se-erp-notification-service = "8035"
-    se-geocoding-service        = "8037"
-    se-location-service         = "8029"
-    se-media-service            = "8043"
-    se-mobile-api               = "8011"
-    se-notification-service     = "8042"
-    se-payment-service          = "8012"
-    se-phone-lookup-service     = "8039"
-    se-room-service             = "8032"
-    se-sampro-service           = "8013"
-    se-scheduling-service       = "8014"
-    se-technician-service       = "8015"
-    se-trade-service            = "8033"
-    se-vehicle-service          = "8030"
-    se-web-api                  = "8016"
-  }
+  default = {}
 }
 
 # TODO: remove these default values
@@ -229,110 +312,9 @@ variable "service_deployment_maximum_percent_map" {
   }
 }
 
-# Configure the Terraform backend storage
-# NOTE: Terraform does not support variables in this block
-terraform {
-  backend "s3" {
-    bucket         = "schedule-engine-terraform-sandbox"
-    key            = "terraform.tfstate"
-    region         = "us-east-1"
-    encrypt        = true
-    dynamodb_table = "terraform_state_lock"
-    acl            = "private"
-    profile        = "se-sandbox-account-terraform"
-  }
-}
-
-provider "aws" {
-  region  = "${var.region}"
-  profile = "${var.aws_creds_profile}"
-
-  assume_role {
-    role_arn     = "arn:aws:iam::${var.aws_account_id}:role/TerraformRole"
-    session_name = "terraform"
-  }
-}
-
 # -----------------------------------------------------------------------------
-# se-stack module (infrastructure)
+# Module Outputs
 # -----------------------------------------------------------------------------
-module "se_stack" {
-  source = "../../modules/se-stack"
-
-  name        = "${var.name}"
-  region      = "${var.region}"
-  environment = "${var.environment}"
-
-  aws_account_id   = "${var.aws_account_id}"
-  aws_account_key  = "${var.aws_account_key}"
-  aws_account_name = "${var.aws_account_name}"
-
-  ecs_cluster_name      = "${coalesce(var.ecs_cluster_name, var.name)}"
-  cloudwatch_prefix     = "${var.environment}"
-  vpc_cidr              = "${var.vpc_cidr}"
-  external_subnets      = "${var.external_subnets}"
-  internal_subnets      = "${var.internal_subnets}"
-  availability_zones    = "${var.availability_zones}"
-  ecs_max_size          = "${var.ecs_max_size}"
-  ecs_min_size          = "${var.ecs_min_size}"
-  ecs_desired_capacity  = "${var.ecs_desired_capacity}"
-  ecs_instance_type     = "${var.ecs_instance_type}"
-  bastion_instance_type = "${var.bastion_instance_type}"
-  ecs_ami               = "${var.ecs_ami}"
-  key_name              = "${var.key_name}"
-  internal_domain_name  = "${var.internal_domain_name}"
-  external_domain_name  = "${var.external_domain_name}"
-}
-
-# -----------------------------------------------------------------------------
-# se-service-list module (SE Tasks and Services)
-# -----------------------------------------------------------------------------
-module "se_service_list" {
-  source = "../../modules/se-service-list"
-
-  region      = "${var.region}"
-  cluster     = "${module.se_stack.cluster}"
-  environment = "${var.environment}"
-  vpc_id      = "${module.se_stack.vpc_id}"
-  zone_id     = "${module.se_stack.zone_id}"
-
-  kong_db_password        = "${var.kong_db_password}"
-  kong_db_security_groups = "${module.se_stack.ecs_cluster_security_group_id},${module.se_stack.external_ssh_security_group_id}"
-
-  ecs_cluster_security_group_id = "${module.se_stack.ecs_cluster_security_group_id}"
-
-  internal_alb_arn              = "${module.se_stack.internal_alb_arn}"
-  internal_alb_listener_arn     = "${module.se_stack.default_internal_alb_listener_arn}"
-  external_alb_target_group_arn = "${module.se_stack.default_external_alb_target_group_arn}"
-
-  internal_subnet_ids = "${module.se_stack.internal_subnet_ids}"
-  external_subnet_ids = "${module.se_stack.external_subnet_ids}"
-
-  default_image_tag = "${var.default_image_tag}"
-
-  # Environment Variables
-  default_node_env                 = "${var.default_node_env}"
-  default_se_env                   = "${var.default_se_env}"
-  aws_account_id                   = "${var.aws_account_id}"
-  aws_account_key                  = "${var.aws_account_key}"
-  aws_account_name                 = "${var.aws_account_name}"
-  mongo_connection_string_template = "${var.mongo_connection_string_template}"
-
-  ecr_domain                     = "${module.se_stack.ecr_domain}"
-  ecs_tasks_cloudwatch_log_group = "${module.se_stack.ecs_tasks_cloudwatch_log_group}"
-
-  # Service Maps
-  port_map           = "${var.service_port_map}"
-  container_port_map = "${var.service_container_port_map}"
-  node_env_map       = "${var.service_node_env_map}"
-  se_env_map         = "${var.service_se_env_map}"
-  image_tag_map      = "${var.service_image_tag_map}"
-
-  # Task Defaults
-  default_task_cpu                = "${var.default_task_cpu}"
-  default_task_memory             = "${var.default_task_memory}"
-  default_task_memory_reservation = "${var.default_task_memory_reservation}"
-}
 
 // The region in which the infrastructure lives.
 output "region" {

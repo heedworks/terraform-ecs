@@ -22,3 +22,6 @@
 #   value = "${module.elb.fqdn}"
 # }
 
+output "cloudwatch_metric_widget" {
+  value = "${data.template_file.cloudwatch_metric_widget.rendered}"
+}

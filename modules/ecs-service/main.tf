@@ -76,7 +76,7 @@ module "task" {
   ports = <<EOF
   [
     {
-      "protocol": "TCP",
+      "protocol": "tcp",
       "containerPort": ${var.container_port},
       "hostPort": ${var.port}
     }
@@ -130,5 +130,41 @@ resource "aws_route53_record" "main" {
     name                   = "${data.aws_lb.main.dns_name}"
     zone_id                = "${data.aws_lb.main.zone_id}"
     evaluate_target_health = true
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "main" {
+  alarm_name                = "${var.cluster}-${module.task.name}-healthy-host-count-low"
+  comparison_operator       = "LessThanThreshold"
+  evaluation_periods        = "2"
+  period                    = "60"
+  metric_name               = "HealthyHostCount"
+  threshold                 = "2"
+  namespace                 = "AWS/ApplicationELB"
+  statistic                 = "Minimum"
+  insufficient_data_actions = []
+
+  dimensions {
+    LoadBalancer = "${data.aws_lb.main.arn_suffix}"
+    TargetGroup  = "${aws_lb_target_group.main.arn_suffix}"
+  }
+
+  alarm_description = "Alert if the ALB target group is below the desired count for 2 minutes"
+  alarm_actions     = []
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+data "template_file" "cloudwatch_metric_widget" {
+  template = "${file("${path.module}/templates/cloudwatch_metric_widget.tpl")}"
+
+  vars {
+    region                  = "us-east-1"
+    cluster_name            = "${var.cluster}"
+    service_name            = "${module.task.name}"
+    target_group_arn_suffix = "${aws_lb_target_group.main.arn_suffix}"
+    lb_arn_suffix           = "${data.aws_lb.main.arn_suffix}"
   }
 }

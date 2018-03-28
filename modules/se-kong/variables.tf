@@ -134,8 +134,8 @@ variable "external_alb_target_group_arn" {
 }
 
 variable "admin_port" {
-  description = ""
-  default     = "8022"
+  description = "The se-kong-admin container host port"
+  default     = 0
 }
 
 variable "admin_container_port" {
@@ -144,8 +144,8 @@ variable "admin_container_port" {
 }
 
 variable "proxy_port" {
-  description = ""
-  default     = "8021"
+  description = "The se-kong-proxy container host port"
+  default     = 0
 }
 
 variable "proxy_container_port" {

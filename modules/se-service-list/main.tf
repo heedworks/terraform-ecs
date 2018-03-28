@@ -62,6 +62,8 @@ variable "default_deployment_maximum_percent" {
 variable "port_map" {
   description = "map of service name and host port"
   type        = "map"
+
+  default = {}
 }
 
 #------------------------------------------------------------------------------
@@ -224,6 +226,48 @@ variable "mongo_connection_string_template" {
 #   external_alb_target_group_arn = "${var.external_alb_target_group_arn}"
 # }
 
+resource "aws_cloudwatch_dashboard" "main" {
+  dashboard_name = "service-pulse-dashboard"
+
+  dashboard_body = <<EOF
+ {
+   "widgets": [
+      ${module.se_address_service.cloudwatch_metric_widget},
+      ${module.se_admin_console_api.cloudwatch_metric_widget},
+      ${module.se_admin_auth_service.cloudwatch_metric_widget},
+      ${module.se_agent_api.cloudwatch_metric_widget},
+      ${module.se_agent_auth_service.cloudwatch_metric_widget},
+      ${module.se_appointment_service.cloudwatch_metric_widget},
+      ${module.se_certification_service.cloudwatch_metric_widget},
+      ${module.se_client_auth_service.cloudwatch_metric_widget},
+      ${module.se_client_dashboard_api.cloudwatch_metric_widget},
+      ${module.se_client_service.cloudwatch_metric_widget},
+      ${module.se_communication_service.cloudwatch_metric_widget},
+      ${module.se_contract_service.cloudwatch_metric_widget},
+      ${module.se_customer_auth_service.cloudwatch_metric_widget},
+      ${module.se_customer_service.cloudwatch_metric_widget},
+      ${module.se_device_auth_service.cloudwatch_metric_widget},
+      ${module.se_dispatch_service.cloudwatch_metric_widget},
+      ${module.se_erp_notification_service.cloudwatch_metric_widget},
+      ${module.se_geocoding_service.cloudwatch_metric_widget},
+      ${module.se_location_service.cloudwatch_metric_widget},
+      ${module.se_media_service.cloudwatch_metric_widget},
+      ${module.se_mobile_api.cloudwatch_metric_widget},
+      ${module.se_notification_service.cloudwatch_metric_widget},
+      ${module.se_payment_service.cloudwatch_metric_widget},
+      ${module.se_phone_lookup_service.cloudwatch_metric_widget},
+      ${module.se_room_service.cloudwatch_metric_widget},
+      ${module.se_sampro_service.cloudwatch_metric_widget},
+      ${module.se_scheduling_service.cloudwatch_metric_widget},
+      ${module.se_technician_service.cloudwatch_metric_widget},
+      ${module.se_trade_service.cloudwatch_metric_widget},
+      ${module.se_vehicle_service.cloudwatch_metric_widget},
+      ${module.se_web_api.cloudwatch_metric_widget}
+   ]
+ }
+ EOF
+}
+
 # -----------------------------------------------------------------------------
 # ECS task and service for se-mobile-api
 # -----------------------------------------------------------------------------
@@ -240,7 +284,7 @@ module "se_mobile_api" {
   image     = "${var.ecr_domain}/schedule-engine/se-mobile-api"
   image_tag = "${lookup(var.image_tag_map, "se-mobile-api", var.default_image_tag)}"
 
-  port           = "${lookup(var.port_map, "se-mobile-api")}"
+  port           = "${lookup(var.port_map, "se-mobile-api", 0)}"
   container_port = "${lookup(var.container_port_map, "se-mobile-api", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -284,7 +328,7 @@ module "se_address_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-address-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-address-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-address-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -328,7 +372,7 @@ module "se_admin_console_api" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-admin-console-api", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-admin-console-api")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-admin-console-api", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -372,7 +416,7 @@ module "se_admin_auth_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-admin-auth-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-admin-auth-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-admin-auth-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -416,7 +460,7 @@ module "se_agent_api" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-agent-api", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-agent-api")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-agent-api", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -460,7 +504,7 @@ module "se_agent_auth_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-agent-auth-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-agent-auth-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-agent-auth-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -504,7 +548,7 @@ module "se_appointment_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-appointment-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-appointment-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-appointment-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -548,7 +592,7 @@ module "se_certification_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-certification-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-certification-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-certification-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -592,7 +636,7 @@ module "se_client_auth_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-client-auth-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-client-auth-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-client-auth-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -636,7 +680,7 @@ module "se_client_dashboard_api" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-client-dashboard-api", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-client-dashboard-api")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-client-dashboard-api", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -680,7 +724,7 @@ module "se_client_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-client-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-client-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-client-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -724,7 +768,7 @@ module "se_communication_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-communication-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-communication-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-communication-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -768,7 +812,7 @@ module "se_contract_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-contract-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-contract-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-contract-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -812,7 +856,7 @@ module "se_customer_auth_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-customer-auth-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-customer-auth-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-customer-auth-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -856,7 +900,7 @@ module "se_customer_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-customer-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-customer-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-customer-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -900,7 +944,7 @@ module "se_device_auth_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-device-auth-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-device-auth-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-device-auth-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -944,7 +988,7 @@ module "se_dispatch_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-dispatch-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-dispatch-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-dispatch-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -988,7 +1032,7 @@ module "se_erp_notification_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-erp-notification-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-erp-notification-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-erp-notification-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -1032,7 +1076,7 @@ module "se_geocoding_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-geocoding-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-geocoding-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-geocoding-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -1076,7 +1120,7 @@ module "se_location_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-location-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-location-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-location-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -1120,7 +1164,7 @@ module "se_media_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-media-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-media-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-media-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -1164,7 +1208,7 @@ module "se_notification_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-notification-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-notification-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-notification-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -1208,7 +1252,7 @@ module "se_payment_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-payment-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-payment-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-payment-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -1252,7 +1296,7 @@ module "se_phone_lookup_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-phone-lookup-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-phone-lookup-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-phone-lookup-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -1296,7 +1340,7 @@ module "se_room_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-room-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-room-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-room-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -1340,7 +1384,7 @@ module "se_sampro_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-sampro-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-sampro-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-sampro-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -1384,7 +1428,7 @@ module "se_scheduling_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-scheduling-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-scheduling-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-scheduling-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -1428,7 +1472,7 @@ module "se_technician_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-technician-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-technician-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-technician-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -1472,7 +1516,7 @@ module "se_trade_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-trade-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-trade-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-trade-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -1516,7 +1560,7 @@ module "se_vehicle_service" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-vehicle-service", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-vehicle-service")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-vehicle-service", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
@@ -1560,7 +1604,7 @@ module "se_web_api" {
   image     = "${var.ecr_domain}/schedule-engine/se-client-service"
   image_tag = "${lookup(var.image_tag_map, "se-web-api", var.aws_account_key)}"
 
-  port           = "${lookup(var.port_map, "se-web-api")}"
+  port           = 0
   container_port = "${lookup(var.container_port_map, "se-web-api", var.default_container_port)}"
 
   alb_arn          = "${var.internal_alb_arn}"
