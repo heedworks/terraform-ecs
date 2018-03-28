@@ -161,6 +161,18 @@ variable "default_se_env" {
   description = "default value for SE_ENV, e.g. integration"
 }
 
+variable "default_task_cpu" {
+  description = "default number of cpu units to reserve for the container"
+}
+
+variable "default_task_memory" {
+  description = "default maximum number of MiB of memory to reserve for the container"
+}
+
+variable "default_task_memory_reservation" {
+  description = "default number of MiB of memory to reserve for the container"
+}
+
 variable "service_container_port_map" {
   type = "map"
 
@@ -315,6 +327,11 @@ module "se_service_list" {
   node_env_map       = "${var.service_node_env_map}"
   se_env_map         = "${var.service_se_env_map}"
   image_tag_map      = "${var.service_image_tag_map}"
+
+  # Task Defaults
+  default_task_cpu                = "${var.default_task_cpu}"
+  default_task_memory             = "${var.default_task_memory}"
+  default_task_memory_reservation = "${var.default_task_memory_reservation}"
 }
 
 // The region in which the infrastructure lives.

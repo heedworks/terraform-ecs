@@ -38,7 +38,7 @@ ecs_max_size = 100
 
 ecs_desired_capacity = 3
 
-ecs_instance_type = "t2.large"
+ecs_instance_type = "t2.medium"
 
 # ecs_root_volume_size = "25"
 
@@ -49,6 +49,12 @@ ecs_instance_type = "t2.large"
 # kong_db_password = "7dxvs>)Dmtc2nnc"
 
 # mongo_connection_string_template = "mongodb://admin:rGmGTpEnhf2%3E%253frvpDXMPUP@cluster0-shard-00-00-hulfh.mongodb.net:27017,cluster0-shard-00-01-hulfh.mongodb.net:27017,cluster0-shard-00-02-hulfh.mongodb.net:27017/%s?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin"
+
+default_task_cpu = 0
+
+default_task_memory = 256
+
+default_task_memory_reservation = 64
 
 default_image_tag = "integration"
 

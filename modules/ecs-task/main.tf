@@ -36,12 +36,13 @@ resource "aws_ecs_task_definition" "main" {
 [
   {
     "name": "${var.name}",
-    "cpu": ${var.cpu},
     "environment": ${var.env_vars},
     "essential": true,
     "command": ${var.command},
     "image": "${var.image}:${var.image_tag}",
+    "cpu": ${var.cpu},
     "memory": ${var.memory},
+    "memoryReservation": ${var.memory_reservation},
     "portMappings": ${var.ports},
     "entryPoint": ${var.entry_point},
     "mountPoints": [],

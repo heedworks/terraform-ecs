@@ -66,8 +66,9 @@ module "task" {
   image_tag             = "${coalesce(var.image_tag, var.aws_account_key)}"
   command               = "${var.command}"
   env_vars              = "${var.env_vars}"
-  memory                = "${var.memory}"
   cpu                   = "${var.cpu}"
+  memory                = "${var.memory}"
+  memory_reservation    = "${var.memory_reservation}"
   awslogs_group         = "${var.awslogs_group}"
   awslogs_region        = "${var.awslogs_region}"
   awslogs_stream_prefix = "${var.awslogs_stream_prefix}"
@@ -77,7 +78,7 @@ module "task" {
     {
       "protocol": "TCP",
       "containerPort": ${var.container_port},
-      "hostPort": 0
+      "hostPort": "${var.port}"
     }
   ]
 EOF
@@ -104,7 +105,7 @@ resource "aws_lb_target_group" "main" {
 
 resource "aws_lb_listener_rule" "main" {
   listener_arn = "${var.alb_listener_arn}"
-  priority     = "${var.port}"
+  priority     = "${var.listener_rule_priority}"
 
   action {
     type             = "forward"

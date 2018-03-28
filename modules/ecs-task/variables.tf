@@ -20,7 +20,17 @@ variable "environment" {
 
 variable "cpu" {
   description = "The number of cpu units to reserve for the container"
-  default     = 512
+  default     = 0
+}
+
+variable "memory" {
+  description = "The maximum number of MiB of memory to reserve for the container"
+  default     = 256
+}
+
+variable "memory_reservation" {
+  description = "The number of MiB of memory to reserve for the container"
+  default     = 64
 }
 
 variable "env_vars" {
@@ -46,11 +56,6 @@ variable "ports" {
 variable "image_tag" {
   description = "The docker image tag"
   default     = "latest"
-}
-
-variable "memory" {
-  description = "The number of MiB of memory to reserve for the container"
-  default     = 512
 }
 
 variable "log_driver" {

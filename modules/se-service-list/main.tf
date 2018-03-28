@@ -29,6 +29,21 @@ variable "default_se_env" {
   description = "The default SE_ENV environment variable"
 }
 
+variable "default_task_cpu" {
+  description = "default number of cpu units to reserve for the container"
+  default     = 0
+}
+
+variable "default_task_memory" {
+  description = "default maximum number of MiB of memory to reserve for the container"
+  default     = 256
+}
+
+variable "default_task_memory_reservation" {
+  description = "default number of MiB of memory to reserve for the container"
+  default     = 64
+}
+
 variable "default_desired_count" {
   description = "The desired task instance count"
   default     = 2
@@ -75,6 +90,27 @@ variable "se_env_map" {
 
 variable "node_env_map" {
   description = "map of service name to container port to override the default_node_env variable, if applicable"
+  type        = "map"
+
+  default = {}
+}
+
+variable "task_cpu_map" {
+  description = "map of service name to task cpu value to override the default_task_cpu variable, if applicable"
+  type        = "map"
+
+  default = {}
+}
+
+variable "task_cpu_memory" {
+  description = "map of service name to task memory value to override the default_task_memory variable, if applicable"
+  type        = "map"
+
+  default = {}
+}
+
+variable "task_cpu_memory_reservation" {
+  description = "map of service name to task memory_reservation value to override the default_task_memory_reservation variable, if applicable"
   type        = "map"
 
   default = {}
@@ -209,6 +245,10 @@ module "se_mobile_api" {
 
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  cpu                = "${lookup(var.task_cpu_map, "se-mobile-api", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-mobile-api", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-mobile-api", var.default_task_memory_reservation)}"
 
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"

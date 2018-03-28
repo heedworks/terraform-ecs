@@ -126,14 +126,19 @@ variable "desired_count" {
   default     = 2
 }
 
+variable "cpu" {
+  description = "The number of cpu units to reserve for the container"
+  default     = 0
+}
+
 variable "memory" {
-  description = "The number of MiB of memory to reserve for the container"
+  description = "The maximum number of MiB of memory to reserve for the container"
   default     = 256
 }
 
-variable "cpu" {
-  description = "The number of cpu units to reserve for the container"
-  default     = 128
+variable "memory_reservation" {
+  description = "The number of MiB of memory to reserve for the container"
+  default     = 64
 }
 
 variable "protocol" {
@@ -169,4 +174,9 @@ variable "awslogs_region" {
 variable "awslogs_stream_prefix" {
   description = "The awslogs stream prefix. defaults to var.cluster"
   default     = ""
+}
+
+variable "listener_rule_priority" {
+  description = " The priority for the rule between 1 and 50000. Leaving it unset will automatically set the rule with next available priority after currently existing highest rule. A listener can't have multiple rules with the same priority."
+  default     = 0
 }
