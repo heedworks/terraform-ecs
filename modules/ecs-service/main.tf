@@ -78,7 +78,7 @@ module "task" {
     {
       "protocol": "TCP",
       "containerPort": ${var.container_port},
-      "hostPort": "${var.port}"
+      "hostPort": ${var.port}
     }
   ]
 EOF
@@ -105,7 +105,6 @@ resource "aws_lb_target_group" "main" {
 
 resource "aws_lb_listener_rule" "main" {
   listener_arn = "${var.alb_listener_arn}"
-  priority     = "${var.listener_rule_priority}"
 
   action {
     type             = "forward"

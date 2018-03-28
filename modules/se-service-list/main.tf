@@ -102,14 +102,14 @@ variable "task_cpu_map" {
   default = {}
 }
 
-variable "task_cpu_memory" {
+variable "task_memory_map" {
   description = "map of service name to task memory value to override the default_task_memory variable, if applicable"
   type        = "map"
 
   default = {}
 }
 
-variable "task_cpu_memory_reservation" {
+variable "task_memory_reservation_map" {
   description = "map of service name to task memory_reservation value to override the default_task_memory_reservation variable, if applicable"
   type        = "map"
 
@@ -290,6 +290,10 @@ module "se_address_service" {
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
 
+  cpu                = "${lookup(var.task_cpu_map, "se-address-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-address-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-address-service", var.default_task_memory_reservation)}"
+
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
   awslogs_region        = "${var.region}"
@@ -329,6 +333,10 @@ module "se_admin_console_api" {
 
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  cpu                = "${lookup(var.task_cpu_map, "se-admin-console-api", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-admin-console-api", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-admin-console-api", var.default_task_memory_reservation)}"
 
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
@@ -370,6 +378,10 @@ module "se_admin_auth_service" {
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
 
+  cpu                = "${lookup(var.task_cpu_map, "se-admin-auth-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-admin-auth-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-admin-auth-service", var.default_task_memory_reservation)}"
+
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
   awslogs_region        = "${var.region}"
@@ -409,6 +421,10 @@ module "se_agent_api" {
 
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  cpu                = "${lookup(var.task_cpu_map, "se-agent-api", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-agent-api", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-agent-api", var.default_task_memory_reservation)}"
 
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
@@ -450,6 +466,10 @@ module "se_agent_auth_service" {
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
 
+  cpu                = "${lookup(var.task_cpu_map, "se-agent-auth-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-agent-auth-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-agent-auth-service", var.default_task_memory_reservation)}"
+
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
   awslogs_region        = "${var.region}"
@@ -489,6 +509,10 @@ module "se_appointment_service" {
 
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  cpu                = "${lookup(var.task_cpu_map, "se-appointment-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-appointment-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-appointment-service", var.default_task_memory_reservation)}"
 
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
@@ -530,6 +554,10 @@ module "se_certification_service" {
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
 
+  cpu                = "${lookup(var.task_cpu_map, "se-certification-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-certification-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-certification-service", var.default_task_memory_reservation)}"
+
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
   awslogs_region        = "${var.region}"
@@ -569,6 +597,10 @@ module "se_client_auth_service" {
 
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  cpu                = "${lookup(var.task_cpu_map, "se-client-auth-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-client-auth-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-client-auth-service", var.default_task_memory_reservation)}"
 
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
@@ -610,6 +642,10 @@ module "se_client_dashboard_api" {
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
 
+  cpu                = "${lookup(var.task_cpu_map, "se-client-dashboard-api", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-client-dashboard-api", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-client-dashboard-api", var.default_task_memory_reservation)}"
+
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
   awslogs_region        = "${var.region}"
@@ -649,6 +685,10 @@ module "se_client_service" {
 
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  cpu                = "${lookup(var.task_cpu_map, "se-client-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-client-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-client-service", var.default_task_memory_reservation)}"
 
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
@@ -690,6 +730,10 @@ module "se_communication_service" {
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
 
+  cpu                = "${lookup(var.task_cpu_map, "se-communication-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-communication-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-communication-service", var.default_task_memory_reservation)}"
+
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
   awslogs_region        = "${var.region}"
@@ -729,6 +773,10 @@ module "se_contract_service" {
 
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  cpu                = "${lookup(var.task_cpu_map, "se-contract-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-contract-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-contract-service", var.default_task_memory_reservation)}"
 
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
@@ -770,6 +818,10 @@ module "se_customer_auth_service" {
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
 
+  cpu                = "${lookup(var.task_cpu_map, "se-customer-auth-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-customer-auth-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-customer-auth-service", var.default_task_memory_reservation)}"
+
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
   awslogs_region        = "${var.region}"
@@ -809,6 +861,10 @@ module "se_customer_service" {
 
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  cpu                = "${lookup(var.task_cpu_map, "se-customer-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-customer-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-customer-service", var.default_task_memory_reservation)}"
 
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
@@ -850,6 +906,10 @@ module "se_device_auth_service" {
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
 
+  cpu                = "${lookup(var.task_cpu_map, "se-device-auth-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-device-auth-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-device-auth-service", var.default_task_memory_reservation)}"
+
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
   awslogs_region        = "${var.region}"
@@ -889,6 +949,10 @@ module "se_dispatch_service" {
 
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  cpu                = "${lookup(var.task_cpu_map, "se-dispatch-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-dispatch-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-dispatch-service", var.default_task_memory_reservation)}"
 
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
@@ -930,6 +994,10 @@ module "se_erp_notification_service" {
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
 
+  cpu                = "${lookup(var.task_cpu_map, "se-erp-notification-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-erp-notification-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-erp-notification-service", var.default_task_memory_reservation)}"
+
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
   awslogs_region        = "${var.region}"
@@ -969,6 +1037,10 @@ module "se_geocoding_service" {
 
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  cpu                = "${lookup(var.task_cpu_map, "se-geocoding-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-geocoding-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-geocoding-service", var.default_task_memory_reservation)}"
 
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
@@ -1010,6 +1082,10 @@ module "se_location_service" {
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
 
+  cpu                = "${lookup(var.task_cpu_map, "se-location-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-location-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-location-service", var.default_task_memory_reservation)}"
+
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
   awslogs_region        = "${var.region}"
@@ -1049,6 +1125,10 @@ module "se_media_service" {
 
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  cpu                = "${lookup(var.task_cpu_map, "se-media-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-media-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-media-service", var.default_task_memory_reservation)}"
 
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
@@ -1090,6 +1170,10 @@ module "se_notification_service" {
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
 
+  cpu                = "${lookup(var.task_cpu_map, "se-notification-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-notification-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-notification-service", var.default_task_memory_reservation)}"
+
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
   awslogs_region        = "${var.region}"
@@ -1129,6 +1213,10 @@ module "se_payment_service" {
 
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  cpu                = "${lookup(var.task_cpu_map, "se-payment-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-payment-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-payment-service", var.default_task_memory_reservation)}"
 
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
@@ -1170,6 +1258,10 @@ module "se_phone_lookup_service" {
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
 
+  cpu                = "${lookup(var.task_cpu_map, "se-phone-lookup-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-phone-lookup-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-phone-lookup-service", var.default_task_memory_reservation)}"
+
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
   awslogs_region        = "${var.region}"
@@ -1209,6 +1301,10 @@ module "se_room_service" {
 
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  cpu                = "${lookup(var.task_cpu_map, "se-room-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-room-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-room-service", var.default_task_memory_reservation)}"
 
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
@@ -1250,6 +1346,10 @@ module "se_sampro_service" {
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
 
+  cpu                = "${lookup(var.task_cpu_map, "se-sampro-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-sampro-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-sampro-service", var.default_task_memory_reservation)}"
+
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
   awslogs_region        = "${var.region}"
@@ -1289,6 +1389,10 @@ module "se_scheduling_service" {
 
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  cpu                = "${lookup(var.task_cpu_map, "se-scheduling-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-scheduling-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-scheduling-service", var.default_task_memory_reservation)}"
 
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
@@ -1330,6 +1434,10 @@ module "se_technician_service" {
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
 
+  cpu                = "${lookup(var.task_cpu_map, "se-technician-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-technician-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-technician-service", var.default_task_memory_reservation)}"
+
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
   awslogs_region        = "${var.region}"
@@ -1369,6 +1477,10 @@ module "se_trade_service" {
 
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
+
+  cpu                = "${lookup(var.task_cpu_map, "se-trade-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-trade-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-trade-service", var.default_task_memory_reservation)}"
 
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
@@ -1410,6 +1522,10 @@ module "se_vehicle_service" {
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
 
+  cpu                = "${lookup(var.task_cpu_map, "se-vehicle-service", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-vehicle-service", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-vehicle-service", var.default_task_memory_reservation)}"
+
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
   awslogs_region        = "${var.region}"
@@ -1450,6 +1566,10 @@ module "se_web_api" {
   alb_arn          = "${var.internal_alb_arn}"
   alb_listener_arn = "${var.internal_alb_listener_arn}"
 
+  cpu                = "${lookup(var.task_cpu_map, "se-web-api", var.default_task_cpu)}"
+  memory             = "${lookup(var.task_memory_map, "se-web-api", var.default_task_memory)}"
+  memory_reservation = "${lookup(var.task_memory_reservation_map, "se-web-api", var.default_task_memory_reservation)}"
+
   # AWS CloudWatch Log Variables
   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
   awslogs_region        = "${var.region}"
@@ -1466,199 +1586,3 @@ module "se_web_api" {
   ]
   EOF
 }
-
-# # -----------------------------------------------------------------------------
-# # ECS task and service for se-mobile-api
-# # -----------------------------------------------------------------------------
-# module "se_mobile_api" {
-#   source = "../se-service"
-
-
-#   name        = "se-mobile-api"
-#   cluster     = "${var.cluster}"
-#   environment = "${var.environment}"
-#   vpc_id      = "${var.vpc_id}"
-#   ecr_domain  = "${var.ecr_domain}"
-#   image       = "${var.ecr_domain}/schedule-engine/se-mobile-api"
-#   image_tag   = "${lookup(var.image_tag_map, "se-mobile-api", var.aws_account_key)}"
-
-
-#   container_port = "${lookup(var.container_port_map, "se-mobile-api", var.default_container_port)}"
-#   port           = "${lookup(var.port_map, "se-mobile-api")}"
-
-
-#   zone_id          = "${var.zone_id}"
-#   alb_arn          = "${var.internal_alb_arn}"
-#   alb_listener_arn = "${var.internal_alb_listener_arn}"
-
-
-#   # Environment Variables
-#   node_env                = "${lookup(var.node_env_map, "se-mobile-api", var.default_node_env, var.environment)}"
-#   se_env                  = "${lookup(var.se_env_map, "se-mobile-api", var.default_se_env, var.environment)}"
-#   aws_account_id          = "${var.aws_account_id}"
-#   aws_account_key         = "${var.aws_account_key}"
-#   aws_account_name        = "${var.aws_account_name}"
-#   mongo_connection_string = "${format(var.mongo_connection_string_template, "se_mobile_api")}"
-
-
-#   # AWS CloudWatch Log Variables
-#   awslogs_group  = "${var.ecs_tasks_cloudwatch_log_group}"
-#   awslogs_region = "${var.region}"
-# }
-
-
-# # -----------------------------------------------------------------------------
-# # ECS task and service for se-client-service
-# # -----------------------------------------------------------------------------
-# module "se_client_service" {
-#   source = "../ecs-service"
-
-
-#   name             = "se-client-service"
-#   cluster          = "${var.cluster}"
-#   environment      = "${var.environment}"
-#   aws_account_key  = "${var.aws_account_key}"
-#   vpc_id           = "${var.vpc_id}"
-#   image            = "${var.ecr_domain}/schedule-engine/se-client-service"
-#   image_tag        = "${lookup(var.image_tag_map, "se-client-service", var.aws_account_key)}"
-#   port             = "${lookup(var.port_map, "se-client-service")}"
-#   container_port   = "${lookup(var.container_port_map, "se-client-service", var.default_container_port)}"
-#   zone_id          = "${var.zone_id}"
-#   alb_arn          = "${var.internal_alb_arn}"
-#   alb_listener_arn = "${var.internal_alb_listener_arn}"
-
-
-#   # AWS CloudWatch Log Variables
-#   awslogs_group         = "${var.ecs_tasks_cloudwatch_log_group}"
-#   awslogs_region        = "${var.region}"
-#   awslogs_stream_prefix = "${var.cluster}"
-
-
-#   env_vars = <<EOF
-#     [
-#       { "name": "NODE_ENV",                "value": "${lookup(var.node_env_map, "se-client-service", var.default_node_env, var.environment)}" }, 
-#       { "name": "SE_ENV",                  "value": "${lookup(var.se_env_map, "se-client-service", var.default_se_env, var.environment)}" },
-#       { "name": "AWS_ACCOUNT_ID",          "value": "${var.aws_account_id}" },
-#       { "name": "AWS_ACCOUNT_KEY",         "value": "${var.aws_account_key}" },
-#       { "name": "AWS_ACCOUNT_NAME",        "value": "${var.aws_account_name}" },
-#       { "name": "MONGO_CONNECTION_STRING", "value": "${format(var.mongo_connection_string_template, "se_client_service")}" }
-#     ]
-#     EOF
-# }
-
-
-# # -----------------------------------------------------------------------------
-# # ECS task and service for se-mobile-api
-# # -----------------------------------------------------------------------------
-# module "se_mobile_api" {
-#   source = "../ecs-service"
-
-
-#   name        = "se-mobile-api"
-#   cluster     = "${module.ecs_cluster.name}"
-#   environment = "${var.environment}"
-#   vpc_id      = "${module.network.vpc_id}"
-#   image       = "${module.defaults.ecr_domain}/schedule-engine/se-mobile-api"
-#   image_tag   = "${var.aws_account_key}"
-
-
-#   port             = "8011"
-#   zone_id          = "${module.dns.zone_id}"
-#   alb_arn          = "${module.ecs_cluster.internal_alb_arn}"
-#   alb_listener_arn = "${module.ecs_cluster.default_internal_alb_listener_arn}"
-
-
-#   # AWS CloudWatch Log Variables
-#   awslogs_group         = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"
-#   awslogs_region        = "${var.region}"
-#   awslogs_stream_prefix = "${module.ecs_cluster.name}"
-
-
-#   env_vars = <<EOF
-#   [
-#     { "name": "NODE_ENV",        "value": "development" }, 
-#     { "name": "AWS_ACCOUNT_KEY", "value": "${var.aws_account_key}" }
-#   ]
-#   EOF
-# }
-
-
-# # -----------------------------------------------------------------------------
-# # ECS task and service for se-client-service
-# # -----------------------------------------------------------------------------
-# module "se_client_service" {
-#   source = "../ecs-service"
-
-
-#   cluster     = "${module.ecs_cluster.name}"
-#   name        = "se-client-service"
-#   environment = "${var.environment}"
-#   vpc_id      = "${module.network.vpc_id}"
-#   image       = "${module.defaults.ecr_domain}/schedule-engine/se-client-service"
-#   image_tag   = "${var.aws_account_key}"
-
-
-#   port             = "8006"
-#   zone_id          = "${module.dns.zone_id}"
-#   alb_arn          = "${module.ecs_cluster.internal_alb_arn}"
-#   alb_listener_arn = "${module.ecs_cluster.default_internal_alb_listener_arn}"
-
-
-#   # AWS CloudWatch Log Variables
-#   awslogs_group         = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"
-#   awslogs_region        = "${var.region}"
-#   awslogs_stream_prefix = "${module.ecs_cluster.name}"
-
-
-#   env_vars = <<EOF
-#   [
-#     { "name": "NODE_ENV",                "value": "development" }, 
-#     { "name": "SE_ENV",                  "value": "development" },
-#     { "name": "AWS_ACCOUNT_ID",          "value": "${var.aws_account_id}" },
-#     { "name": "AWS_ACCOUNT_KEY",         "value": "${var.aws_account_key}" },
-#     { "name": "AWS_ACCOUNT_NAME",        "value": "${var.aws_account_name}" },
-#     { "name": "MONGO_CONNECTION_STRING", "value": "mongodb://admin:rGmGTpEnhf2%3E%253frvpDXMPUP@cluster0-shard-00-00-hulfh.mongodb.net:27017,cluster0-shard-00-01-hulfh.mongodb.net:27017,cluster0-shard-00-02-hulfh.mongodb.net:27017/se_client_service?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin" }
-#   ]
-#   EOF
-# }
-
-
-# # -----------------------------------------------------------------------------
-# # ECS task and service for se-geocoding-service
-# # -----------------------------------------------------------------------------
-# module "se_geocoding_service" {
-#   source = "../ecs-service"
-
-
-#   cluster     = "${module.ecs_cluster.name}"
-#   name        = "se-geocoding-service"
-#   environment = "${var.environment}"
-#   vpc_id      = "${module.network.vpc_id}"
-#   image       = "${module.defaults.ecr_domain}/schedule-engine/se-geocoding-service"
-#   image_tag   = "${var.aws_account_key}"
-
-
-#   port             = "8037"
-#   zone_id          = "${module.dns.zone_id}"
-#   alb_arn          = "${module.ecs_cluster.internal_alb_arn}"
-#   alb_listener_arn = "${module.ecs_cluster.default_internal_alb_listener_arn}"
-
-
-#   # AWS CloudWatch Log Variables
-#   awslogs_group         = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"
-#   awslogs_region        = "${var.region}"
-#   awslogs_stream_prefix = "${module.ecs_cluster.name}"
-
-
-#   env_vars = <<EOF
-#   [
-#     { "name": "NODE_ENV",                "value": "development" }, 
-#     { "name": "SE_ENV",                  "value": "development" },
-#     { "name": "AWS_ACCOUNT_ID",          "value": "${var.aws_account_id}" },
-#     { "name": "AWS_ACCOUNT_KEY",         "value": "${var.aws_account_key}" },
-#     { "name": "AWS_ACCOUNT_NAME",        "value": "${var.aws_account_name}" },
-#     { "name": "MONGO_CONNECTION_STRING", "value": "mongodb://admin:rGmGTpEnhf2%3E%253frvpDXMPUP@cluster0-shard-00-00-hulfh.mongodb.net:27017,cluster0-shard-00-01-hulfh.mongodb.net:27017,cluster0-shard-00-02-hulfh.mongodb.net:27017/se_geocoding_service?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin" }
-#   ]
-#   EOF
-# }
-

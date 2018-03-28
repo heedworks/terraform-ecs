@@ -175,8 +175,3 @@ variable "awslogs_stream_prefix" {
   description = "The awslogs stream prefix. defaults to var.cluster"
   default     = ""
 }
-
-variable "listener_rule_priority" {
-  description = " The priority for the rule between 1 and 50000. Leaving it unset will automatically set the rule with next available priority after currently existing highest rule. A listener can't have multiple rules with the same priority."
-  default     = 0
-}
