@@ -79,6 +79,7 @@ module "se_service_list" {
 
   internal_alb_arn              = "${module.se_stack.internal_alb_arn}"
   internal_alb_listener_arn     = "${module.se_stack.default_internal_alb_listener_arn}"
+  external_alb_arn              = "${module.se_stack.external_alb_arn}"
   external_alb_target_group_arn = "${module.se_stack.default_external_alb_target_group_arn}"
 
   internal_subnet_ids = "${module.se_stack.internal_subnet_ids}"
@@ -276,16 +277,15 @@ variable "service_se_env_map" {
   type = "map"
 
   default = {
-    se-mobile-api = "integration"
+    se-mobile-api         = "integration"
+    se-kong-configuration = "integration"
   }
 }
 
 variable "service_node_env_map" {
   type = "map"
 
-  default = {
-    se-mobile-api = "development"
-  }
+  default = {}
 }
 
 variable "service_desired_count_map" {

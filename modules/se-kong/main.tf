@@ -47,11 +47,16 @@ module "configuration_task" {
 
   env_vars = <<EOF
   [
+    { "name": "NODE_ENV",                  "value": "${coalesce(var.configuration_node_env, var.environment)}" }, 
+    { "name": "SE_ENV",                    "value": "${coalesce(var.configuration_se_env, var.environment)}" },
     { "name": "KONG_PG_CONNECTION_STRING", "value": "${module.db.db_connection_string}" }
   ]
   EOF
 }
 
+# -----------------------------------------------------------------------------
+# ECS task for se-kong-migrations
+# -----------------------------------------------------------------------------
 module "migrations_task" {
   source = "../ecs-task"
 
@@ -166,7 +171,7 @@ module "proxy_task" {
   ports = <<EOF
   [
     {
-      "protocol": "TCP",
+      "protocol": "tcp",
       "containerPort": ${var.proxy_container_port},
       "hostPort": ${var.proxy_port}
     }
@@ -182,4 +187,78 @@ module "proxy_task" {
     { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" }
   ]
   EOF
+}
+
+# -----------------------------------------------------------------------------
+# CloudWatch Alarm for se-kong-configuration HealthyHostCount
+# -----------------------------------------------------------------------------
+# resource "aws_cloudwatch_metric_alarm" "main" {
+#   alarm_name                = "${var.cluster}-se-kong-configuration-healthy-host-count-low"
+#   comparison_operator       = "LessThanThreshold"
+#   evaluation_periods        = "2"
+#   period                    = "60"
+#   metric_name               = "HealthyHostCount"
+#   threshold                 = "1"
+#   namespace                 = "AWS/ApplicationELB"
+#   statistic                 = "Minimum"
+#   insufficient_data_actions = []
+
+#   dimensions {
+#     LoadBalancer = "${data.aws_lb.external.arn_suffix}"
+#     TargetGroup  = "${data.aws_lb_target_group.external.arn_suffix}"
+#   }
+
+#   alarm_description = "Alert if the ALB target group is below the desired count for 2 minutes"
+#   alarm_actions     = []
+
+#   lifecycle {
+#     create_before_destroy = true
+#   }
+# }
+
+# -----------------------------------------------------------------------------
+# CloudWatch Alarm for se-kong-proxy HealthyHostCount
+# -----------------------------------------------------------------------------
+resource "aws_cloudwatch_metric_alarm" "main" {
+  alarm_name                = "${var.cluster}-${module.proxy_task.name}-healthy-host-count-low"
+  comparison_operator       = "LessThanThreshold"
+  evaluation_periods        = "2"
+  period                    = "60"
+  metric_name               = "HealthyHostCount"
+  threshold                 = "${var.proxy_desired_count}"
+  namespace                 = "AWS/ApplicationELB"
+  statistic                 = "Minimum"
+  insufficient_data_actions = []
+
+  dimensions {
+    LoadBalancer = "${data.aws_lb.external.arn_suffix}"
+    TargetGroup  = "${data.aws_lb_target_group.external.arn_suffix}"
+  }
+
+  alarm_description = "Alert if the ALB target group is below the desired count for 2 minutes"
+  alarm_actions     = []
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+data "aws_lb" "external" {
+  arn = "${var.external_alb_arn}"
+}
+
+data "aws_lb_target_group" "external" {
+  arn = "${var.external_alb_target_group_arn}"
+}
+
+data "template_file" "proxy_cloudwatch_metric_widget" {
+  template = "${file("${path.module}/../ecs-service/templates/cloudwatch_metric_widget.tpl")}"
+
+  vars {
+    region                  = "us-east-1"
+    cluster_name            = "${var.cluster}"
+    service_name            = "${module.proxy_task.name}"
+    target_group_arn_suffix = "${data.aws_lb_target_group.external.arn_suffix}"
+    lb_arn_suffix           = "${data.aws_lb.external.arn_suffix}"
+  }
 }

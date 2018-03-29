@@ -91,9 +91,14 @@ variable "configuration_image_tag" {
   default     = ""
 }
 
-variable "configuration_cpu" {
-  description = "The number of cpu units to reserve for the container"
-  default     = 128
+variable "configuration_node_env" {
+  description = ""
+  default     = ""
+}
+
+variable "configuration_se_env" {
+  description = ""
+  default     = ""
 }
 
 variable "configuration_command" {
@@ -122,11 +127,15 @@ variable "awslogs_stream_prefix" {
 }
 
 variable "internal_alb_arn" {
-  description = "The ARN of the ALB target group for se-kong-admin"
+  description = "The ARN of the internal ALB"
 }
 
 variable "internal_alb_listener_arn" {
   description = "The ARN of the ALB listener for se-kong-admin"
+}
+
+variable "external_alb_arn" {
+  description = "The ARN of the external ALB"
 }
 
 variable "external_alb_target_group_arn" {

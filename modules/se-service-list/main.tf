@@ -183,6 +183,10 @@ variable "internal_alb_arn" {
   description = ""
 }
 
+variable "external_alb_arn" {
+  description = ""
+}
+
 variable "external_alb_target_group_arn" {
   description = ""
 }
@@ -200,32 +204,8 @@ variable "mongo_connection_string_template" {
 }
 
 # -----------------------------------------------------------------------------
-# Kong Admin and Proxy services and tasks
+# Service Metric CloudWatch Dashboard
 # -----------------------------------------------------------------------------
-# module "se_kong" {
-#   source = "../se-kong"
-
-#   aws_account_key = "${var.aws_account_key}"
-#   cluster         = "${var.cluster}"
-#   region          = "${var.region}"
-#   environment     = "${var.environment}"
-#   vpc_id          = "${var.vpc_id}"
-#   zone_id         = "${var.zone_id}"
-#   ecr_domain      = "${var.ecr_domain}"
-
-#   # RDS Variables
-#   db_subnet_ids      = "${var.internal_subnet_ids}"
-#   db_security_groups = "${var.kong_db_security_groups}"
-#   db_name            = "${var.kong_db_name}"
-#   db_password        = "${var.kong_db_password}"
-#   awslogs_group      = "${var.ecs_tasks_cloudwatch_log_group}"
-
-#   # ALB Variables
-#   internal_alb_arn              = "${var.internal_alb_arn}"
-#   internal_alb_listener_arn     = "${var.internal_alb_listener_arn}"
-#   external_alb_target_group_arn = "${var.external_alb_target_group_arn}"
-# }
-
 resource "aws_cloudwatch_dashboard" "main" {
   dashboard_name = "service-pulse-dashboard"
 
@@ -266,6 +246,39 @@ resource "aws_cloudwatch_dashboard" "main" {
    ]
  }
  EOF
+}
+
+# -----------------------------------------------------------------------------
+# Kong Admin and Proxy services and tasks
+# -----------------------------------------------------------------------------
+module "se_kong" {
+  source = "../se-kong"
+
+  aws_account_key = "${var.aws_account_key}"
+  cluster         = "${var.cluster}"
+  region          = "${var.region}"
+  environment     = "${var.environment}"
+  vpc_id          = "${var.vpc_id}"
+  zone_id         = "${var.zone_id}"
+  ecr_domain      = "${var.ecr_domain}"
+
+  image_tag               = "${lookup(var.image_tag_map, "se-kong", var.default_image_tag)}"
+  configuration_image_tag = "${lookup(var.image_tag_map, "se-kong-configuration", var.default_image_tag)}"
+  configuration_node_env  = "${lookup(var.node_env_map, "se-kong-configuration", var.default_node_env)}"
+  configuration_se_env    = "${lookup(var.se_env_map, "se-kong-configuration", var.default_se_env)}"
+
+  # RDS Variables
+  db_subnet_ids      = "${var.internal_subnet_ids}"
+  db_security_groups = "${var.kong_db_security_groups}"
+  db_name            = "${var.kong_db_name}"
+  db_password        = "${var.kong_db_password}"
+  awslogs_group      = "${var.ecs_tasks_cloudwatch_log_group}"
+
+  # ALB Variables
+  internal_alb_arn              = "${var.internal_alb_arn}"
+  internal_alb_listener_arn     = "${var.internal_alb_listener_arn}"
+  external_alb_arn              = "${var.external_alb_arn}"
+  external_alb_target_group_arn = "${var.external_alb_target_group_arn}"
 }
 
 # -----------------------------------------------------------------------------

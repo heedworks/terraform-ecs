@@ -232,3 +232,10 @@ resource "aws_cloudwatch_metric_alarm" "memory_low" {
   # support modifying alarms concurrently.
   depends_on = ["aws_cloudwatch_metric_alarm.cpu_low"]
 }
+
+module "ecs_events" {
+  source = "../ecs-events"
+
+  cluster     = "${var.name}"
+  environment = "${var.environment}"
+}

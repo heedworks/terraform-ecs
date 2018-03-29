@@ -139,7 +139,7 @@ resource "aws_cloudwatch_metric_alarm" "main" {
   evaluation_periods        = "2"
   period                    = "60"
   metric_name               = "HealthyHostCount"
-  threshold                 = "2"
+  threshold                 = "${var.desired_count}"
   namespace                 = "AWS/ApplicationELB"
   statistic                 = "Minimum"
   insufficient_data_actions = []
