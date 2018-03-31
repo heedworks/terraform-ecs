@@ -61,6 +61,37 @@ resource "aws_s3_bucket" "se_widget_ui_haller" {
 }
 
 # -----------------------------------------------------------------------------
+# S3 Bucket for hosting se-widget-ui-croppmetcalfe
+# -----------------------------------------------------------------------------
+data "template_file" "se_widget_ui_croppmetcalfe_policy" {
+  template = "${file("${path.module}/templates/public-read-policy.json")}"
+
+  vars = {
+    bucket = "se-widget-ui-croppmetcalfe-${var.aws_account_key}"
+  }
+}
+
+resource "aws_s3_bucket" "se_widget_ui_croppmetcalfe" {
+  bucket = "se-widget-ui-croppmetcalfe-${var.aws_account_key}"
+
+  versioning {
+    enabled = true
+  }
+
+  website {
+    index_document = "index.html"
+    error_document = "error.html"
+  }
+
+  tags {
+    Name        = "se-widget-ui-croppmetcalfe-${var.aws_account_key}"
+    Environment = "${var.environment}"
+  }
+
+  policy = "${data.template_file.se_widget_ui_croppmetcalfe_policy.rendered}"
+}
+
+# -----------------------------------------------------------------------------
 # Service Metric CloudWatch Dashboard
 # -----------------------------------------------------------------------------
 resource "aws_cloudwatch_dashboard" "main" {
