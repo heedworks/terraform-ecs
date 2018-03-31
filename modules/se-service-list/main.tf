@@ -269,7 +269,7 @@ module "se_admin_console_api" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-admin-console-api"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-admin-console-api", var.aws_account_key)}"
 
   port           = 0
@@ -313,7 +313,7 @@ module "se_admin_auth_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-admin-auth-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-admin-auth-service", var.aws_account_key)}"
 
   port           = 0
@@ -357,7 +357,7 @@ module "se_agent_api" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-agent-api"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-agent-api", var.aws_account_key)}"
 
   port           = 0
@@ -401,7 +401,7 @@ module "se_agent_auth_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-agent-auth-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-agent-auth-service", var.aws_account_key)}"
 
   port           = 0
@@ -445,7 +445,7 @@ module "se_appointment_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-appointment-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-appointment-service", var.aws_account_key)}"
 
   port           = 0
@@ -489,7 +489,7 @@ module "se_certification_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-certification-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-certification-service", var.aws_account_key)}"
 
   port           = 0
@@ -533,7 +533,7 @@ module "se_client_auth_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-client-auth-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-client-auth-service", var.aws_account_key)}"
 
   port           = 0
@@ -577,7 +577,7 @@ module "se_client_dashboard_api" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-client-dashboard-api"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-client-dashboard-api", var.aws_account_key)}"
 
   port           = 0
@@ -621,7 +621,7 @@ module "se_client_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-client-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-client-service", var.aws_account_key)}"
 
   port           = 0
@@ -665,7 +665,7 @@ module "se_communication_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-communication-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-communication-service", var.aws_account_key)}"
 
   port           = 0
@@ -709,7 +709,7 @@ module "se_contract_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-contract-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-contract-service", var.aws_account_key)}"
 
   port           = 0
@@ -753,7 +753,7 @@ module "se_customer_auth_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-customer-auth-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-customer-auth-service", var.aws_account_key)}"
 
   port           = 0
@@ -797,7 +797,7 @@ module "se_customer_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-customer-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-customer-service", var.aws_account_key)}"
 
   port           = 0
@@ -841,7 +841,7 @@ module "se_device_auth_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-device-auth-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-device-auth-service", var.aws_account_key)}"
 
   port           = 0
@@ -885,7 +885,7 @@ module "se_dispatch_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-dispatch-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-dispatch-service", var.aws_account_key)}"
 
   port           = 0
@@ -929,7 +929,7 @@ module "se_erp_notification_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-erp-notification-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-erp-notification-service", var.aws_account_key)}"
 
   port           = 0
@@ -1016,7 +1016,7 @@ module "se_location_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-location-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-location-service", var.aws_account_key)}"
 
   port           = 0
@@ -1060,7 +1060,7 @@ module "se_media_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-media-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-media-service", var.aws_account_key)}"
 
   port           = 0
@@ -1104,7 +1104,7 @@ module "se_notification_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-notification-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-notification-service", var.aws_account_key)}"
 
   port           = 0
@@ -1148,7 +1148,7 @@ module "se_payment_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-payment-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-payment-service", var.aws_account_key)}"
 
   port           = 0
@@ -1192,7 +1192,7 @@ module "se_phone_lookup_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-phone-lookup-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-phone-lookup-service", var.aws_account_key)}"
 
   port           = 0
@@ -1236,7 +1236,7 @@ module "se_room_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-room-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-room-service", var.aws_account_key)}"
 
   port           = 0
@@ -1280,7 +1280,7 @@ module "se_sampro_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-sampro-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-sampro-service", var.aws_account_key)}"
 
   port           = 0
@@ -1324,7 +1324,7 @@ module "se_scheduling_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-scheduling-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-scheduling-service", var.aws_account_key)}"
 
   port           = 0
@@ -1368,7 +1368,7 @@ module "se_technician_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-technician-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-technician-service", var.aws_account_key)}"
 
   port           = 0
@@ -1412,7 +1412,7 @@ module "se_trade_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-trade-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-trade-service", var.aws_account_key)}"
 
   port           = 0
@@ -1456,7 +1456,7 @@ module "se_vehicle_service" {
   zone_id         = "${var.zone_id}"
 
   # image            = "${var.ecr_domain}/schedule-engine/se-vehicle-service"
-  image     = "${var.ecr_domain}/schedule-engine/se-client-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-vehicle-service", var.aws_account_key)}"
 
   port           = 0
