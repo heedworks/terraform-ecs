@@ -4,10 +4,6 @@ resource "aws_sns_topic" "ecs_events" {
 
 data "aws_caller_identity" "current" {}
 
-data "aws_region" "current" {
-  current = true
-}
-
 data "template_file" "ecs_task_stopped" {
   template = <<EOF
 {
@@ -24,7 +20,7 @@ EOF
   vars {
     account_id = "${data.aws_caller_identity.current.account_id}"
     cluster    = "${var.cluster}"
-    aws_region = "${data.aws_region.current.name}"
+    aws_region = "${var.region}"
   }
 }
 
