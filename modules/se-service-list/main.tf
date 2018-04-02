@@ -1,16 +1,16 @@
 # -----------------------------------------------------------------------------
-# S3 Bucket for hosting se-widget-embed
+# S3 Bucket for hosting se-widget-demo
 # -----------------------------------------------------------------------------
-data "template_file" "se_widget_embed_policy" {
+data "template_file" "se_widget_demo_policy" {
   template = "${file("${path.module}/templates/public-read-policy.json")}"
 
   vars = {
-    bucket = "se-widget-embed-${var.aws_account_key}"
+    bucket = "${var.aws_account_key}.se-widget-demo"
   }
 }
 
-resource "aws_s3_bucket" "se_widget_embed" {
-  bucket = "se-widget-embed-${var.aws_account_key}"
+resource "aws_s3_bucket" "se_widget_demo" {
+  bucket = "${var.aws_account_key}.se-widget-demo"
 
   versioning {
     enabled = true
@@ -22,7 +22,100 @@ resource "aws_s3_bucket" "se_widget_embed" {
   }
 
   tags {
-    Name        = "se-widget-embed-${var.aws_account_key}"
+    Name        = "${var.aws_account_key}.se-widget-demo"
+    Environment = "${var.environment}"
+  }
+
+  policy = "${data.template_file.se_widget_demo_policy.rendered}"
+}
+
+# -----------------------------------------------------------------------------
+# S3 Bucket for hosting se-client-dashboard
+# -----------------------------------------------------------------------------
+data "template_file" "se_client_dashboard_policy" {
+  template = "${file("${path.module}/templates/public-read-policy.json")}"
+
+  vars = {
+    bucket = "${var.aws_account_key}.se-client-dashboard"
+  }
+}
+
+resource "aws_s3_bucket" "se_client_dashboard" {
+  bucket = "${var.aws_account_key}.se-client-dashboard"
+
+  versioning {
+    enabled = true
+  }
+
+  website {
+    index_document = "index.html"
+    error_document = "error.html"
+  }
+
+  tags {
+    Name        = "${var.aws_account_key}.se-client-dashboard"
+    Environment = "${var.environment}"
+  }
+
+  policy = "${data.template_file.se_client_dashboard_policy.rendered}"
+}
+
+# -----------------------------------------------------------------------------
+# S3 Bucket for hosting se-admin-console
+# -----------------------------------------------------------------------------
+data "template_file" "se_admin_console_policy" {
+  template = "${file("${path.module}/templates/public-read-policy.json")}"
+
+  vars = {
+    bucket = "${var.aws_account_key}.se-admin-console"
+  }
+}
+
+resource "aws_s3_bucket" "se_admin_console" {
+  bucket = "${var.aws_account_key}.se-admin-console"
+
+  versioning {
+    enabled = true
+  }
+
+  website {
+    index_document = "index.html"
+    error_document = "error.html"
+  }
+
+  tags {
+    Name        = "${var.aws_account_key}.se-admin-console"
+    Environment = "${var.environment}"
+  }
+
+  policy = "${data.template_file.se_admin_console_policy.rendered}"
+}
+
+# -----------------------------------------------------------------------------
+# S3 Bucket for hosting se-widget-embed
+# -----------------------------------------------------------------------------
+data "template_file" "se_widget_embed_policy" {
+  template = "${file("${path.module}/templates/public-read-policy.json")}"
+
+  vars = {
+    bucket = "${var.aws_account_key}.se-widget-embed"
+  }
+}
+
+resource "aws_s3_bucket" "se_widget_embed" {
+  bucket = "${var.aws_account_key}.se-widget-embed"
+
+  versioning {
+    enabled = true
+  }
+
+  website {
+    index_document = "index.html"
+    error_document = "error.html"
+  }
+
+  tags {
+    Name        = "${var.aws_account_key}.se-widget-embed"
     Environment = "${var.environment}"
   }
 
@@ -36,12 +129,12 @@ data "template_file" "se_widget_ui_haller_policy" {
   template = "${file("${path.module}/templates/public-read-policy.json")}"
 
   vars = {
-    bucket = "se-widget-ui-haller-${var.aws_account_key}"
+    bucket = "${var.aws_account_key}-haller.se-widget-ui"
   }
 }
 
 resource "aws_s3_bucket" "se_widget_ui_haller" {
-  bucket = "se-widget-ui-haller-${var.aws_account_key}"
+  bucket = "${var.aws_account_key}-haller.se-widget-ui"
 
   versioning {
     enabled = true
@@ -67,12 +160,12 @@ data "template_file" "se_widget_ui_croppmetcalfe_policy" {
   template = "${file("${path.module}/templates/public-read-policy.json")}"
 
   vars = {
-    bucket = "se-widget-ui-croppmetcalfe-${var.aws_account_key}"
+    bucket = "${var.aws_account_key}-croppmetcalfe.se-widget-ui"
   }
 }
 
 resource "aws_s3_bucket" "se_widget_ui_croppmetcalfe" {
-  bucket = "se-widget-ui-croppmetcalfe-${var.aws_account_key}"
+  bucket = "${var.aws_account_key}-croppmetcalfe.se-widget-ui"
 
   versioning {
     enabled = true
@@ -84,7 +177,7 @@ resource "aws_s3_bucket" "se_widget_ui_croppmetcalfe" {
   }
 
   tags {
-    Name        = "se-widget-ui-croppmetcalfe-${var.aws_account_key}"
+    Name        = "${var.aws_account_key}-croppmetcalfe.se-widget-ui"
     Environment = "${var.environment}"
   }
 
@@ -225,7 +318,7 @@ module "se_address_service" {
   vpc_id          = "${var.vpc_id}"
   zone_id         = "${var.zone_id}"
 
-  image            = "${var.ecr_domain}/schedule-engine/se-address-service"
+  image     = "${var.ecr_domain}/schedule-engine/se-address-service"
   image_tag = "${lookup(var.image_tag_map, "se-address-service", var.aws_account_key)}"
 
   port           = 0
@@ -1499,7 +1592,7 @@ module "se_web_api" {
   vpc_id          = "${var.vpc_id}"
   zone_id         = "${var.zone_id}"
 
-  image            = "${var.ecr_domain}/schedule-engine/se-web-api"
+  image     = "${var.ecr_domain}/schedule-engine/se-web-api"
   image_tag = "${lookup(var.image_tag_map, "se-web-api", var.aws_account_key)}"
 
   port           = 0
