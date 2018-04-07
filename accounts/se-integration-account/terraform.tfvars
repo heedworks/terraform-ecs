@@ -47,3 +47,9 @@ default_image_tag = "integration"
 default_node_env = "development"
 
 default_se_env = "integration"
+
+// kafka_host = "ec2-35-172-33-1.compute-1.amazonaws.com:9092,ec2-52-90-107-255.compute-1.amazonaws.com:9092,ec2-54-236-63-243.compute-1.amazonaws.com:9092"
+
+// kafka_host = "ip-10-30-133-67.ec2.internal:9092,ip-10-30-148-117.ec2.internal:9092,ip-10-30-141-122.ec2.internal:9092"
+
+kafka_host = "ip-10-30-133-67.ec2.internal:9092,ip-10-30-148-117.ec2.internal:9092,ip-10-30-141-122.ec2.internal:9092"

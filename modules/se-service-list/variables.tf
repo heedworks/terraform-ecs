@@ -202,3 +202,7 @@ variable "ecs_tasks_cloudwatch_log_group" {
 variable "mongo_connection_string_template" {
   description = "Mongo connection string with a '%s' placeholder for the database name, e.g. mongodb://user:password@cluster0-shard-00-01-hulfh.mongodb.net:27017/%s"
 }
+
+variable "kafka_host" {
+  description = "Kafka host string, e.g. ip-10-0-50-34.ec2.internal:9092,ip-10-0-51-136.ec2.internal:9092"
+}

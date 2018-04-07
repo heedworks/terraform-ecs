@@ -403,6 +403,7 @@ module "se_agent_api" {
   aws_account_key = "${var.aws_account_key}"
   vpc_id          = "${var.vpc_id}"
   zone_id         = "${var.zone_id}"
+  desired_count   = 1
 
   image     = "${var.ecr_domain}/schedule-engine/se-agent-api"
   image_tag = "${lookup(var.image_tag_map, "se-agent-api", var.aws_account_key)}"
@@ -424,11 +425,13 @@ module "se_agent_api" {
 
   env_vars = <<EOF
   [
+    { "name": "DEBUG",                   "value": "kafka-node:*" },
     { "name": "NODE_ENV",                "value": "${lookup(var.node_env_map, "se-agent-api", var.default_node_env)}" }, 
     { "name": "SE_ENV",                  "value": "${lookup(var.se_env_map, "se-agent-api", var.default_se_env)}" },
     { "name": "AWS_ACCOUNT_ID",          "value": "${var.aws_account_id}" },
     { "name": "AWS_ACCOUNT_KEY",         "value": "${var.aws_account_key}" },
     { "name": "AWS_ACCOUNT_NAME",        "value": "${var.aws_account_name}" },
+    { "name": "KAFKA_HOST",              "value": "${var.kafka_host}" },
     { "name": "MONGO_CONNECTION_STRING", "value": "${format(var.mongo_connection_string_template, "se_agent_api")}" }
   ]
   EOF
@@ -682,11 +685,13 @@ module "se_client_service" {
 
   env_vars = <<EOF
   [
+    { "name": "DEBUG",                   "value": "kafka-node:*" },
     { "name": "NODE_ENV",                "value": "${lookup(var.node_env_map, "se-client-service", var.default_node_env)}" }, 
     { "name": "SE_ENV",                  "value": "${lookup(var.se_env_map, "se-client-service", var.default_se_env)}" },
     { "name": "AWS_ACCOUNT_ID",          "value": "${var.aws_account_id}" },
     { "name": "AWS_ACCOUNT_KEY",         "value": "${var.aws_account_key}" },
     { "name": "AWS_ACCOUNT_NAME",        "value": "${var.aws_account_name}" },
+    { "name": "KAFKA_HOST",              "value": "${var.kafka_host}" },
     { "name": "MONGO_CONNECTION_STRING", "value": "${format(var.mongo_connection_string_template, "se_client_service")}" }
   ]
   EOF
@@ -1349,6 +1354,7 @@ module "se_sampro_service" {
   aws_account_key = "${var.aws_account_key}"
   vpc_id          = "${var.vpc_id}"
   zone_id         = "${var.zone_id}"
+  desired_count   = 1
 
   image     = "${var.ecr_domain}/schedule-engine/se-sampro-service"
   image_tag = "${lookup(var.image_tag_map, "se-sampro-service", var.aws_account_key)}"
@@ -1370,11 +1376,13 @@ module "se_sampro_service" {
 
   env_vars = <<EOF
   [
+    { "name": "DEBUG",                   "value": "kafka-node:*" },
     { "name": "NODE_ENV",                "value": "${lookup(var.node_env_map, "se-sampro-service", var.default_node_env)}" }, 
     { "name": "SE_ENV",                  "value": "${lookup(var.se_env_map, "se-sampro-service", var.default_se_env)}" },
     { "name": "AWS_ACCOUNT_ID",          "value": "${var.aws_account_id}" },
     { "name": "AWS_ACCOUNT_KEY",         "value": "${var.aws_account_key}" },
     { "name": "AWS_ACCOUNT_NAME",        "value": "${var.aws_account_name}" },
+    { "name": "KAFKA_HOST",              "value": "${var.kafka_host}" },
     { "name": "MONGO_CONNECTION_STRING", "value": "${format(var.mongo_connection_string_template, "se_sampro_service")}" }
   ]
   EOF

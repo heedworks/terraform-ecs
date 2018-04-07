@@ -45,8 +45,12 @@ module "bastion" {
 module "dhcp" {
   source = "../dhcp"
 
+  vpc_id = "${module.network.vpc_id}"
+
+  # name    = "ec2.internal"
+  # servers = "AmazonProvidedDNS"
+
   name    = "${module.dns.name}"
-  vpc_id  = "${module.network.vpc_id}"
   servers = "${module.defaults.domain_name_servers}"
 
   # servers = "${coalesce(var.domain_name_servers, module.defaults.domain_name_servers)}"
@@ -69,7 +73,7 @@ module "ecs_cluster" {
   name            = "${coalesce(var.ecs_cluster_name, var.name)}"
   security_groups = "${module.security_groups.internal_ssh},${module.security_groups.internal_alb},${module.security_groups.external_alb}"
 
-  cloudwatch_prefix = "${var.environment}" # See ecs-instances module when to set this and when not!
+  cloudwatch_prefix = "${var.environment}"
   vpc_cidr          = "${var.vpc_cidr}"
 
   # external_subnets   = "${var.external_subnets}"

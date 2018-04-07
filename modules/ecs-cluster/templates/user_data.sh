@@ -3,7 +3,7 @@
 # Timezone
 ln -fs /usr/share/zoneinfo/UTC /etc/localtime
 
-#Using script from http://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_cloudwatch_logs.html
+# Using script from http://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_cloudwatch_logs.html
 # Install awslogs and the jq JSON parser
 yum install -y awslogs jq aws-cli
 
@@ -87,8 +87,8 @@ EOF
 
 start ecs
 
-#Get ECS instance info, although not used in this user_data it self this allows you to use
-#az(availability zone) and region
+# Get ECS instance info, although not used in this user_data it self this allows you to use
+# az(availability zone) and region
 until $(curl --output /dev/null --silent --head --fail http://localhost:51678/v1/metadata); do
   printf '.'
   sleep 5
@@ -97,7 +97,7 @@ instance_arn=$(curl -s http://localhost:51678/v1/metadata | jq -r '. | .Containe
 az=$(curl -s http://instance-data/latest/meta-data/placement/availability-zone)
 region=$${az:0:$${#az} - 1}
 
-#Custom userdata script code
+# Custom userdata script code
 ${custom_userdata}
 
 echo "Done"

@@ -93,6 +93,7 @@ module "se_service_list" {
   aws_account_id                   = "${var.aws_account_id}"
   aws_account_key                  = "${var.aws_account_key}"
   aws_account_name                 = "${var.aws_account_name}"
+  kafka_host                       = "${var.kafka_host}"
   mongo_connection_string_template = "${var.mongo_connection_string_template}"
 
   ecr_domain                     = "${module.se_stack.ecr_domain}"
@@ -219,6 +220,10 @@ variable "ecs_ami" {
 
 variable "kong_db_password" {
   description = "Postgres user password"
+}
+
+variable "kafka_host" {
+  description = "Kafka host"
 }
 
 variable "mongo_connection_string_template" {
