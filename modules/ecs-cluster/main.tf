@@ -56,6 +56,7 @@ resource "aws_launch_configuration" "main" {
   name_prefix          = "${var.name}-"
   image_id             = "${var.image_id}"
   instance_type        = "${var.instance_type}"
+  ebs_optimized        = "${var.instance_ebs_optimized}"
   security_groups      = ["${aws_security_group.cluster.id}"]
   iam_instance_profile = "${aws_iam_instance_profile.ecs.id}"
   user_data            = "${data.template_file.user_data.rendered}"

@@ -68,6 +68,11 @@ variable "instance_type" {
   description = "AWS instance type to use"
 }
 
+variable "instance_ebs_optimized" {
+  description = "When set to true the instance will be launched with EBS optimized turned on"
+  default     = true
+}
+
 variable "image_id" {
   description = "The AWS ami id to use for ECS"
 }
