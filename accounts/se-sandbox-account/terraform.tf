@@ -43,21 +43,24 @@ module "se_stack" {
   aws_account_key  = "${var.aws_account_key}"
   aws_account_name = "${var.aws_account_name}"
 
-  ecs_cluster_name      = "${coalesce(var.ecs_cluster_name, var.name)}"
-  cloudwatch_prefix     = "${var.environment}"
-  vpc_cidr              = "${var.vpc_cidr}"
-  external_subnets      = "${var.external_subnets}"
-  internal_subnets      = "${var.internal_subnets}"
-  availability_zones    = "${var.availability_zones}"
-  ecs_max_size          = "${var.ecs_max_size}"
-  ecs_min_size          = "${var.ecs_min_size}"
-  ecs_desired_capacity  = "${var.ecs_desired_capacity}"
-  ecs_instance_type     = "${var.ecs_instance_type}"
-  bastion_instance_type = "${var.bastion_instance_type}"
-  ecs_ami               = "${var.ecs_ami}"
-  key_name              = "${var.key_name}"
-  internal_domain_name  = "${var.internal_domain_name}"
-  external_domain_name  = "${var.external_domain_name}"
+  ecs_cluster_name           = "${coalesce(var.ecs_cluster_name, var.name)}"
+  cloudwatch_prefix          = "${var.environment}"
+  vpc_cidr                   = "${var.vpc_cidr}"
+  external_subnets           = "${var.external_subnets}"
+  internal_subnets           = "${var.internal_subnets}"
+  availability_zones         = "${var.availability_zones}"
+  ecs_max_size               = "${var.ecs_max_size}"
+  ecs_min_size               = "${var.ecs_min_size}"
+  ecs_desired_capacity       = "${var.ecs_desired_capacity}"
+  ecs_instance_type          = "${var.ecs_instance_type}"
+  ecs_instance_ebs_optimized = "${var.ecs_instance_ebs_optimized}"
+  ecs_root_volume_size       = "${var.ecs_root_volume_size}"
+  ecs_docker_volume_size     = "${var.ecs_docker_volume_size}"
+  bastion_instance_type      = "${var.bastion_instance_type}"
+  ecs_ami                    = "${var.ecs_ami}"
+  key_name                   = "${var.key_name}"
+  internal_domain_name       = "${var.internal_domain_name}"
+  external_domain_name       = "${var.external_domain_name}"
 }
 
 # -----------------------------------------------------------------------------
@@ -192,6 +195,21 @@ variable "ecs_cluster_name" {
 variable "ecs_instance_type" {
   description = "the instance type to use for your default ecs cluster"
   default     = "t2.micro"
+}
+
+variable "ecs_instance_ebs_optimized" {
+  description = "use EBS - not all instance types support EBS"
+  default     = true
+}
+
+variable "ecs_root_volume_size" {
+  description = "the size of the ecs instance root volume"
+  default     = 25
+}
+
+variable "ecs_docker_volume_size" {
+  description = "the size of the ecs instance docker volume"
+  default     = 25
 }
 
 variable "ecs_min_size" {

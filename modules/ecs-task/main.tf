@@ -45,8 +45,8 @@ resource "aws_ecs_task_definition" "main" {
     "memoryReservation": ${var.memory_reservation},
     "portMappings": ${var.ports},
     "entryPoint": ${var.entry_point},
-    "mountPoints": [],
-    "volumesFrom": [],
+    "mountPoints": ${var.mount_points},
+    "volumesFrom": ${var.volumes_from},
     "logConfiguration": {
       "logDriver": "${var.log_driver}",
       "options": {

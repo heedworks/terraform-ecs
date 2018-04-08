@@ -1,6 +1,7 @@
 resource "aws_iam_role" "ecs_lb_role" {
-  name = "${var.environment}_ecs_lb_role"
-  path = "/ecs/"
+  name        = "ecs-lb-role-${var.environment}"
+  description = "Managed by Terraform"
+  path        = "/ecs/"
 
   assume_role_policy = <<EOF
 {

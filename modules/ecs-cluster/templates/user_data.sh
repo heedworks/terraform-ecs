@@ -11,13 +11,14 @@ yum install -y awslogs jq aws-cli
 ${ecs_config}
 {
   echo "ECS_CLUSTER=${cluster_name}"
-  echo 'ECS_AVAILABLE_LOGGING_DRIVERS=${ecs_logging}'
+  echo "ECS_AVAILABLE_LOGGING_DRIVERS=${ecs_logging}"
+  echo "ECS_INSTANCE_ATTRIBUTES=${ecs_instance_attributes}"
 } >> /etc/ecs/ecs.config
 
 # Inject the CloudWatch Logs configuration file contents
 cat > /etc/awslogs/awslogs.conf <<- EOF
 [general]
-state_file = /var/lib/awslogs/agent-state        
+state_file = /var/lib/awslogs/agent-state
  
 [/var/log/dmesg]
 file = /var/log/dmesg

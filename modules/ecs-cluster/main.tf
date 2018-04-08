@@ -2,12 +2,13 @@ data "template_file" "user_data" {
   template = "${file("${path.module}/templates/user_data.sh")}"
 
   vars {
-    ecs_config        = "${var.ecs_config}"
-    ecs_logging       = "${var.ecs_logging}"
-    cluster_name      = "${var.name}"
-    env_name          = "${var.environment}"
-    custom_userdata   = "${var.custom_userdata}"
-    cloudwatch_prefix = "${var.cloudwatch_prefix}"
+    ecs_config              = "${var.ecs_config}"
+    ecs_logging             = "${var.ecs_logging}"
+    ecs_instance_attributes = "${var.ecs_instance_attributes}"
+    cluster_name            = "${var.name}"
+    env_name                = "${var.environment}"
+    custom_userdata         = "${var.custom_userdata}"
+    cloudwatch_prefix       = "${var.cloudwatch_prefix}"
   }
 }
 
@@ -53,14 +54,28 @@ resource "aws_security_group" "cluster" {
 
 # Default disk size for Docker is 22 gig, see http://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-optimized_AMI.html
 resource "aws_launch_configuration" "main" {
-  name_prefix          = "${var.name}-"
-  image_id             = "${var.image_id}"
-  instance_type        = "${var.instance_type}"
+  name_prefix   = "${var.name}-${var.instance_group}-"
+  image_id      = "${var.image_id}"
+  instance_type = "${var.instance_type}"
+
   ebs_optimized        = "${var.instance_ebs_optimized}"
   security_groups      = ["${aws_security_group.cluster.id}"]
   iam_instance_profile = "${aws_iam_instance_profile.ecs.id}"
   user_data            = "${data.template_file.user_data.rendered}"
   key_name             = "${var.key_name}"
+
+  # root
+  root_block_device {
+    volume_type = "gp2"
+    volume_size = "${var.root_volume_size}"
+  }
+
+  # docker
+  ebs_block_device {
+    device_name = "/dev/xvdcz"
+    volume_type = "gp2"
+    volume_size = "${var.docker_volume_size}"
+  }
 
   # aws_launch_configuration can not be modified.
   # Therefore we use create_before_destroy so that a new modified aws_launch_configuration can be created 
@@ -72,7 +87,7 @@ resource "aws_launch_configuration" "main" {
 
 # Instances are scaled across availability zones http://docs.aws.amazon.com/autoscaling/latest/userguide/auto-scaling-benefits.html 
 resource "aws_autoscaling_group" "main" {
-  name = "${var.name}"
+  name = "${var.name}-${var.instance_group}"
 
   max_size             = "${var.max_size}"
   min_size             = "${var.min_size}"
@@ -85,7 +100,7 @@ resource "aws_autoscaling_group" "main" {
 
   tag {
     key                 = "Name"
-    value               = "${var.name}"
+    value               = "${var.name}-${var.instance_group}"
     propagate_at_launch = "true"
   }
 
@@ -98,6 +113,12 @@ resource "aws_autoscaling_group" "main" {
   tag {
     key                 = "Cluster"
     value               = "${var.name}"
+    propagate_at_launch = "true"
+  }
+
+  tag {
+    key                 = "InstanceGroup"
+    value               = "${var.instance_group}"
     propagate_at_launch = "true"
   }
 

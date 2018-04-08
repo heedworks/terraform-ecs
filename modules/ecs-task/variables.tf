@@ -48,6 +48,16 @@ variable "entry_point" {
   default     = "[]"
 }
 
+variable "mount_points" {
+  description = "The mount points for data volumes in your container."
+  default     = "[]"
+}
+
+variable "volumes_from" {
+  description = "Data volumes to mount from another container."
+  default     = "[]"
+}
+
 variable "ports" {
   description = "The docker container ports"
   default     = "[]"

@@ -56,6 +56,16 @@ variable "desired_capacity" {
   description = "The desired capacity of the cluster"
 }
 
+variable "root_volume_size" {
+  description = "Root volume size in GB"
+  default     = 25
+}
+
+variable "docker_volume_size" {
+  description = "Attached EBS volume size in GB"
+  default     = 25
+}
+
 variable "key_name" {
   description = "SSH key name to be used"
 }
@@ -95,6 +105,11 @@ variable "ecs_config" {
 variable "ecs_logging" {
   default     = "[\"json-file\",\"awslogs\"]"
   description = "Adding logging option to ECS that the Docker containers can use. It is possible to add fluentd as well"
+}
+
+variable "ecs_instance_attributes" {
+  default     = "{\"se-instance-type\": \"default\"}"
+  description = "A list of custom attributes, in JSON form, to apply to your container instances."
 }
 
 variable "cloudwatch_prefix" {

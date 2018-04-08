@@ -40,9 +40,11 @@ ecs_desired_capacity = 3
 
 ecs_instance_type = "t2.medium"
 
-# ecs_root_volume_size = "25"
+ecs_instance_ebs_optimized = "false"
 
-# ecs_docker_volume_size = "25"
+ecs_root_volume_size = "25"
+
+ecs_docker_volume_size = "25"
 
 # ecs_ami = "ami-a7a242da"
 

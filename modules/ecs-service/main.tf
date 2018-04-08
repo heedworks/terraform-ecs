@@ -29,6 +29,11 @@ resource "aws_ecs_service" "main" {
   deployment_minimum_healthy_percent = "${var.deployment_minimum_healthy_percent}"
   deployment_maximum_percent         = "${var.deployment_maximum_percent}"
 
+  placement_constraints {
+    type       = "memberOf"
+    expression = "attribute:se-instance-type == ${var.se_instance_type}"
+  }
+
   placement_strategy {
     type  = "spread"
     field = "attribute:ecs.availability-zone"

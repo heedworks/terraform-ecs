@@ -151,6 +151,11 @@ variable "iam_role" {
   default     = ""
 }
 
+variable "se_instance_type" {
+  description = "Custom ECS attribute value for se-instance-type placement constraint"
+  default     = "default"
+}
+
 variable "deployment_minimum_healthy_percent" {
   description = "lower limit (% of desired_count) of # of running tasks during a deployment"
   default     = 100

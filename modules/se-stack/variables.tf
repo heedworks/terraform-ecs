@@ -149,6 +149,21 @@ variable "ecs_instance_type" {
   default     = "t2.micro"
 }
 
+variable "ecs_instance_ebs_optimized" {
+  description = "use EBS - not all instance types support EBS"
+  default     = true
+}
+
+variable "ecs_root_volume_size" {
+  description = "the size of the ecs instance root volume"
+  default     = 25
+}
+
+variable "ecs_docker_volume_size" {
+  description = "the size of the ecs instance docker volume"
+  default     = 25
+}
+
 variable "ecs_min_size" {
   description = "the minimum number of instances to use in the default ecs cluster"
 
@@ -166,16 +181,6 @@ variable "ecs_max_size" {
 variable "ecs_desired_capacity" {
   description = "the desired number of instances to use in the default ecs cluster"
   default     = 3
-}
-
-variable "ecs_root_volume_size" {
-  description = "the size of the ecs instance root volume"
-  default     = 25
-}
-
-variable "ecs_docker_volume_size" {
-  description = "the size of the ecs instance docker volume"
-  default     = 25
 }
 
 # variable "ecs_docker_auth_type" {
