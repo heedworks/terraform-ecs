@@ -64,4 +64,4 @@ default_node_env = "development"
 
 default_se_env = "development"
 
-kafka_host = "10.30.135.194:9092,10.30.145.248:9092,10.30.128.213:9092"
+kafka_host = "se-kafka-1.internal:29092"

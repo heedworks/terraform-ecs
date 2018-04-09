@@ -1,3 +1,5 @@
+# NOTE: NEED TO MOUNT EBS VOLUMES FROM DOCKER
+
 variable "environment" {
   description = "The name of the environment"
 }
@@ -379,7 +381,7 @@ resource "aws_ecs_service" "zookeeper" {
 # ECS task for se-zookeeper
 # -----------------------------------------------------------------------------
 module "zookeeper_task" {
-  source = "../ecs-task"
+  source = "../se-zookeeper-task"
 
   name        = "se-zookeeper-1"
   environment = "${var.environment}"
@@ -463,7 +465,7 @@ resource "aws_ecs_service" "kafka" {
 # ECS task for se-kafka
 # -----------------------------------------------------------------------------
 module "kafka_task" {
-  source = "../ecs-task"
+  source = "../se-kafka-task"
 
   name        = "se-kafka-1"
   environment = "${var.environment}"

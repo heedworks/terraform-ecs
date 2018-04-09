@@ -66,54 +66,54 @@ module "se_stack" {
 # -----------------------------------------------------------------------------
 # se-service-list module (SE Tasks and Services)
 # -----------------------------------------------------------------------------
-# module "se_service_list" {
-#   source = "../../modules/se-service-list"
+module "se_service_list" {
+  source = "../../modules/se-service-list"
 
-#   region      = "${var.region}"
-#   cluster     = "${module.se_stack.cluster}"
-#   environment = "${var.environment}"
-#   vpc_id      = "${module.se_stack.vpc_id}"
-#   zone_id     = "${module.se_stack.zone_id}"
+  region      = "${var.region}"
+  cluster     = "${module.se_stack.cluster}"
+  environment = "${var.environment}"
+  vpc_id      = "${module.se_stack.vpc_id}"
+  zone_id     = "${module.se_stack.zone_id}"
 
-#   kong_db_password        = "${var.kong_db_password}"
-#   kong_db_security_groups = "${module.se_stack.ecs_cluster_security_group_id},${module.se_stack.external_ssh_security_group_id}"
+  kong_db_password        = "${var.kong_db_password}"
+  kong_db_security_groups = "${module.se_stack.ecs_cluster_security_group_id},${module.se_stack.external_ssh_security_group_id}"
 
-#   ecs_cluster_security_group_id = "${module.se_stack.ecs_cluster_security_group_id}"
+  ecs_cluster_security_group_id = "${module.se_stack.ecs_cluster_security_group_id}"
 
-#   internal_alb_arn              = "${module.se_stack.internal_alb_arn}"
-#   internal_alb_listener_arn     = "${module.se_stack.default_internal_alb_listener_arn}"
-#   external_alb_arn              = "${module.se_stack.external_alb_arn}"
-#   external_alb_target_group_arn = "${module.se_stack.default_external_alb_target_group_arn}"
+  internal_alb_arn              = "${module.se_stack.internal_alb_arn}"
+  internal_alb_listener_arn     = "${module.se_stack.default_internal_alb_listener_arn}"
+  external_alb_arn              = "${module.se_stack.external_alb_arn}"
+  external_alb_target_group_arn = "${module.se_stack.default_external_alb_target_group_arn}"
 
-#   internal_subnet_ids = "${module.se_stack.internal_subnet_ids}"
-#   external_subnet_ids = "${module.se_stack.external_subnet_ids}"
+  internal_subnet_ids = "${module.se_stack.internal_subnet_ids}"
+  external_subnet_ids = "${module.se_stack.external_subnet_ids}"
 
-#   default_image_tag = "${var.default_image_tag}"
+  default_image_tag = "${var.default_image_tag}"
 
-#   # Environment Variables
-#   default_node_env                 = "${var.default_node_env}"
-#   default_se_env                   = "${var.default_se_env}"
-#   aws_account_id                   = "${var.aws_account_id}"
-#   aws_account_key                  = "${var.aws_account_key}"
-#   aws_account_name                 = "${var.aws_account_name}"
-#   kafka_host                       = "${var.kafka_host}"
-#   mongo_connection_string_template = "${var.mongo_connection_string_template}"
+  # Environment Variables
+  default_node_env                 = "${var.default_node_env}"
+  default_se_env                   = "${var.default_se_env}"
+  aws_account_id                   = "${var.aws_account_id}"
+  aws_account_key                  = "${var.aws_account_key}"
+  aws_account_name                 = "${var.aws_account_name}"
+  kafka_host                       = "${var.kafka_host}"
+  mongo_connection_string_template = "${var.mongo_connection_string_template}"
 
-#   ecr_domain                     = "${module.se_stack.ecr_domain}"
-#   ecs_tasks_cloudwatch_log_group = "${module.se_stack.ecs_tasks_cloudwatch_log_group}"
+  ecr_domain                     = "${module.se_stack.ecr_domain}"
+  ecs_tasks_cloudwatch_log_group = "${module.se_stack.ecs_tasks_cloudwatch_log_group}"
 
-#   # Service Maps
-#   container_port_map = "${var.service_container_port_map}"
+  # Service Maps
+  container_port_map = "${var.service_container_port_map}"
 
-#   node_env_map  = "${var.service_node_env_map}"
-#   se_env_map    = "${var.service_se_env_map}"
-#   image_tag_map = "${var.service_image_tag_map}"
+  node_env_map  = "${var.service_node_env_map}"
+  se_env_map    = "${var.service_se_env_map}"
+  image_tag_map = "${var.service_image_tag_map}"
 
-#   # Task Defaults
-#   default_task_cpu                = "${var.default_task_cpu}"
-#   default_task_memory             = "${var.default_task_memory}"
-#   default_task_memory_reservation = "${var.default_task_memory_reservation}"
-# }
+  # Task Defaults
+  default_task_cpu                = "${var.default_task_cpu}"
+  default_task_memory             = "${var.default_task_memory}"
+  default_task_memory_reservation = "${var.default_task_memory_reservation}"
+}
 
 # -----------------------------------------------------------------------------
 # Module Variables
