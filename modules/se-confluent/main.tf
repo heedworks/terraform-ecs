@@ -393,8 +393,8 @@ module "zookeeper_task" {
     },
     {
       "protocol": "tcp",
-      "containerPort": 32888,
-      "hostPort": 32888
+      "containerPort": 23888,
+      "hostPort": 23888
     }
   ]
   EOF
