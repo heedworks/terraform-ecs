@@ -304,6 +304,22 @@ resource "aws_instance" "confluent_1" {
   depends_on = ["aws_ebs_volume.zk_data_1", "aws_ebs_volume.zk_txn_logs_1", "aws_ebs_volume.kafka_data_1"]
 }
 
+resource "aws_route53_record" "zookeeper" {
+  zone_id = "${var.zone_id}"
+  name    = "se-zookeeper-1"
+  type    = "A"
+  ttl     = "300"
+  records = ["${aws_instance.confluent_1.private_ip}"]
+}
+
+resource "aws_route53_record" "kafka" {
+  zone_id = "${var.zone_id}"
+  name    = "se-kafka-1"
+  type    = "A"
+  ttl     = "300"
+  records = ["${aws_instance.confluent_1.private_ip}"]
+}
+
 resource "aws_volume_attachment" "ebs_att_zk_data_1" {
   device_name  = "/dev/sdh"
   volume_id    = "${aws_ebs_volume.zk_data_1.id}"
@@ -328,7 +344,7 @@ resource "aws_volume_attachment" "ebs_att_kafka_data_1" {
 #-------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
-# ECS task and service for se-zookeeper
+# ECS service for se-zookeeper
 # -----------------------------------------------------------------------------
 
 resource "aws_ecs_service" "zookeeper" {
@@ -360,7 +376,7 @@ resource "aws_ecs_service" "zookeeper" {
 }
 
 # -----------------------------------------------------------------------------
-# ECS task for se-kong-proxy
+# ECS task for se-zookeeper
 # -----------------------------------------------------------------------------
 module "zookeeper_task" {
   source = "../ecs-task"
@@ -399,28 +415,85 @@ module "zookeeper_task" {
   ]
   EOF
 
+  # { "name": "ZOOKEEPER_SERVERS",     "value": "se-zookeeper-1.internal:22888:23888" }
   env_vars = <<EOF
   [
     { "name": "ZOOKEEPER_SERVER_ID",   "value": "1" }, 
     { "name": "ZOOKEEPER_CLIENT_PORT", "value": "22181" }, 
     { "name": "ZOOKEEPER_TICK_TIME",   "value": "2000" }, 
     { "name": "ZOOKEEPER_INIT_LIMIT",  "value": "5" }, 
-    { "name": "ZOOKEEPER_SYNC_LIMIT",  "value": "2" },
-    { "name": "ZOOKEEPER_SERVERS",     "value": "se-zookeeper-1.internal:22888:23888" }
+    { "name": "ZOOKEEPER_SYNC_LIMIT",  "value": "2" }
   ]
   EOF
 }
 
-resource "aws_route53_record" "main" {
-  zone_id = "${var.zone_id}"
-  name    = "se-zookeeper-1"
-  type    = "A"
-  ttl     = "300"
-  records = ["${aws_instance.confluent_1.private_ip}"]
+# -----------------------------------------------------------------------------
+# ECS service for se-kafka
+# -----------------------------------------------------------------------------
 
-  # alias {
-  #   name                   = "${data.aws_lb.main.dns_name}"
-  #   zone_id                = "${data.aws_lb.main.zone_id}"
-  #   evaluate_target_health = true
-  # }
+resource "aws_ecs_service" "kafka" {
+  name    = "se-kafka-1"
+  cluster = "${var.cluster}"
+
+  # iam_role = "${var.iam_role}"
+
+  desired_count                      = "1"
+  deployment_minimum_healthy_percent = "0"
+  deployment_maximum_percent         = "100"
+  placement_constraints {
+    type       = "memberOf"
+    expression = "attribute:se-instance-type == confluent"
+  }
+  placement_strategy {
+    type  = "spread"
+    field = "attribute:ecs.availability-zone"
+  }
+  placement_strategy {
+    type  = "spread"
+    field = "instanceId"
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+  # Track the latest ACTIVE revision
+  task_definition = "${module.kafka_task.name}:${module.kafka_task.max_revision}"
+}
+
+# -----------------------------------------------------------------------------
+# ECS task for se-kafka
+# -----------------------------------------------------------------------------
+module "kafka_task" {
+  source = "../ecs-task"
+
+  name        = "se-kafka-1"
+  environment = "${var.environment}"
+  image       = "confluentinc/cp-kafka"
+  image_tag   = "latest"
+
+  cpu                = "1024"
+  memory             = "512"
+  memory_reservation = "256"
+
+  # AWS CloudWatch Log Variables
+  awslogs_group         = "${var.awslogs_group}"
+  awslogs_region        = "${coalesce(var.awslogs_region, var.region)}"
+  awslogs_stream_prefix = "${coalesce(var.awslogs_stream_prefix, var.cluster)}"
+
+  ports = <<EOF
+  [
+    {
+      "protocol": "tcp",
+      "containerPort": 29092,
+      "hostPort": 29092
+    }
+  ]
+  EOF
+
+  env_vars = <<EOF
+  [
+    { "name": "KAFKA_BROKER_ID",            "value": "1" }, 
+    { "name": "KAFKA_ZOOKEEPER_CONNECT",    "value": "se-zookeeper-1.internal:22181" }, 
+    { "name": "KAFKA_ADVERTISED_LISTENERS", "value": "PLAINTEXT://se-kafka-1.internal:29092" }
+  ]
+  EOF
 }
