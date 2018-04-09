@@ -27,6 +27,10 @@ output "ecs_tasks_cloudwatch_log_group" {
 #   value = "${module.network.external_subnet_ids}"
 # }
 
+output "iam_instance_profile" {
+  value = "${aws_iam_instance_profile.ecs.id}"
+}
+
 output "external_alb_arn" {
   value = "${module.external_alb.arn}"
 }

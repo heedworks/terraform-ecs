@@ -103,6 +103,27 @@ resource "aws_key_pair" "ecs" {
   public_key = "${file(format("%s/../../ssh-keys/se-%s-account.key.pub", path.module, var.aws_account_key))}"
 }
 
+module "se_confluent" {
+  source = "../se-confluent"
+
+  ami                  = "${coalesce(var.ecs_ami, module.defaults.ecs_ami)}"
+  region               = "${var.region}"
+  availability_zones   = "${var.availability_zones}"
+  environment          = "${var.environment}"
+  cluster              = "${module.ecs_cluster.name}"
+  key_name             = "${aws_key_pair.ecs.key_name}"
+  instance_type        = "${var.ecs_instance_type}"
+  iam_instance_profile = "${module.ecs_cluster.iam_instance_profile}"
+  security_groups      = "${module.ecs_cluster.security_group_id}"
+  subnet_ids           = "${module.network.internal_subnet_ids}"
+  zone_id              = "${module.dns.zone_id}"
+
+  #   # AWS CloudWatch Log Variables
+  awslogs_group         = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"
+  awslogs_region        = "${var.region}"
+  awslogs_stream_prefix = "${module.ecs_cluster.name}"
+}
+
 # module "se_kong" {
 #   source = "../se-kong"
 

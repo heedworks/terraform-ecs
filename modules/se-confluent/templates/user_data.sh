@@ -1,5 +1,7 @@
 #!/bin/bash
 
+murl_top=http://169.254.169.254/latest/meta-data
+
 # Timezone
 ln -fs /usr/share/zoneinfo/UTC /etc/localtime
 
@@ -12,11 +14,11 @@ ${ecs_config}
 {
   echo "ECS_CLUSTER=${cluster_name}"
   echo "ECS_AVAILABLE_LOGGING_DRIVERS=[\"json-file\",\"awslogs\"]"
-  echo "ECS_INSTANCE_ATTRIBUTES={\"se-instance-type\": \"default\"}"
+  echo "ECS_INSTANCE_ATTRIBUTES={\"se-instance-type\": \"confluent\"}"
 } >> /etc/ecs/ecs.config
 
-#   echo "ECS_AVAILABLE_LOGGING_DRIVERS=${ecs_logging}"
 #   echo "ECS_INSTANCE_ATTRIBUTES_VAR=${ecs_instance_attributes}"
+#   echo "ECS_AVAILABLE_LOGGING_DRIVERS=${ecs_logging}"
 
 # Inject the CloudWatch Logs configuration file contents
 cat > /etc/awslogs/awslogs.conf <<- EOF
@@ -61,7 +63,7 @@ datetime_format = %Y-%m-%dT%H:%M:%SZ
 EOF
 
 # Set the region to send CloudWatch Logs data to (the region where the container instance is located)
-region=$(curl 169.254.169.254/latest/meta-data/placement/availability-zone | sed s'/.$//')
+region=$(curl $murl_top/placement/availability-zone | sed s'/.$//')
 sed -i -e "s/region = us-east-1/region = $region/g" /etc/awslogs/awscli.conf
 
 # Set the ip address of the node 
@@ -93,14 +95,19 @@ start ecs
 
 # Get ECS instance info, although not used in this user_data it self this allows you to use
 # az(availability zone) and region
-until $(curl --output /dev/null --silent --head --fail http://localhost:51678/v1/metadata); do
-  printf '.'
-  sleep 5
-done
-instance_arn=$(curl -s http://localhost:51678/v1/metadata | jq -r '. | .ContainerInstanceArn' | awk -F/ '{print $NF}' )
-az=$(curl -s http://instance-data/latest/meta-data/placement/availability-zone)
-region=$${az:0:$${#az} - 1}
+# until $(curl --output /dev/null --silent --head --fail http://localhost:51678/v1/metadata); do
+#   printf '.'
+#   sleep 5
+# done
+# instance_arn=$(curl -s http://localhost:51678/v1/metadata | jq -r '. | .ContainerInstanceArn' | awk -F/ '{print $NF}' )
+# az=$(curl -s http://instance-data/latest/meta-data/placement/availability-zone)
+# region=$${az:0:$${#az} - 1}
 
+instance_id=$(curl -f -s $murl_top/instance-id)
+az=$(curl -f -s $murl_top/placement/availability-zone)
+region="`echo \"$az\" | sed -e 's:\([0-9][0-9]*\)[a-z]*\$:\\1:'`"
+
+echo "Starting custom userdata scripts..."
 # Custom userdata script code
 ${custom_userdata}
 

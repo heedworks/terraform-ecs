@@ -22,6 +22,29 @@ resource "aws_iam_role" "ecs_instance_role" {
 EOF
 }
 
+resource "aws_iam_policy" "ecs_ec2_custom_policy" {
+  name        = "ecs-role-${var.name}-${var.environment}"
+  description = "Managed by Terraform"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+        "Effect": "Allow",
+        "Action": "ec2:DescribeVolumes",
+        "Resource": "*"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_ec2_attach_custom_policy" {
+  role       = "${aws_iam_role.ecs_instance_role.id}"
+  policy_arn = "${aws_iam_policy.ecs_ec2_custom_policy.arn}"
+}
+
 resource "aws_iam_instance_profile" "ecs" {
   name = "ecs-instance-profile-${var.name}-${var.environment}"
   path = "/"

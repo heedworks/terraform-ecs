@@ -87,10 +87,10 @@ variable "image_id" {
   description = "The AWS ami id to use for ECS"
 }
 
-variable "bastion_instance_type" {
-  description = "Instance type for the bastion"
-  default     = "t2.micro"
-}
+# variable "bastion_instance_type" {
+#   description = "Instance type for the bastion"
+#   default     = "t2.micro"
+# }
 
 variable "custom_userdata" {
   default     = ""
@@ -108,7 +108,7 @@ variable "ecs_logging" {
 }
 
 variable "ecs_instance_attributes" {
-  default     = "{\"se-instance-type\": \"default\"}"
+  default     = "{\\\"se-instance-type\\\": \\\"default:\\\"}"
   description = "A list of custom attributes, in JSON form, to apply to your container instances."
 }
 
