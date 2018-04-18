@@ -30,6 +30,37 @@ resource "aws_s3_bucket" "se_widget_demo" {
 }
 
 # -----------------------------------------------------------------------------
+# S3 Bucket for hosting se-widget-docs
+# -----------------------------------------------------------------------------
+data "template_file" "se_widget_docs_policy" {
+  template = "${file("${path.module}/templates/public-read-policy.json")}"
+
+  vars = {
+    bucket = "${var.aws_account_key}.se-widget-docs"
+  }
+}
+
+resource "aws_s3_bucket" "se_widget_docs" {
+  bucket = "${var.aws_account_key}.se-widget-docs"
+
+  versioning {
+    enabled = true
+  }
+
+  website {
+    index_document = "index.html"
+    error_document = "error.html"
+  }
+
+  tags {
+    Name        = "${var.aws_account_key}.se-widget-docs"
+    Environment = "${var.environment}"
+  }
+
+  policy = "${data.template_file.se_widget_docs_policy.rendered}"
+}
+
+# -----------------------------------------------------------------------------
 # S3 Bucket for hosting se-client-dashboard
 # -----------------------------------------------------------------------------
 data "template_file" "se_client_dashboard_policy" {
@@ -403,7 +434,7 @@ module "se_agent_api" {
   aws_account_key = "${var.aws_account_key}"
   vpc_id          = "${var.vpc_id}"
   zone_id         = "${var.zone_id}"
-  desired_count   = 1
+  desired_count   = "${lookup(var.service_desired_count_map, "se-agent-api", var.default_service_desired_count)}"
 
   image     = "${var.ecr_domain}/schedule-engine/se-agent-api"
   image_tag = "${lookup(var.image_tag_map, "se-agent-api", var.aws_account_key)}"
@@ -1354,7 +1385,7 @@ module "se_sampro_service" {
   aws_account_key = "${var.aws_account_key}"
   vpc_id          = "${var.vpc_id}"
   zone_id         = "${var.zone_id}"
-  desired_count   = 1
+  desired_count   = "${lookup(var.service_desired_count_map, "se-sampro-service", var.default_service_desired_count)}"
 
   image     = "${var.ecr_domain}/schedule-engine/se-sampro-service"
   image_tag = "${lookup(var.image_tag_map, "se-sampro-service", var.aws_account_key)}"

@@ -191,3 +191,8 @@ variable "proxy_deployment_maximum_percent" {
   description = "upper limit (% of desired_count) of # of running tasks during a deployment"
   default     = 200
 }
+
+variable "se_instance_type" {
+  description = "Custom ECS attribute value for se-instance-type placement constraint"
+  default     = "default"
+}

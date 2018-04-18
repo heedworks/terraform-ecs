@@ -107,11 +107,12 @@ module "se_confluent" {
   key_name             = "${aws_key_pair.ecs.key_name}"
   instance_type        = "${var.ecs_instance_type}"
   iam_instance_profile = "${module.ecs_cluster.iam_instance_profile}"
-  security_groups      = "${module.ecs_cluster.security_group_id}"
+  security_groups      = "${module.ecs_cluster.security_group_id},${module.security_groups.internal_alb}"
   subnet_ids           = "${module.network.internal_subnet_ids}"
   zone_id              = "${module.dns.zone_id}"
 
   #   # AWS CloudWatch Log Variables
+  cloudwatch_prefix     = "${var.environment}"
   awslogs_group         = "${module.ecs_cluster.ecs_tasks_cloudwatch_log_group}"
   awslogs_region        = "${var.region}"
   awslogs_stream_prefix = "${module.ecs_cluster.name}"

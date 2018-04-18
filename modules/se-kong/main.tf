@@ -24,6 +24,21 @@ resource "aws_ecs_service" "configuration" {
   cluster       = "${var.cluster}"
   desired_count = 1
 
+  placement_constraints {
+    type       = "memberOf"
+    expression = "attribute:se-instance-type == ${var.se_instance_type}"
+  }
+
+  placement_strategy {
+    type  = "spread"
+    field = "attribute:ecs.availability-zone"
+  }
+
+  placement_strategy {
+    type  = "spread"
+    field = "instanceId"
+  }
+
   # Track the latest ACTIVE revision
   task_definition = "${module.configuration_task.name}:${module.configuration_task.max_revision}"
 }
@@ -117,12 +132,13 @@ module "admin" {
 
   env_vars = <<EOF
   [
-    { "name": "KONG_DATABASE",    "value": "postgres" }, 
-    { "name": "KONG_PG_USER",     "value": "${module.db.username}" },
-    { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" },
-    { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
-    { "name": "KONG_PG_PORT",     "value": "${module.db.port}" },
-    { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" }
+    { "name": "KONG_ADMIN_LISTEN", "value": "0.0.0.0:8001"},
+    { "name": "KONG_DATABASE",     "value": "postgres" }, 
+    { "name": "KONG_PG_USER",      "value": "${module.db.username}" },
+    { "name": "KONG_PG_PASSWORD",  "value": "${var.db_password}" },
+    { "name": "KONG_PG_HOST",      "value": "${module.db.address}" },
+    { "name": "KONG_PG_PORT",      "value": "${module.db.port}" },
+    { "name": "KONG_PG_DATABASE",  "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" }
   ]
   EOF
 }
@@ -137,6 +153,21 @@ resource "aws_ecs_service" "proxy" {
   desired_count                      = "${var.proxy_desired_count}"
   deployment_minimum_healthy_percent = "${var.proxy_deployment_minimum_healthy_percent}"
   deployment_maximum_percent         = "${var.proxy_deployment_maximum_percent}"
+
+  placement_constraints {
+    type       = "memberOf"
+    expression = "attribute:se-instance-type == ${var.se_instance_type}"
+  }
+
+  placement_strategy {
+    type  = "spread"
+    field = "attribute:ecs.availability-zone"
+  }
+
+  placement_strategy {
+    type  = "spread"
+    field = "instanceId"
+  }
 
   lifecycle {
     create_before_destroy = true
@@ -180,11 +211,12 @@ module "proxy_task" {
 
   env_vars = <<EOF
   [
-    { "name": "KONG_DATABASE",    "value": "postgres" }, 
-    { "name": "KONG_PG_HOST",     "value": "${module.db.address}" },
-    { "name": "KONG_PG_DATABASE", "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" },
-    { "name": "KONG_PG_USER",     "value": "${module.db.username}" },
-    { "name": "KONG_PG_PASSWORD", "value": "${var.db_password}" }
+    { "name": "KONG_PROXY_LISTEN", "value": "0.0.0.0:8000"},
+    { "name": "KONG_DATABASE",     "value": "postgres" }, 
+    { "name": "KONG_PG_HOST",      "value": "${module.db.address}" },
+    { "name": "KONG_PG_DATABASE",  "value": "${coalesce(var.db_database, replace(var.db_name, "-", "_"))}" },
+    { "name": "KONG_PG_USER",      "value": "${module.db.username}" },
+    { "name": "KONG_PG_PASSWORD",  "value": "${var.db_password}" }
   ]
   EOF
 }

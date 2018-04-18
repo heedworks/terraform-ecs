@@ -105,9 +105,10 @@ module "se_service_list" {
   # Service Maps
   container_port_map = "${var.service_container_port_map}"
 
-  node_env_map  = "${var.service_node_env_map}"
-  se_env_map    = "${var.service_se_env_map}"
-  image_tag_map = "${var.service_image_tag_map}"
+  service_desired_count_map = "${var.service_desired_count_map}"
+  node_env_map              = "${var.service_node_env_map}"
+  se_env_map                = "${var.service_se_env_map}"
+  image_tag_map             = "${var.service_image_tag_map}"
 
   # Task Defaults
   default_task_cpu                = "${var.default_task_cpu}"
@@ -291,18 +292,13 @@ variable "service_container_port_map" {
 variable "service_image_tag_map" {
   type = "map"
 
-  default = {
-    se-mobile-api = "integration"
-  }
+  default = {}
 }
 
 variable "service_se_env_map" {
   type = "map"
 
-  default = {
-    se-mobile-api         = "integration"
-    se-kong-configuration = "integration"
-  }
+  default = {}
 }
 
 variable "service_node_env_map" {
@@ -315,24 +311,21 @@ variable "service_desired_count_map" {
   type = "map"
 
   default = {
-    se-technician-service = 1
+    se-agent-api      = 1
+    se-sampro-service = 1
   }
 }
 
 variable "service_deployment_minimum_healthy_percent_map" {
   type = "map"
 
-  default = {
-    se-room-service = 50
-  }
+  default = {}
 }
 
 variable "service_deployment_maximum_percent_map" {
   type = "map"
 
-  default = {
-    se-mobile-api = 100
-  }
+  default = {}
 }
 
 # -----------------------------------------------------------------------------

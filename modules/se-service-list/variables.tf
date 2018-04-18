@@ -21,6 +21,11 @@ variable "default_image_tag" {
   description = "The default image_tag for ECR images"
 }
 
+variable "default_service_desired_count" {
+  description = "The default desired task count"
+  default     = 2
+}
+
 variable "default_node_env" {
   description = "The default NODE_ENV environment variable"
 }
@@ -78,6 +83,13 @@ variable "container_port_map" {
 
 variable "image_tag_map" {
   description = "map of service name to container port to override the default_image_tag variable, if applicable"
+  type        = "map"
+
+  default = {}
+}
+
+variable "service_desired_count_map" {
+  description = "map of service name to desired task count to override the default_service_desired_count_map variable, if applicable"
   type        = "map"
 
   default = {}

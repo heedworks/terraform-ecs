@@ -1,5 +1,7 @@
 #!/bin/bash
 
+murl_top=http://169.254.169.254/latest/meta-data
+
 # Timezone
 ln -fs /usr/share/zoneinfo/UTC /etc/localtime
 

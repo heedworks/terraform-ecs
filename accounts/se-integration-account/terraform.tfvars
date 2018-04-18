@@ -6,7 +6,7 @@ aws_account_key = "integration"
 
 aws_account_id = "205210731340"
 
-aws_account_name = "se-sandbox-account"
+aws_account_name = "se-integration-account"
 
 region = "us-east-1"
 
@@ -36,6 +36,12 @@ ecs_desired_capacity = 3
 
 ecs_instance_type = "t2.medium"
 
+ecs_instance_ebs_optimized = "false"
+
+ecs_root_volume_size = "25"
+
+ecs_docker_volume_size = "25"
+
 default_task_cpu = 0
 
 default_task_memory = 256
@@ -48,8 +54,4 @@ default_node_env = "development"
 
 default_se_env = "integration"
 
-// kafka_host = "ec2-35-172-33-1.compute-1.amazonaws.com:9092,ec2-52-90-107-255.compute-1.amazonaws.com:9092,ec2-54-236-63-243.compute-1.amazonaws.com:9092"
-
-// kafka_host = "ip-10-30-133-67.ec2.internal:9092,ip-10-30-148-117.ec2.internal:9092,ip-10-30-141-122.ec2.internal:9092"
-
-kafka_host = "ip-10-30-133-67.ec2.internal:9092,ip-10-30-148-117.ec2.internal:9092,ip-10-30-141-122.ec2.internal:9092"
+kafka_host = "se-kafka-1.internal:29092"

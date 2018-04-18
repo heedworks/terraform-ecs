@@ -125,7 +125,10 @@ data "template_file" "user_data" {
     ecs_instance_attributes = "${var.ecs_instance_attributes}"
     cluster_name            = "${var.cluster}"
     env_name                = "${var.environment}"
-    cloudwatch_prefix       = "${var.cloudwatch_prefix}"
+
+    # cloudwatch_prefix       = "confluent"
+
+    cloudwatch_prefix = "${var.cloudwatch_prefix}"
 
     # custom_userdata         = "${var.custom_userdata}"
 
@@ -417,11 +420,12 @@ module "zookeeper_task" {
   ]
   EOF
 
+  # { "name": "ZOOKEEPER_SERVER_ID",   "value": "1" }, 
   # { "name": "ZOOKEEPER_SERVERS",     "value": "se-zookeeper-1.internal:22888:23888" }
+
   env_vars = <<EOF
-  [
-    { "name": "ZOOKEEPER_SERVER_ID",   "value": "1" }, 
-    { "name": "ZOOKEEPER_CLIENT_PORT", "value": "22181" }, 
+  [    
+    { "name": "ZOOKEEPER_CLIENT_PORT", "value": "22181" },
     { "name": "ZOOKEEPER_TICK_TIME",   "value": "2000" }, 
     { "name": "ZOOKEEPER_INIT_LIMIT",  "value": "5" }, 
     { "name": "ZOOKEEPER_SYNC_LIMIT",  "value": "2" }
@@ -491,11 +495,12 @@ module "kafka_task" {
   ]
   EOF
 
+  # { "name": "KAFKA_BROKER_ID",                        "value": "1" }, 
   env_vars = <<EOF
-  [
-    { "name": "KAFKA_BROKER_ID",            "value": "1" }, 
-    { "name": "KAFKA_ZOOKEEPER_CONNECT",    "value": "se-zookeeper-1.internal:22181" }, 
-    { "name": "KAFKA_ADVERTISED_LISTENERS", "value": "PLAINTEXT://se-kafka-1.internal:29092" }
+  [    
+    { "name": "KAFKA_ZOOKEEPER_CONNECT",                "value": "se-zookeeper-1.internal:22181" }, 
+    { "name": "KAFKA_ADVERTISED_LISTENERS",             "value": "PLAINTEXT://se-kafka-1.internal:29092" },
+    { "name": "KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "value": "1" }
   ]
   EOF
 }
